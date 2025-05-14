@@ -64,21 +64,6 @@
                 <!-- Hidden fields for technical use -->
                 <field name="project_readonly" invisible="1"/>
 
-                <!-- Warning message for TBD Customer -->
-                <field name="is_tbd_customer" invisible="1"/>
-                <div class="alert alert-warning" role="alert"
-                     attrs="{'invisible': ['|', ('is_real_estate', '=', False), '|', ('partner_id', '=', False), ('is_tbd_customer', '=', False)]}">
-                    <div class="d-flex align-items-center">
-                        <i class="fa fa-exclamation-triangle mr-2"></i>
-                        <div>
-                            <strong>Please select a customer</strong>
-                            <p class="mb-0">
-                                This is a draft reservation. Please select a real customer before confirming the order.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Project selection field with standard layout -->
                 <field name="project_id"
                        attrs="{'required': [('is_real_estate', '=', True)], 'readonly': [('project_readonly', '=', True)], 'invisible': [('is_real_estate', '=', False)]}"

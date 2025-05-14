@@ -49,6 +49,11 @@ This module provides a complete solution for managing real estate projects, buil
    - Search for "Real Estate Reservation"
    - Click "Install" button
 
+### Method 3: clone repository inside addons folder
+
+   -git clone https://walidaitba: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@github.com/walidaitba/wm_real_estate.git
+
+
 ## Dependencies
 
 This module depends on the following Odoo modules:
@@ -165,37 +170,7 @@ When an apartment is marked as sold:
    - Configure income accounts for apartment sales
    - Navigate to **Accounting > Configuration > Chart of Accounts**
 
-## Troubleshooting
 
-### Common Issues
 
-1. **Cannot create an apartment**:
-   - Ensure you have created at least one project and building
-   - Check that you have proper permissions
 
-2. **Apartment not showing in quotation**:
-   - Verify the apartment status is **Available**
-   - Check that the apartment is properly linked to a building and project
-   - Ensure the apartment is active (not archived)
 
-3. **Cannot confirm quotation**:
-   - Ensure the customer field is filled
-   - Check that the apartment is still available
-   - Verify you have proper permissions
-
-4. **Duplicate Confirm buttons**:
-   - If you see duplicate Confirm buttons, clear your browser cache
-   - Log out and log back in
-
-5. **Status not updating**:
-   - Check for any validation errors in the console
-   - Ensure all required fields are filled
-   - Try refreshing the page
-
-## Support
-
-For any questions or support, please contact the module author.
-
-## License
-
-This module is licensed under LGPL-3.
