@@ -227,12 +227,9 @@ class ProductTemplate(models.Model):
             # Log the state change
             _logger.info("Apartment state changed to %s for apartment %s", self.apartment_state, self.name)
 
-            # Schedule inventory update after save
             # Note: We can't update the quantity directly in an onchange method
-            # because the changes won't persist. Instead, we set a flag to update
-            # the quantity after the record is saved.
-            self.env.context = dict(self.env.context)
-            self.env.context.update(update_inventory_after_save=True)
+            # because the changes won't persist. The quantity will be updated
+            # when the record is saved through the write method.
 
     @api.onchange('project_id')
     def _onchange_project_id(self):
@@ -561,21 +558,45 @@ class ProductTemplate(models.Model):
                 _logger.info("Setting initial inventory quantity for new apartment %s with state %s",
                             res.name, res.apartment_state)
 
-                # Set a flag to update the quantity after the transaction is complete
-                # This avoids creating a cron job during the transaction
-                self.env.context = dict(self.env.context)
-                self.env.context.update(update_inventory_after_save=True)
-
-                # Log that we'll update the quantity after save
-                _logger.info("Will update quantity for %s after save", res.name)
-
-                # Also set it immediately for good measure
+                # IMPROVED: Force immediate quantity update with stronger cache invalidation
                 self._force_inventory_quantity(res)
 
-                # Log the updated quantity
-                _logger.info("After creation, apartment %s has state %s and quantity %s",
-                            res.name, res.apartment_state, res.qty_available)
-                _logger.info("Scheduled job to ensure quantity is set correctly")
+                # Verify the quantity was set correctly
+                res.invalidate_cache(['qty_available'])
+                self.env.clear_cache()
+
+                # Refresh the product to get the latest quantity
+                res = self.browse(res.id)
+
+                _logger.info("Initial quantity for %s: %s", res.name, res.qty_available)
+
+                # If quantity is still not set correctly, try again with direct method
+                if res.apartment_state == 'available' and res.qty_available < 1.0:
+                    _logger.warning("Initial quantity not set correctly. Trying direct method.")
+
+                    # Get the product variant and location
+                    variant = res.product_variant_ids[0]
+                    warehouse = self.env['stock.warehouse'].search([], limit=1)
+                    location = warehouse.lot_stock_id
+
+                    # Use direct method
+                    self._force_quantity_direct(variant.id, location.id, 1.0)
+
+                    # Invalidate cache again
+                    res.invalidate_cache(['qty_available'])
+                    self.env.clear_cache()
+
+                    # Refresh the product again
+                    res = self.browse(res.id)
+                    _logger.info("After direct update, initial quantity for %s: %s", res.name, res.qty_available)
+
+                # The post-commit hook will ensure the quantity is set correctly
+                # even if there are cache issues
+
+                # Schedule a post-commit update to ensure quantity is set correctly
+                self.env.cr.after('commit', lambda: self._post_commit_update_quantity(res.id))
+
+                _logger.info("Scheduled post-commit job to ensure quantity is set correctly")
 
                 # Update the apartment with any missing information
                 update_vals = {}
@@ -615,11 +636,9 @@ class ProductTemplate(models.Model):
         """Override write to sync changes with apartment"""
         # Check if we're being called from apartment update or delete to avoid infinite recursion
         if self.env.context.get('from_apartment_update') or self.env.context.get('from_apartment_delete'):
-            res = super(ProductTemplate, self).write(vals)
-            # Update inventory quantity if apartment state changed
-            if 'apartment_state' in vals:
-                self._update_inventory_quantity()
-            return res
+            # Just perform the write operation without additional quantity updates
+            # The apartment module will handle quantity updates separately
+            return super(ProductTemplate, self).write(vals)
 
         # Store original values for comparison
         original_vals = {}
@@ -955,54 +974,91 @@ class ProductTemplate(models.Model):
 
             location = warehouse.lot_stock_id
 
-            # Use the ORM instead of direct SQL to avoid transaction issues
+            # Use the standard Odoo method to update quantity
+            # This is more reliable than direct SQL operations
             StockQuant = self.env['stock.quant']
 
-            # Find and delete existing quants
+            # First, remove existing quants to avoid quantity inconsistencies
             quants = StockQuant.search([
                 ('product_id', '=', variant.id),
                 ('location_id', '=', location.id)
             ])
 
             if quants:
-                quants.unlink()
+                quants.sudo().unlink()
                 _logger.info("Deleted existing quants for product %s", product.name)
 
-            # Create a new quant with the desired quantity
-            StockQuant.create({
-                'product_id': variant.id,
-                'location_id': location.id,
-                'quantity': quantity,
-                'company_id': self.env.company.id
-            })
-            _logger.info("Created new quant for product %s with quantity %s", product.name, quantity)
+            # Create a new quant with the correct quantity
+            if quantity > 0:
+                StockQuant.sudo().create({
+                    'product_id': variant.id,
+                    'location_id': location.id,
+                    'quantity': quantity,
+                    'company_id': self.env.company.id,
+                    'in_date': fields.Datetime.now(),
+                })
+                _logger.info("Created new quant for product %s with quantity %s", product.name, quantity)
 
-            # Invalidate cache to ensure qty_available is updated
+            # Force a complete cache invalidation
+            self.env.cache.invalidate()
             product.invalidate_cache(['qty_available'])
             self.env.clear_cache()
 
-            # Log the result
-            _logger.info("Successfully set quantity for %s to %s", product.name, quantity)
-
-            # Double-check that the quantity was set correctly using ORM
-            product.invalidate_cache()
-            self.env.clear_cache()
-
             # Refresh the product to get the latest quantity
-            product = product.browse(product.id)
+            product = self.env['product.template'].browse(product.id)
 
-            _logger.info("Verified quantity for %s: %s", product.name, product.qty_available)
+            _logger.info("Successfully set quantity for %s to %s (verified: %s)",
+                        product.name, quantity, product.qty_available)
 
-            # If there's still an issue, log it but don't try to fix it here
-            # The scheduled job will take care of it
+            # If there's still an issue, try a more direct approach
             if abs(product.qty_available - quantity) > 0.001:
-                _logger.warning("Quantity mismatch for %s: expected %s, got %s",
+                _logger.warning("Quantity mismatch for %s: expected %s, got %s. Trying direct method.",
                                product.name, quantity, product.qty_available)
+
+                # Try a more direct approach using SQL (as a last resort)
+                self._force_quantity_direct(variant.id, location.id, quantity)
+
+                # Invalidate cache again
+                self.env.cache.invalidate()
+                product.invalidate_cache(['qty_available'])
+                self.env.clear_cache()
+
+                # Refresh the product again
+                product = self.env['product.template'].browse(product.id)
+                _logger.info("After direct update, quantity for %s: %s", product.name, product.qty_available)
 
             return True
         except Exception as e:
             _logger.error("Error setting quantity for %s: %s", product.name, str(e))
             return False
+
+    def _force_quantity_direct(self, product_id, location_id, quantity):
+        """
+        Force quantity update using a more direct approach.
+        This is a fallback method when the standard approach fails.
+
+        Args:
+            product_id: The product variant ID
+            location_id: The stock location ID
+            quantity: The quantity to set
+        """
+        try:
+            # First, delete existing quants
+            self.env.cr.execute("""
+                DELETE FROM stock_quant
+                WHERE product_id = %s AND location_id = %s
+            """, (product_id, location_id))
+
+            # Then create a new quant with the correct quantity
+            if quantity > 0:
+                self.env.cr.execute("""
+                    INSERT INTO stock_quant (product_id, location_id, quantity, company_id, in_date)
+                    VALUES (%s, %s, %s, %s, NOW())
+                """, (product_id, location_id, quantity, self.env.company.id))
+
+            _logger.info("Direct quantity update completed for product_id %s", product_id)
+        except Exception as e:
+            _logger.error("Error in direct quantity update: %s", str(e))
 
     def _update_inventory_quantity(self):
         """Update inventory quantity based on apartment state"""
@@ -1164,14 +1220,49 @@ Salles de bain: {bathrooms}
         if not self.is_apartment:
             raise UserError(_("This action is only available for apartments."))
 
-        # Use our simplified method to set the quantity
+        # Use our improved method to set the quantity
         # It will determine the correct quantity based on apartment_state
         result = self._force_inventory_quantity(self)
 
         if not result:
             raise UserError(_("Failed to update quantity. Please try again."))
 
-        # Return a notification
+        # Force a full cache invalidation to ensure UI is updated
+        self.env.cache.invalidate()
+        self.invalidate_cache(['qty_available'])
+        self.env.clear_cache()
+
+        # Reload the record to get fresh data
+        self = self.browse(self.id)
+
+        # Log the updated quantity
+        _logger.info("After action_update_quantity, quantity for %s: %s", self.name, self.qty_available)
+
+        # If quantity is still not correct, try the direct method
+        expected_qty = 1.0 if self.apartment_state == 'available' else 0.0
+        if abs(self.qty_available - expected_qty) > 0.001:
+            _logger.warning("Quantity still incorrect after update. Using direct method.")
+
+            # Get the product variant and location
+            variant = self.product_variant_ids[0] if self.product_variant_ids else False
+            if variant:
+                warehouse = self.env['stock.warehouse'].search([], limit=1)
+                if warehouse:
+                    location = warehouse.lot_stock_id
+                    # Use direct method
+                    self._force_quantity_direct(variant.id, location.id, expected_qty)
+
+                    # Invalidate cache again
+                    self.env.cache.invalidate()
+                    self.invalidate_cache(['qty_available'])
+                    self.env.clear_cache()
+
+                    # Reload the record again
+                    self = self.browse(self.id)
+                    _logger.info("After direct update in action_update_quantity, quantity for %s: %s",
+                                self.name, self.qty_available)
+
+        # Return a notification and reload the view to show updated quantity
         message = _('The quantity has been updated to 1 for available apartment.') if self.apartment_state == 'available' else _('The quantity has been updated to 0.')
         return {
             'type': 'ir.actions.client',
@@ -1181,8 +1272,64 @@ Salles de bain: {bathrooms}
                 'message': message,
                 'type': 'success',
                 'sticky': False,
+                'next': {
+                    'type': 'ir.actions.client',
+                    'tag': 'reload',
+                }
             }
         }
+
+    def _post_commit_update_quantity(self, product_id):
+        """Update quantity after the transaction is committed"""
+        try:
+            # Get the product with a new cursor to ensure we're in a new transaction
+            with api.Environment.manage():
+                new_cr = self.pool.cursor()
+                try:
+                    with api.Environment(new_cr, self.env.uid, self.env.context) as new_env:
+                        product = new_env['product.template'].browse(product_id)
+                        if product.exists() and product.is_apartment:
+                            _logger.info("Post-commit: Updating quantity for %s", product.name)
+
+                            # Use the standard method to update quantity
+                            if product.apartment_state == 'available':
+                                # Get the product variant and location
+                                if product.product_variant_ids:
+                                    variant = product.product_variant_ids[0]
+                                    warehouse = new_env['stock.warehouse'].search([], limit=1)
+                                    if warehouse:
+                                        location = warehouse.lot_stock_id
+
+                                        # Use the standard method to update quantity
+                                        StockQuant = new_env['stock.quant']
+
+                                        # First, remove existing quants
+                                        quants = StockQuant.search([
+                                            ('product_id', '=', variant.id),
+                                            ('location_id', '=', location.id)
+                                        ])
+
+                                        if quants:
+                                            quants.sudo().unlink()
+
+                                        # Create a new quant with quantity 1
+                                        StockQuant.sudo().create({
+                                            'product_id': variant.id,
+                                            'location_id': location.id,
+                                            'quantity': 1.0,
+                                            'company_id': new_env.company.id,
+                                            'in_date': fields.Datetime.now(),
+                                        })
+
+                                        new_cr.commit()
+                                        _logger.info("Post-commit: Successfully updated quantity for %s", product.name)
+                except Exception as e:
+                    _logger.error("Error in post-commit quantity update: %s", str(e))
+                    new_cr.rollback()
+                finally:
+                    new_cr.close()
+        except Exception as e:
+            _logger.error("Failed to create new cursor for post-commit update: %s", str(e))
 
     def _get_or_create_building_category(self, building):
         """Get or create product category for building"""

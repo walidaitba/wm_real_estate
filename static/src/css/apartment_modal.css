@@ -55,6 +55,8 @@
     opacity: 1;
 }
 
+
+
 .o_apartment_dialog .modal-body .apartment-modal-content strong {
     color: #875A7B; /* Odoo purple */
 }
@@ -97,3 +99,8 @@
     align-items: center !important;
     min-height: calc(100% - 60px) !important;
 }
+
+
+    .modal-body {
+        overflow: initial !important;
+    }

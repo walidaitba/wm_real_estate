@@ -114,7 +114,7 @@
                         attrs="{'invisible': [('is_apartment', '=', False)]}">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_value">
-                            <field name="qty_available" widget="statinfo" nolabel="1"/>
+                            <field name="qty_available" widget="statinfo" nolabel="1" force_save="1"/>
                         </span>
                         <span class="o_stat_text">Quantity</span>
                     </div>

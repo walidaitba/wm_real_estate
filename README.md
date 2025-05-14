@@ -49,17 +49,6 @@ This module provides a complete solution for managing real estate projects, buil
    - Search for "Real Estate Reservation"
    - Click "Install" button
 
-## Configuration
-
-After installation:
-
-1. Go to Real Estate → Properties → Projects
-   - Create your real estate projects
-
-2. For each project, create buildings and apartments
-
-3. Use the standard Odoo Sales module to sell apartments
-
 ## Dependencies
 
 This module depends on the following Odoo modules:
@@ -69,6 +58,139 @@ This module depends on the following Odoo modules:
 - product
 - stock
 - sale_stock
+- account
+
+# Apartment Sales Workflow Documentation
+
+This section provides comprehensive documentation for the apartment sales workflow in the Real Estate module, from apartment creation to sale completion.
+
+## Apartment Status Flow
+
+Apartments in the system follow a specific status flow:
+
+1. **Available** - The apartment is available for sale
+2. **Réservation en cours** - A quotation has been created but not yet confirmed
+3. **Reserved** - A quotation has been confirmed, creating a reservation
+4. **Sold** - The apartment has been sold and is no longer available
+
+The status changes automatically based on actions in the sales process:
+
+```
+Available → Réservation en cours → Reserved → Sold
+```
+
+## Step-by-Step Workflow
+
+### Creating an Apartment
+
+1. Navigate to **Real Estate > Properties > Apartments**
+2. Click **Create**
+3. Fill in the required information:
+   - Apartment Number
+   - Code
+   - Building (must select an existing building)
+   - Floor
+   - Price
+   - Area (m²)
+   - Number of Rooms
+   - Number of Bathrooms
+   - Description (optional)
+4. Click **Save**
+
+The apartment will be automatically created with the status **Available**.
+
+### Creating a Quotation/Reservation
+
+1. Navigate to **Real Estate > Quotations > Quotations**
+2. Click **Create**
+3. Fill in the required information:
+   - Customer
+   - Project (select from dropdown)
+4. In the Order Lines section, click **Add an apartment**
+5. Select an apartment from the list (only available apartments will be shown)
+6. Adjust the price if needed
+7. Click **Save**
+
+When an apartment is added to a quotation, its status automatically changes to **Réservation en cours**.
+
+### Confirming a Quotation
+
+1. Open the quotation you want to confirm
+2. Click the **Confirm** button in the top-right corner
+3. The system will display a success message
+
+When a quotation is confirmed:
+- The quotation becomes a sales order
+- The apartment status changes to **Reserved**
+- A delivery order is created for the apartment handover
+
+### Converting a Reservation to a Sale
+
+1. Navigate to **Real Estate > Quotations > Quotations**
+2. Open the confirmed sales order (reservation)
+3. Click on the apartment line to view details
+4. Click the **Mark as Sold** button
+5. Confirm the action
+
+Alternatively, you can:
+1. Navigate to **Real Estate > Properties > Apartments**
+2. Open the reserved apartment
+3. Click the **Mark as Sold** button
+4. Confirm the action
+
+When an apartment is marked as sold:
+- The apartment status changes to **Sold**
+- The apartment is removed from available inventory
+
+## Configuration Settings
+
+### Required Configuration
+
+1. **Projects and Buildings**:
+   - At least one project and building must be created before apartments can be added
+   - Navigate to **Real Estate > Properties > Projects** to create projects
+   - Navigate to **Real Estate > Properties > Buildings** to create buildings
+
+2. **Product Categories**:
+   - Apartments are managed as products in the inventory
+   - A product category for apartments is automatically created during installation
+
+### Optional Configuration
+
+1. **Sales Teams**:
+   - You can assign specific sales teams to handle real estate sales
+   - Navigate to **Sales > Configuration > Sales Teams**
+
+2. **Accounting Integration**:
+   - Configure income accounts for apartment sales
+   - Navigate to **Accounting > Configuration > Chart of Accounts**
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Cannot create an apartment**:
+   - Ensure you have created at least one project and building
+   - Check that you have proper permissions
+
+2. **Apartment not showing in quotation**:
+   - Verify the apartment status is **Available**
+   - Check that the apartment is properly linked to a building and project
+   - Ensure the apartment is active (not archived)
+
+3. **Cannot confirm quotation**:
+   - Ensure the customer field is filled
+   - Check that the apartment is still available
+   - Verify you have proper permissions
+
+4. **Duplicate Confirm buttons**:
+   - If you see duplicate Confirm buttons, clear your browser cache
+   - Log out and log back in
+
+5. **Status not updating**:
+   - Check for any validation errors in the console
+   - Ensure all required fields are filled
+   - Try refreshing the page
 
 ## Support
 

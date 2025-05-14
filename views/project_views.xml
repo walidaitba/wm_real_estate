@@ -134,15 +134,15 @@
                                     <field name="code"/> - <field name="city"/>
                                 </div>
                                 <div>
-                                    <span><t t-esc="record.building_count.value"/> <span t-translation="off">Buildings</span></span>
+                                    <span><t t-esc="record.building_count.value"/> <span>Buildings</span></span>
                                 </div>
                                 <div>
-                                    <span><t t-esc="record.apartment_count.value"/> <span t-translation="off">Apartments</span></span>
+                                    <span><t t-esc="record.apartment_count.value"/> <span>Apartments</span></span>
                                 </div>
                                 <div>
-                                    <span class="text-danger"><t t-esc="record.sold_apartment_count.value"/> <span t-translation="off">Sold</span></span>
-                                    <span class="text-success ml-2"><t t-esc="record.available_apartment_count.value"/> <span t-translation="off">Available</span></span>
-                                    <span class="text-warning ml-2"><t t-esc="record.reserved_apartment_count.value"/> <span t-translation="off">Reserved</span></span>
+                                    <span class="text-danger"><t t-esc="record.sold_apartment_count.value"/> <span>Sold</span></span>
+                                    <span class="text-success ml-2"><t t-esc="record.available_apartment_count.value"/> <span>Available</span></span>
+                                    <span class="text-warning ml-2"><t t-esc="record.reserved_apartment_count.value"/> <span>Reserved</span></span>
                                 </div>
                             </div>
                         </div>

@@ -35,20 +35,27 @@
                 <field name="is_tbd_customer" invisible="1"/>
             </xpath>
 
-            <!-- Modify standard buttons for real estate orders -->
+            <!-- Hide standard buttons for real estate orders -->
             <xpath expr="//button[@name='action_confirm']" position="attributes">
-                <attribute name="attrs">{'invisible': ['|', ('state', 'not in', ['sent', 'draft']), '&amp;', ('is_real_estate', '=', True), ('has_apartment', '=', True)]}</attribute>
+                <attribute name="attrs">{'invisible': ['|', ('state', 'not in', ['sent', 'draft']), ('is_real_estate', '=', True)]}</attribute>
             </xpath>
 
-            <!-- Add real estate specific buttons -->
-            <xpath expr="//button[@name='action_confirm']" position="before">
-                <!-- Draft state buttons - Create Reservation button (disabled for now) -->
-                <button name="action_confirm_reservation" string="Create Reservation" type="object"
-                        class="oe_highlight"
-                        attrs="{'invisible': [('id', '!=', False)]}"/>
+            <!-- Hide payment buttons for real estate orders -->
+            <xpath expr="//button[@name='payment_action_capture']" position="attributes">
+                <attribute name="attrs">{'invisible': ['|', '!', ('authorized_transaction_ids', '!=', []), ('is_real_estate', '=', True)]}</attribute>
+            </xpath>
 
-                <!-- Sale state buttons - View Delivery button -->
-                <button name="action_view_delivery" string="View Delivery" type="object"
+            <xpath expr="//button[@name='payment_action_void']" position="attributes">
+                <attribute name="attrs">{'invisible': ['|', '!', ('authorized_transaction_ids', '!=', []), ('is_real_estate', '=', True)]}</attribute>
+            </xpath>
+
+            <!-- Add custom confirm button for real estate orders -->
+            <xpath expr="//header" position="inside">
+                <button name="action_confirm" string="Confirm" type="object" class="oe_highlight"
+                        attrs="{'invisible': ['|', ('state', 'not in', ['sent', 'draft']), ('is_real_estate', '=', False)]}"/>
+
+                <!-- View Delivery button for confirmed real estate orders -->
+                <button name="action_view_delivery" string="View Delivery" type="object" icon="fa-key"
                         attrs="{'invisible': ['|', '|', ('has_apartment', '=', False), ('state', '!=', 'sale'), ('is_real_estate', '=', False)]}"/>
             </xpath>
 
@@ -127,11 +134,12 @@
                     <div class="col-md-6">
                         <label for="apartment_id" string="Available Apartment"/>
                         <field name="apartment_id"
-                               domain="[('building_id', '=', building_id), ('state', '=', 'available')]"
+                               domain="[('building_id', '=', building_id), ('state', 'in', ['available', 'in_progress'])]"
                                options="{'no_create': True, 'no_open': False}"
                                context="{'default_state': 'available'}"
                                placeholder="Select an available apartment"
-                               attrs="{'required': [('parent.is_real_estate', '=', True)]}"/>
+                               attrs="{'required': [('parent.is_real_estate', '=', True)]}"
+                               on_change="1"/>
                     </div>
                 </div>
             </xpath>

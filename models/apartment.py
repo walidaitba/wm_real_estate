@@ -310,14 +310,9 @@ Salles de bain: {bathrooms}
                 if active_sales > 0:
                     raise UserError(_("Cannot mark as available. There are active reservations for this apartment."))
                 record.state = 'available'
-                # Update product state
+                # Update product state - this will also update the quantity
                 self._update_product_state(record)
-
-                # Force update quantity to 1 for all products linked to this apartment
-                products = self.env['product.template'].search([('apartment_id', '=', record.id)])
-                for product in products:
-                    self._set_inventory_quantity(product, 1.0)
-                    _logger.info("Forced inventory quantity to 1.0 for apartment %s marked as available", record.name)
+                _logger.info("Updated product state and quantity for apartment %s marked as available", record.name)
             elif record.state == 'sold':
                 # Check if there are confirmed sales
                 confirmed_sales = self.env['sale.order.line'].search_count([
@@ -327,14 +322,9 @@ Salles de bain: {bathrooms}
                 if confirmed_sales > 0:
                     raise UserError(_("Cannot mark as available. This apartment has been sold."))
                 record.state = 'available'
-                # Update product state
+                # Update product state - this will also update the quantity
                 self._update_product_state(record)
-
-                # Force update quantity to 1 for all products linked to this apartment
-                products = self.env['product.template'].search([('apartment_id', '=', record.id)])
-                for product in products:
-                    self._set_inventory_quantity(product, 1.0)
-                    _logger.info("Forced inventory quantity to 1.0 for apartment %s marked as available", record.name)
+                _logger.info("Updated product state and quantity for apartment %s marked as available", record.name)
             else:
                 raise UserError(_("This apartment is already available."))
 
@@ -502,29 +492,29 @@ Salles de bain: {bathrooms}
 
             # Double-check that the quantity was set correctly
             product.invalidate_cache(['qty_available'])
+            self.env.cache.invalidate()
+            self.env.clear_cache()
+
+            # Refresh the product to get the latest quantity
+            product = self.env['product.template'].browse(product.id)
+
             if product.qty_available != 1.0:
-                _logger.warning("Quantity not set correctly for %s. Trying again with direct quant creation.", product.name)
+                _logger.warning("Quantity not set correctly for %s. Trying again with direct method.", product.name)
 
-                # Get the stock.quant model
-                StockQuant = self.env['stock.quant']
-
-                # Get all warehouses
-                warehouses = self.env['stock.warehouse'].search([])
-                if warehouses and product.product_variant_ids:
+                # Try again using the product's direct method
+                if product.product_variant_ids:
                     variant = product.product_variant_ids[0]
-                    for warehouse in warehouses:
-                        # Get the stock location for this warehouse
+                    warehouse = self.env['stock.warehouse'].search([], limit=1)
+                    if warehouse:
                         location = warehouse.lot_stock_id
+                        # Use the product's direct method
+                        product._force_quantity_direct(variant.id, location.id, 1.0)
 
-                        # Force create a new quant with quantity 1
-                        StockQuant.create({
-                            'product_id': variant.id,
-                            'location_id': location.id,
-                            'quantity': 1.0
-                        })
-
-                # Invalidate cache again
+                # Invalidate cache again and refresh the product
+                self.env.cache.invalidate()
                 product.invalidate_cache(['qty_available'])
+                self.env.clear_cache()
+                product = self.env['product.template'].browse(product.id)
 
             _logger.info("Set inventory quantity to 1 for new apartment %s. Final qty_available: %s",
                         apartment.name, product.qty_available)
@@ -569,7 +559,18 @@ Salles de bain: {bathrooms}
                         product.with_context(from_apartment_update=True).categ_id = building_categ.id
 
                     # Update inventory quantity based on apartment state
-                    product._update_inventory_quantity()
+                    # Determine the correct quantity based on apartment state
+                    quantity = 1.0 if apartment.state == 'available' else 0.0
+                    product._force_inventory_quantity(product, quantity)
+
+                    # Force a complete cache invalidation
+                    self.env.cache.invalidate()
+                    product.invalidate_cache(['qty_available'])
+                    self.env.clear_cache()
+
+                    # Log the final quantity
+                    _logger.info("Updated quantity for %s to match state %s. Final qty_available: %s",
+                                product.name, apartment.state, product.qty_available)
 
     def _update_product_state(self, apartment):
         """Update product state based on apartment state"""
@@ -586,14 +587,19 @@ Salles de bain: {bathrooms}
                 }
                 product_with_context.write(vals)
 
-                # Update inventory quantity
-                if apartment.state == 'available':
-                    # Force inventory quantity to 1 for available apartments
-                    self._set_inventory_quantity(product, 1.0)
-                    _logger.info("Forced inventory quantity to 1.0 for available apartment %s", apartment.name)
-                else:
-                    # For other states, use the standard update method
-                    product._update_inventory_quantity()
+                # Update inventory quantity using the product's method
+                # Determine the correct quantity based on apartment state
+                quantity = 1.0 if apartment.state == 'available' else 0.0
+                product._force_inventory_quantity(product, quantity)
+
+                # Force a complete cache invalidation
+                self.env.cache.invalidate()
+                product.invalidate_cache(['qty_available'])
+                self.env.clear_cache()
+
+                # Log the final quantity
+                _logger.info("Updated quantity for %s to match state %s. Final qty_available: %s",
+                            product.name, apartment.state, product.qty_available)
 
     def _get_or_create_project_category(self, project):
         """Get or create product category for project"""
@@ -655,24 +661,18 @@ Salles de bain: {bathrooms}
     def _set_inventory_quantity(self, product, quantity):
         """Set the inventory quantity for a product"""
         try:
-            # CRITICAL FIX: Call the product's method to force inventory quantity
-            # Note: The first parameter should be 'self' for the method, not the product
+            # CRITICAL FIX: Call the product's method to force inventory quantity correctly
             _logger.info("Using product._force_inventory_quantity to set quantity %s for %s",
                         quantity, product.name)
 
-            # CRITICAL FIX: Call the method correctly
-            result = product._force_inventory_quantity(quantity=quantity)
+            # CRITICAL FIX: Call the method correctly with the product as the first parameter
+            result = product._force_inventory_quantity(product, quantity)
 
             # Log the final quantity
             _logger.info("Final quantity for %s: %s", product.name, product.qty_available)
 
-            # Set a flag to update the quantity after the transaction is complete
-            # This avoids creating a cron job during the transaction
-            self.env.context = dict(self.env.context)
-            self.env.context.update(update_inventory_after_save=True)
-
-            # Log that we'll update the quantity after save
-            _logger.info("Will verify quantity for %s after save", product.name)
+            # Log that the quantity has been set
+            _logger.info("Quantity has been set for %s", product.name)
 
             return result
         except Exception as e:

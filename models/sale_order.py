@@ -38,14 +38,14 @@ class SaleOrderLine(models.Model):
     def _onchange_building_id(self):
         """When building is selected, filter apartments"""
         if self.building_id:
-            # If we have a building, filter apartments by this building
-            return {'domain': {'apartment_id': [('building_id', '=', self.building_id.id), ('state', '=', 'available')]}}
+            # If we have a building, filter apartments by this building and show only available or in_progress
+            return {'domain': {'apartment_id': [('building_id', '=', self.building_id.id), ('state', 'in', ['available', 'in_progress'])]}}
         elif self.order_id.project_id:
             # If we have a project but no building, filter apartments by project
-            return {'domain': {'apartment_id': [('project_id', '=', self.order_id.project_id.id), ('state', '=', 'available')]}}
+            return {'domain': {'apartment_id': [('project_id', '=', self.order_id.project_id.id), ('state', 'in', ['available', 'in_progress'])]}}
         else:
-            # No filters
-            return {'domain': {'apartment_id': [('state', '=', 'available')]}}
+            # No filters except state
+            return {'domain': {'apartment_id': [('state', 'in', ['available', 'in_progress'])]}}
 
     @api.onchange('apartment_id')
     def _onchange_apartment_id(self):
