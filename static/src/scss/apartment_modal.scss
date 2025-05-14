@@ -1,0 +1,61 @@
+/* Dialog styling for apartment modal */
+.o_apartment_dialog {
+    .modal-header {
+        background-color: #875A7B !important; /* Odoo purple */
+
+        .modal-title {
+            color: white !important;
+        }
+
+        .close {
+            color: white !important;
+            opacity: 0.8;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
+
+    .modal-body {
+        .apartment-modal-content {
+            strong {
+                color: #875A7B; /* Odoo purple */
+            }
+
+            .badge {
+                padding: 0.4em 0.6em;
+                font-size: 85%;
+                font-weight: 600;
+                border-radius: 0.25rem;
+
+                &.badge-success {
+                    background-color: #28a745;
+                    color: white;
+                }
+
+                &.badge-warning {
+                    background-color: #ffc107;
+                    color: #212529;
+                }
+
+                &.badge-danger {
+                    background-color: #dc3545;
+                    color: white;
+                }
+            }
+        }
+    }
+
+    .modal-footer {
+        .btn-primary {
+            background-color: #875A7B !important; /* Odoo purple */
+            border-color: #875A7B !important;
+
+            &:hover {
+                background-color: darken(#875A7B, 10%) !important;
+                border-color: darken(#875A7B, 10%) !important;
+            }
+        }
+    }
+}

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Custom Sale Order Tree View -->
+    <record id="view_order_tree_real_estate_custom" model="ir.ui.view">
+        <field name="name">sale.order.tree.real.estate.custom</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" eval="False"/>
+        <field name="arch" type="xml">
+            <tree string="Real Estate Orders" decoration-bf="message_needaction==True" decoration-muted="state=='cancel'" decoration-info="is_real_estate == True">
+                <field name="message_needaction" invisible="1"/>
+                <field name="is_real_estate" invisible="1"/>
+                <field name="has_apartment" invisible="1"/>
+                <field name="name" string="Order Number"/>
+                <field name="project_id" optional="show"/>
+                <field name="date_order"/>
+                <field name="partner_id"/>
+                <field name="user_id" optional="show"/>
+                <field name="team_id" optional="hide"/>
+                <field name="activity_ids" widget="list_activity" optional="show"/>
+                <field name="apartment_status" optional="show" widget="badge"
+                       decoration-secondary="apartment_status == 'available'"
+                       decoration-info="apartment_status == 'reserved'"
+                       decoration-success="apartment_status == 'sold'"/>
+                <field name="state"/>
+                <field name="invoice_status" optional="show"/>
+                <field name="amount_total" sum="Total Tax Included" widget="monetary"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

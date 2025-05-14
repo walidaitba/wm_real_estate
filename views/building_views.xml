@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Building Form View -->
+    <record id="view_real_estate_building_form" model="ir.ui.view">
+        <field name="name">real.estate.building.form</field>
+        <field name="model">real.estate.building</field>
+        <field name="arch" type="xml">
+            <form string="Building">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_apartments" type="object" class="oe_stat_button" icon="fa-home">
+                            <field name="apartment_count" widget="statinfo" string="Apartments"/>
+                        </button>
+                        <button name="action_view_sold_apartments" type="object" class="oe_stat_button" icon="fa-home"
+                                context="{'search_default_sold_apartments': 1}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value text-danger"><field name="sold_apartment_count"/></span>
+                                <span class="o_stat_text">Sold</span>
+                            </div>
+                        </button>
+                        <button name="action_view_available_apartments" type="object" class="oe_stat_button" icon="fa-home"
+                                context="{'search_default_available_apartments': 1}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value text-success"><field name="available_apartment_count"/></span>
+                                <span class="o_stat_text">Available</span>
+                            </div>
+                        </button>
+                        <button name="action_view_reservations" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value text-warning"><field name="reservation_count"/></span>
+                                <span class="o_stat_text">Reserved</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Building Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="project_id" attrs="{'readonly': [('context_project_readonly', '=', True)]}"/>
+                            <field name="context_project_readonly" invisible="1"/>
+                            <field name="floors"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Building Tree View -->
+    <record id="view_real_estate_building_tree" model="ir.ui.view">
+        <field name="name">real.estate.building.tree</field>
+        <field name="model">real.estate.building</field>
+        <field name="arch" type="xml">
+            <tree string="Buildings">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="project_id"/>
+                <field name="floors"/>
+                <field name="apartment_count"/>
+                <field name="sold_apartment_count"/>
+                <field name="available_apartment_count"/>
+                <field name="reservation_count"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Building Search View -->
+    <record id="view_real_estate_building_search" model="ir.ui.view">
+        <field name="name">real.estate.building.search</field>
+        <field name="model">real.estate.building</field>
+        <field name="arch" type="xml">
+            <search string="Buildings">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="project_id"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Project" name="group_by_project" domain="[]" context="{'group_by': 'project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Building Action -->
+    <record id="action_real_estate_building" model="ir.actions.act_window">
+        <field name="name">Buildings</field>
+        <field name="res_model">real.estate.building</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_group_by_project': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first building!
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for creating new buildings -->
+    <record id="action_create_building" model="ir.actions.act_window">
+        <field name="name">Create Building</field>
+        <field name="res_model">real.estate.building</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{
+            'default_context_project_readonly': False
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new building
+            </p>
+            <p>
+                Fill in the building details including the project it belongs to.
+            </p>
+        </field>
+    </record>
+</odoo>

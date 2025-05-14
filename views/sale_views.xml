@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Sale Order Search View Inheritance -->
+    <record id="view_sales_order_filter_real_estate" model="ir.ui.view">
+        <field name="name">sale.order.search.real.estate</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <!-- Add real estate filters -->
+            <filter name="my_sale_orders_filter" position="after">
+                <separator/>
+                <filter string="Real Estate" name="real_estate" domain="[('is_real_estate', '=', True)]"/>
+                <filter string="With Apartments" name="with_apartments" domain="[('has_apartment', '=', True)]"/>
+                <separator/>
+            </filter>
+        </field>
+    </record>
+
+    <!-- Sale Order Form View Inheritance -->
+    <record id="view_order_form_real_estate" model="ir.ui.view">
+        <field name="name">sale.order.form.real.estate</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add real estate fields to the header -->
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <field name="is_real_estate" invisible="1"/>
+                <field name="has_apartment" invisible="1"/>
+                <field name="has_project" invisible="1"/>
+                <field name="is_deposit_invoiced" invisible="1"/>
+                <field name="deposit_amount" invisible="1"/>
+                <field name="deposit_invoice_id" invisible="1"/>
+                <field name="delivery_picking_id" invisible="1"/>
+                <field name="delivery_state" invisible="1"/>
+                <field name="is_tbd_customer" invisible="1"/>
+            </xpath>
+
+            <!-- Modify standard buttons for real estate orders -->
+            <xpath expr="//button[@name='action_confirm']" position="attributes">
+                <attribute name="attrs">{'invisible': ['|', ('state', 'not in', ['sent', 'draft']), '&amp;', ('is_real_estate', '=', True), ('has_apartment', '=', True)]}</attribute>
+            </xpath>
+
+            <!-- Add real estate specific buttons -->
+            <xpath expr="//button[@name='action_confirm']" position="before">
+                <!-- Draft state buttons - Create Reservation button (disabled for now) -->
+                <button name="action_confirm_reservation" string="Create Reservation" type="object"
+                        class="oe_highlight"
+                        attrs="{'invisible': [('id', '!=', False)]}"/>
+
+                <!-- Sale state buttons - View Delivery button -->
+                <button name="action_view_delivery" string="View Delivery" type="object"
+                        attrs="{'invisible': ['|', '|', ('has_apartment', '=', False), ('state', '!=', 'sale'), ('is_real_estate', '=', False)]}"/>
+            </xpath>
+
+            <!-- Add real estate specific fields after partner_id -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <!-- Hidden fields for technical use -->
+                <field name="project_readonly" invisible="1"/>
+
+                <!-- Warning message for TBD Customer -->
+                <field name="is_tbd_customer" invisible="1"/>
+                <div class="alert alert-warning" role="alert"
+                     attrs="{'invisible': ['|', ('is_real_estate', '=', False), '|', ('partner_id', '=', False), ('is_tbd_customer', '=', False)]}">
+                    <div class="d-flex align-items-center">
+                        <i class="fa fa-exclamation-triangle mr-2"></i>
+                        <div>
+                            <strong>Please select a customer</strong>
+                            <p class="mb-0">
+                                This is a draft reservation. Please select a real customer before confirming the order.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project selection field with standard layout -->
+                <field name="project_id"
+                       attrs="{'required': [('is_real_estate', '=', True)], 'readonly': [('project_readonly', '=', True)], 'invisible': [('is_real_estate', '=', False)]}"
+                       options="{'no_create': False, 'no_open': False}"
+                       placeholder="Select a project"/>
+
+
+
+            </xpath>
+
+            <!-- Change Product to Apartment in the form view with proper domain -->
+            <xpath expr="//field[@name='order_line']/form//field[@name='product_id']" position="attributes">
+                <attribute name="string">Apartment</attribute>
+                <attribute name="domain">[('is_apartment', '=', True)]</attribute>
+                <attribute name="context">{'default_is_apartment': True}</attribute>
+                <attribute name="options">{'no_create': True}</attribute>
+            </xpath>
+
+            <!-- Add building and apartment fields to sale order line -->
+            <xpath expr="//field[@name='order_line']/form//field[@name='product_id']" position="after">
+                <!-- Real Estate specific fields for order lines -->
+                <div class="alert alert-info mb-3" role="alert" style="margin-bottom: 10px;"
+                     attrs="{'invisible': [('parent.is_real_estate', '=', False)]}">
+                    <div class="d-flex align-items-center">
+                        <i class="fa fa-info-circle mr-2"></i>
+                        <div>
+                            <strong>Real Estate Selection</strong>
+                            <p class="mb-0">
+                                Select a building and an apartment from the available options.
+                                Only available apartments are shown.
+                            </p>
+                            <p class="mb-0 mt-2 font-weight-bold">
+                                Note: Real estate orders can only have ONE apartment line.
+                                Additional apartment lines will be rejected.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="o_horizontal_separator mt-3 mb-2"
+                     attrs="{'invisible': [('parent.is_real_estate', '=', False)]}">
+                    <strong>Apartment Selection</strong>
+                </div>
+
+                <div class="row" attrs="{'invisible': [('parent.is_real_estate', '=', False)]}">
+                    <div class="col-md-6">
+                        <label for="building_id" string="Building"/>
+                        <field name="building_id"
+                               domain="[('project_id', '=', parent.project_id)]"
+                               options="{'no_create': True, 'no_open': False}"
+                               placeholder="Select a building"/>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="apartment_id" string="Available Apartment"/>
+                        <field name="apartment_id"
+                               domain="[('building_id', '=', building_id), ('state', '=', 'available')]"
+                               options="{'no_create': True, 'no_open': False}"
+                               context="{'default_state': 'available'}"
+                               placeholder="Select an available apartment"
+                               attrs="{'required': [('parent.is_real_estate', '=', True)]}"/>
+                    </div>
+                </div>
+            </xpath>
+
+            <!-- Add apartment details section to sale order line form -->
+            <xpath expr="//field[@name='order_line']/form//field[@name='tax_id']" position="after">
+                <!-- Apartment details section with better organization -->
+                <div name="apartment_details_container" attrs="{'invisible': [('apartment_id', '=', False)]}">
+                    <!-- Hidden fields for technical use -->
+                    <field name="apartment_id" invisible="1"/>
+                    <field name="building_id" invisible="1"/>
+                    <field name="product_id" invisible="1"/>
+
+                    <!-- Section title with visual enhancement -->
+                    <div class="o_horizontal_separator mt-3 mb-3" style="background-color: #f8f9fa; padding: 8px; border-radius: 4px;">
+                        <strong><i class="fa fa-building mr-2"></i>Apartment Details</strong>
+                    </div>
+
+                    <!-- Card-style layout for apartment details -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">
+                                            <field name="apartment_id" readonly="1" string="Apartment" nolabel="1"
+                                                   options="{'field_name': 'name'}" class="h5 mb-0"/>
+                                        </h5>
+                                        <field name="apartment_state" readonly="1" nolabel="1" widget="badge"
+                                               decoration-success="apartment_state == 'available'"
+                                               decoration-warning="apartment_state == 'reserved'"
+                                               decoration-danger="apartment_state == 'sold'"/>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <!-- Left column -->
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <strong>Building:</strong>
+                                                <field name="building_id" readonly="1" nolabel="1"/>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Project:</strong>
+                                                <field name="apartment_id" readonly="1" nolabel="1"
+                                                       options="{'field_name': 'project_id'}"/>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Floor:</strong>
+                                                <field name="apartment_id" readonly="1" nolabel="1"
+                                                       options="{'field_name': 'floor'}"/>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Code:</strong>
+                                                <field name="apartment_id" readonly="1" nolabel="1"
+                                                       options="{'field_name': 'code'}"/>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right column -->
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <strong>Area:</strong>
+                                                <field name="apartment_id" readonly="1" nolabel="1"
+                                                       options="{'field_name': 'area'}"/> m²
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Rooms:</strong>
+                                                <field name="apartment_id" readonly="1" nolabel="1"
+                                                       options="{'field_name': 'rooms'}"/>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Bathrooms:</strong>
+                                                <field name="apartment_id" readonly="1" nolabel="1"
+                                                       options="{'field_name': 'bathrooms'}"/>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Price:</strong>
+                                                <field name="apartment_id" readonly="1" nolabel="1"
+                                                       options="{'field_name': 'price'}" class="font-weight-bold"/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Description and features -->
+                                    <div class="mt-3">
+                                        <h6 class="border-bottom pb-2">Description</h6>
+                                        <field name="apartment_id" readonly="1" nolabel="1"
+                                               options="{'field_name': 'description'}" class="text-muted"/>
+                                    </div>
+
+                                    <div class="mt-3">
+                                        <h6 class="border-bottom pb-2">Features</h6>
+                                        <field name="apartment_id" readonly="1" nolabel="1"
+                                               options="{'field_name': 'features'}" class="text-muted"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+
+            <!-- Change Product to Apartment in the header and add building fields -->
+            <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="before">
+                <!-- Add Building field before Apartment field -->
+                <field name="building_id" optional="show"
+                       attrs="{'column_invisible': [('parent.is_real_estate', '=', False)]}"/>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="attributes">
+                <attribute name="string">Apartment</attribute>
+                <attribute name="domain">[('is_apartment', '=', True)]</attribute>
+                <attribute name="context">{'default_is_apartment': True}</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="after">
+                <!-- Add apartment state field after product_id -->
+                <field name="apartment_state" optional="show" widget="badge"
+                       attrs="{'column_invisible': [('parent.is_real_estate', '=', False)]}"
+                       decoration-success="apartment_state == 'available'"
+                       decoration-warning="apartment_state == 'reserved'"
+                       decoration-danger="apartment_state == 'sold'"/>
+            </xpath>
+
+            <!-- Add apartment_id field to the tree view but make it invisible -->
+            <xpath expr="//field[@name='order_line']/tree//field[@name='apartment_state']" position="after">
+                <field name="apartment_id" invisible="1"/>
+            </xpath>
+
+            <!-- Add decoration to order lines with apartments and limit to one line -->
+            <xpath expr="//field[@name='order_line']/tree" position="attributes">
+                <attribute name="decoration-info">apartment_id != False</attribute>
+                <attribute name="decoration-danger">apartment_state == 'reserved' or apartment_state == 'sold'</attribute>
+                <attribute name="editable">bottom</attribute>
+            </xpath>
+
+            <!-- Hide the standard Add a product button for real estate orders -->
+            <xpath expr="//field[@name='order_line']/tree/control" position="attributes">
+                <attribute name="attrs">{'invisible': [('parent.is_real_estate', '=', True)]}</attribute>
+            </xpath>
+
+            <!-- Add a custom message when trying to add more lines -->
+            <xpath expr="//field[@name='order_line']/tree/control" position="after">
+                <control attrs="{'invisible': ['|', ('parent.is_real_estate', '=', False), ('parent.has_apartment', '=', False)]}">
+                    <div class="text-center text-muted">
+                        <i class="fa fa-info-circle"/> Real estate orders can only have one apartment line
+                    </div>
+                </control>
+            </xpath>
+
+            <!-- Add a custom control for adding an apartment when none exists -->
+            <xpath expr="//field[@name='order_line']/tree/control" position="after">
+                <control attrs="{'invisible': ['|', ('parent.is_real_estate', '=', False), '|', ('parent.has_apartment', '=', True), ('parent.project_id', '=', False)]}">
+                    <div class="text-center">
+                        <a role="button" class="btn btn-secondary o_add_record_line">
+                            <i class="fa fa-plus"/> Add an apartment
+                        </a>
+                    </div>
+                </control>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Sale Order Tree View Inheritance -->
+    <record id="view_order_tree_real_estate" model="ir.ui.view">
+        <field name="name">sale.order.tree.real.estate</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <!-- Add real estate fields -->
+            <field name="name" position="after">
+                <field name="is_real_estate" invisible="1"/>
+                <field name="has_apartment" invisible="1"/>
+            </field>
+
+            <!-- Add decoration for real estate orders -->
+            <tree position="attributes">
+                <attribute name="decoration-info">is_real_estate == True</attribute>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Removed problematic view -->
+</odoo>

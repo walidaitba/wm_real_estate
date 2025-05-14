@@ -1,0 +1,99 @@
+/* Apartment Buttons CSS */
+
+/* Style for apartment list view buttons */
+.o_list_button {
+    white-space: nowrap;
+    text-align: right;
+    padding-right: 15px !important;
+}
+
+.o_list_button_header {
+    text-align: right;
+    padding-right: 15px !important;
+}
+
+/* Style for buttons */
+.o_list_button .btn {
+    margin-right: 5px;
+}
+
+.o_list_button .btn-primary {
+    background-color: #875A7B;
+    border-color: #875A7B;
+}
+
+.o_list_button .btn-primary:hover {
+    background-color: #68465e;
+    border-color: #68465e;
+}
+
+.o_list_button .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.o_list_button .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #5a6268;
+}
+
+/* Dialog styling for apartment modal */
+.o_apartment_dialog .modal-header {
+    background-color: #875A7B !important; /* Odoo purple */
+}
+
+.o_apartment_dialog .modal-header .modal-title {
+    color: white !important;
+}
+
+.o_apartment_dialog .modal-header .close {
+    color: white !important;
+    opacity: 0.8;
+}
+
+.o_apartment_dialog .modal-header .close:hover {
+    opacity: 1;
+}
+
+.o_apartment_dialog .modal-body .apartment-modal-content strong {
+    color: #875A7B; /* Odoo purple */
+}
+
+.o_apartment_dialog .modal-body .apartment-modal-content .badge {
+    padding: 0.4em 0.6em;
+    font-size: 85%;
+    font-weight: 600;
+    border-radius: 0.25rem;
+}
+
+.o_apartment_dialog .modal-body .apartment-modal-content .badge.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.o_apartment_dialog .modal-body .apartment-modal-content .badge.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.o_apartment_dialog .modal-body .apartment-modal-content .badge.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.o_apartment_dialog .modal-footer .btn-primary {
+    background-color: #875A7B !important; /* Odoo purple */
+    border-color: #875A7B !important;
+}
+
+.o_apartment_dialog .modal-footer .btn-primary:hover {
+    background-color: #68465e !important;
+    border-color: #68465e !important;
+}
+
+/* Force apartment modal to be centered */
+.o_apartment_dialog .modal-dialog {
+    display: flex !important;
+    align-items: center !important;
+    min-height: calc(100% - 60px) !important;
+}

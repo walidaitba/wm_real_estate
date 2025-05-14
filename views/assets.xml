@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="assets_backend" name="wm_real_estate assets" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <!-- Apartment buttons functionality -->
+            <script type="text/javascript" src="/wm_real_estate/static/src/js/apartment_modal.js"></script>
+            <script type="text/javascript" src="/wm_real_estate/static/src/js/apartment_action.js"></script>
+            <link rel="stylesheet" type="text/css" href="/wm_real_estate/static/src/css/apartment_modal.css"/>
+        </xpath>
+    </template>
+
+    <template id="qunit_suite" name="wm_real_estate tests" inherit_id="web.qunit_suite">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/wm_real_estate/static/src/js/apartment_modal.js"></script>
+            <script type="text/javascript" src="/wm_real_estate/static/src/js/apartment_action.js"></script>
+        </xpath>
+    </template>
+</odoo>

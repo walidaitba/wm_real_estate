@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product Form View Inheritance -->
+    <record id="product_template_form_view_real_estate" model="ir.ui.view">
+        <field name="name">product.template.form.real.estate</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Add is_apartment checkbox directly under product name but outside the h1 tag -->
+            <xpath expr="//div[hasclass('oe_title')]" position="after">
+                <div class="d-flex align-items-center mb-2">
+                    <field name="is_apartment" widget="boolean" class="mr-2"/>
+                    <label for="is_apartment" string="Is Apartment" class="mb-0"/>
+                </div>
+            </xpath>
+
+            <!-- Replace the product name label with two conditional labels -->
+            <xpath expr="//div[hasclass('oe_title')]/label[@for='name']" position="replace">
+                <label for="name" attrs="{'invisible': [('is_apartment', '=', True)]}" class="o_form_label oe_edit_only">Product Name</label>
+                <label for="name" attrs="{'invisible': [('is_apartment', '=', False)]}" class="o_form_label oe_edit_only">Apartment Number</label>
+            </xpath>
+
+            <!-- Change the placeholder based on is_apartment -->
+            <xpath expr="//div[hasclass('oe_title')]/h1/field[@name='name']" position="replace">
+                <field name="name" placeholder="Apartment Number" attrs="{'invisible': [('is_apartment', '=', False)]}" force_save="1"/>
+                <field name="name" placeholder="Product Name" attrs="{'invisible': [('is_apartment', '=', True)]}" force_save="1"/>
+            </xpath>
+
+
+            <!-- Replace the group_general with our custom layout -->
+            <xpath expr="//group[@name='group_general']" position="replace">
+                <group name="group_general">
+                    <!-- Apartment fields (shown only when is_apartment is true) -->
+                    <div class="o_horizontal_separator mt-3 mb-2" attrs="{'invisible': [('is_apartment', '=', False)]}">Apartment Information</div>
+                    <field name="project_id"
+                           attrs="{'invisible': [('is_apartment', '=', False)],
+                                  'required': [('is_apartment', '=', True)],
+                                  'readonly': [('context_project_readonly', '=', True)]}"
+                           options="{'no_create_edit': False, 'no_open': False}"
+                           help="Select the real estate project for this apartment"
+                           placeholder="Select or create a project"
+                           string="Project"/>
+                    <field name="building_id"
+                           attrs="{'invisible': [('is_apartment', '=', False)],
+                                  'required': [('is_apartment', '=', True)],
+                                  'readonly': [('context_building_readonly', '=', True)]}"
+                           domain="[('project_id', '=', project_id)]"
+                           options="{'no_create_edit': False, 'no_open': False}"
+                           help="Select the building where this apartment is located"
+                           placeholder="Select or create a building"
+                           string="Building"/>
+                    <!-- Hidden fields to store context values -->
+                    <field name="context_project_readonly" invisible="1"/>
+                    <field name="context_building_readonly" invisible="1"/>
+                    <field name="floor"
+                           attrs="{'invisible': [('is_apartment', '=', False)], 'required': [('is_apartment', '=', True)]}"
+                           help="Floor number where the apartment is located"
+                           string="Floor"/>
+                    <field name="area"
+                           attrs="{'invisible': [('is_apartment', '=', False)], 'required': [('is_apartment', '=', True)]}"
+                           help="Total area of the apartment in square meters"
+                           string="Area (m²)"/>
+                    <field name="rooms"
+                           attrs="{'invisible': [('is_apartment', '=', False)]}"
+                           help="Number of rooms in the apartment"
+                           string="Number of Rooms"/>
+                    <field name="bathrooms"
+                           attrs="{'invisible': [('is_apartment', '=', False)]}"
+                           help="Number of bathrooms in the apartment"
+                           string="Number of Bathrooms"/>
+                    <field name="apartment_state"
+                           attrs="{'invisible': [('is_apartment', '=', False)]}"
+                           help="Current status of the apartment"
+                           string="Apartment Status"/>
+                    <field name="apartment_id" invisible="1"
+                           options="{'no_create': True}"
+                           help="Link to the real estate apartment record"/>
+
+                    <!-- Standard product fields -->
+                    <div class="o_horizontal_separator mt-3 mb-2">Product Information</div>
+                    <field name="type" string="Product Type"/>
+                    <field name="categ_id" string="Product Category"/>
+                    <!-- dont touch this two fields because they are duplicates-->
+                    <!--
+                    <field name="default_code" placeholder="Internal Reference" string="Internal Reference"/>
+                    <field name="barcode" attrs="{'invisible': [('product_variant_count', '>', 1)]}" placeholder="Barcode" string="Barcode"/>
+                    -->
+                    <field name="product_variant_count" invisible="1"/>
+                    <field name="active" string="Active"/>
+                    <!--
+                    <field name="company_id" groups="base.group_multi_company" string="Company"/>
+                    -->
+                </group>
+            </xpath>
+
+            <!-- Keep the original pricing section -->
+            <xpath expr="//group[@name='group_standard_price']" position="attributes">
+                <attribute name="string">Pricing</attribute>
+            </xpath>
+
+            <!-- Add Create Reservation button to button box for apartments -->
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button name="action_create_reservation" type="object"
+                        class="oe_stat_button" icon="fa-calendar"
+                        attrs="{'invisible': [('is_apartment', '=', False)]}">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Create</span>
+                        <span class="o_stat_text">Quotation</span>
+                    </div>
+                </button>
+                <!-- Add Quantity button for apartments -->
+                <button name="action_open_quants" type="object"
+                        class="oe_stat_button" icon="fa-building-o"
+                        attrs="{'invisible': [('is_apartment', '=', False)]}">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="qty_available" widget="statinfo" nolabel="1"/>
+                        </span>
+                        <span class="o_stat_text">Quantity</span>
+                    </div>
+                </button>
+                <!-- Add Update Quantity button for apartments -->
+                <button name="action_update_quantity" type="object"
+                        class="oe_stat_button" icon="fa-refresh"
+                        attrs="{'invisible': [('is_apartment', '=', False)]}">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Update</span>
+                        <span class="o_stat_text">Quantity</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Product Tree View Inheritance -->
+    <record id="product_template_tree_view_real_estate" model="ir.ui.view">
+        <field name="name">product.template.tree.real.estate</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="name" position="attributes">
+                <attribute name="string">Apartment Number</attribute>
+            </field>
+            <field name="name" position="after">
+                <field name="is_apartment" invisible="1"/>
+                <field name="active" invisible="1"/>
+                <field name="company_id" invisible="1" groups="base.group_multi_company"/>
+                <field name="project_id" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
+                <field name="building_id" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
+                <field name="floor" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
+                <field name="area" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
+                <field name="rooms" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
+                <field name="bathrooms" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
+                <field name="apartment_state" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
+                <field name="qty_available" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Custom Apartment List View -->
+    <record id="product_template_apartment_list_view" model="ir.ui.view">
+        <field name="name">product.template.apartment.list</field>
+        <field name="model">product.template</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="apartment_state == 'available'" decoration-warning="apartment_state == 'reserved'" decoration-danger="apartment_state == 'sold'">
+                <field name="id" invisible="1"/>
+                <field name="is_apartment" invisible="1"/>
+                <field name="name" string="Apartment Number"/>
+                <field name="default_code"/>
+                <field name="project_id"/>
+                <field name="building_id"/>
+                <field name="floor"/>
+                <field name="area"/>
+                <field name="rooms"/>
+                <field name="bathrooms"/>
+                <field name="apartment_state"/>
+                <field name="list_price" widget="monetary"/>
+                <field name="qty_available" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Add decoration to tree view for apartments -->
+    <record id="product_template_tree_view_real_estate_decoration" model="ir.ui.view">
+        <field name="name">product.template.tree.real.estate.decoration</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <tree position="attributes">
+                <attribute name="decoration-info">is_apartment == True</attribute>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Product Search View Inheritance -->
+    <record id="product_template_search_view_real_estate" model="ir.ui.view">
+        <field name="name">product.template.search.real.estate</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <!-- Add searchable fields -->
+            <field name="name" position="after">
+                <field name="project_id"/>
+                <field name="building_id"/>
+                <field name="floor"/>
+                <field name="area"/>
+                <field name="rooms"/>
+                <field name="bathrooms"/>
+                <field name="active"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </field>
+
+            <!-- Add filters -->
+            <filter name="filter_to_sell" position="after">
+                <separator/>
+                <filter string="Apartments" name="is_apartment" domain="[('is_apartment', '=', True)]"/>
+                <separator/>
+                <filter string="Available Apartments" name="available_apartments" domain="[('is_apartment', '=', True), ('apartment_state', '=', 'available')]"/>
+                <filter string="Reserved Apartments" name="reserved_apartments" domain="[('is_apartment', '=', True), ('apartment_state', '=', 'reserved')]"/>
+                <filter string="Sold Apartments" name="sold_apartments" domain="[('is_apartment', '=', True), ('apartment_state', '=', 'sold')]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </filter>
+
+            <!-- Add groupby options -->
+            <group position="inside">
+                <filter string="Project" name="groupby_project" domain="[]" context="{'group_by': 'project_id'}"/>
+                <filter string="Building" name="groupby_building" domain="[]" context="{'group_by': 'building_id'}"/>
+                <filter string="Floor" name="groupby_floor" domain="[]" context="{'group_by': 'floor'}"/>
+                <filter string="Apartment Status" name="groupby_apartment_state" domain="[]" context="{'group_by': 'apartment_state'}"/>
+                <filter string="Company" name="groupby_company" domain="[]" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+            </group>
+        </field>
+    </record>
+
+    <!-- Custom Product Kanban View for Real Estate -->
+    <record id="product_template_kanban_view_real_estate" model="ir.ui.view">
+        <field name="name">product.template.kanban.real.estate</field>
+        <field name="model">product.template</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="apartment_state" class="o_kanban_small_column">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="default_code"/>
+                <field name="list_price"/>
+                <field name="is_apartment"/>
+                <field name="building_id"/>
+                <field name="floor"/>
+                <field name="area"/>
+                <field name="image_1920"/>
+                <field name="active"/>
+                <field name="product_variant_count"/>
+                <field name="company_id"/>
+                <field name="apartment_state"/>
+                <field name="project_id"/>
+                <field name="rooms"/>
+                <field name="bathrooms"/>
+                <field name="is_locked"/>
+                <field name="locked_by_order_id"/>
+
+                <!-- Define the column headers and their colors -->
+                <progressbar field="apartment_state" colors='{"available": "success", "reserved": "warning", "sold": "danger"}'/>
+
+                <!-- Define the groups to display (only available and reserved) -->
+                <field name="apartment_state" widget="state_selection" options="{
+                    'clickable': '1',
+                    'fold_field': 'fold',
+                    'group_by_tooltip': {
+                        'available': 'Available apartments',
+                        'reserved': 'Reserved apartments'
+                    }
+                }"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_image">
+                                <img t-att-src="kanban_image('product.template', 'image_128', record.id.raw_value)" alt="Product"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                                <div t-if="record.default_code.raw_value">
+                                    [<field name="default_code"/>]
+                                </div>
+                                <div t-if="record.list_price.raw_value">
+                                    <field name="list_price" widget="monetary"/>
+                                </div>
+                                <!-- Real Estate specific fields -->
+                                <div t-if="record.is_apartment.raw_value" class="mt-2">
+                                    <!-- Status indicator with color coding -->
+                                    <div t-if="record.apartment_state.raw_value" class="mb-2">
+                                        <span t-att-class="'badge ' +
+                                            ((record.apartment_state.raw_value == 'available' and record.is_locked.raw_value == false) and 'badge-success' or
+                                            (record.apartment_state.raw_value == 'available' and record.is_locked.raw_value == true) and 'badge-info' or
+                                            record.apartment_state.raw_value == 'reserved' and 'badge-warning' or
+                                            record.apartment_state.raw_value == 'sold' and 'badge-danger' or 'badge-secondary')">
+                                            <t t-if="record.apartment_state.raw_value == 'available' and record.is_locked.raw_value == true">
+                                                In Quotation
+                                            </t>
+                                            <t t-else="">
+                                                <field name="apartment_state"/>
+                                            </t>
+                                        </span>
+                                    </div>
+                                    <!-- Show locked information if applicable -->
+                                    <div t-if="record.is_locked.raw_value" class="mt-1">
+                                        <small class="text-muted">Locked by: <field name="locked_by_order_id"/></small>
+                                    </div>
+                                    <div t-if="record.project_id.raw_value">
+                                        <strong t-translation="off">Project:</strong> <field name="project_id"/>
+                                    </div>
+                                    <div t-if="record.building_id.raw_value">
+                                        <strong t-translation="off">Building:</strong> <field name="building_id"/>
+                                    </div>
+                                    <div t-if="record.floor.raw_value">
+                                        <strong t-translation="off">Floor:</strong> <field name="floor"/>
+                                    </div>
+                                    <div t-if="record.area.raw_value">
+                                        <strong t-translation="off">Area:</strong> <field name="area"/> m²
+                                    </div>
+                                    <div t-if="record.rooms.raw_value">
+                                        <strong t-translation="off">Rooms:</strong> <field name="rooms"/>
+                                    </div>
+                                    <div t-if="record.bathrooms.raw_value">
+                                        <strong t-translation="off">Bathrooms:</strong> <field name="bathrooms"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Real Estate Apartments Product Action -->
+    <record id="action_real_estate_apartment_products" model="ir.actions.act_window">
+        <field name="name">Apartments</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('is_apartment', '=', True)]</field>
+        <field name="context">{
+            'search_default_is_apartment': 1,
+            'search_default_groupby_project': 1,
+            'search_default_groupby_building': 1,
+            'search_default_groupby_apartment_state': 1,
+            'default_is_apartment': True,
+            'default_type': 'product',
+            'default_apartment_state': 'available',
+            'default_rooms': 1,
+            'default_bathrooms': 1,
+            'default_floor': 0,
+            'default_area': 0.0,
+            'default_context_project_readonly': False,
+            'default_context_building_readonly': False,
+            'default_qty_available': 1.0,
+            'force_qty_available': 1.0,
+            'form_view_ref': 'wm_real_estate.product_template_form_view_real_estate',
+            'from_apartment_list': True
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No apartments found!
+            </p>
+            <p>
+                Apartments are managed as products in the inventory module.
+                Click the create button to add a new apartment.
+            </p>
+            <p>
+                Each apartment must be linked to a building and project.
+            </p>
+        </field>
+    </record>
+
+    <!-- View specific to the action for tree view -->
+    <record id="action_real_estate_apartment_products_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="product_template_apartment_list_view"/>
+        <field name="act_window_id" ref="action_real_estate_apartment_products"/>
+    </record>
+
+    <!-- View specific to the action for form view -->
+    <record id="action_real_estate_apartment_products_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="product_template_form_view_real_estate"/>
+        <field name="act_window_id" ref="action_real_estate_apartment_products"/>
+    </record>
+
+    <!-- Action for creating new apartment products -->
+    <record id="action_create_apartment_product" model="ir.actions.act_window">
+        <field name="name">Create Apartment</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="view_id" ref="product_template_form_view_real_estate"/>
+        <field name="context">{
+            'default_is_apartment': True,
+            'default_type': 'product',
+            'default_apartment_state': 'available',
+            'default_rooms': 1,
+            'default_bathrooms': 1,
+            'default_floor': 0,
+            'default_area': 0.0,
+            'default_context_project_readonly': False,
+            'default_context_building_readonly': False,
+            'default_qty_available': 1.0,
+            'force_qty_available': 1.0,
+            'form_view_ref': 'wm_real_estate.product_template_form_view_real_estate',
+            'create': True,
+            'show_buttons': True,
+            'from_menu': True
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new apartment
+            </p>
+            <p>
+                Fill in the apartment details including the project and building it belongs to.
+                The apartment will be automatically added to the inventory as a product.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

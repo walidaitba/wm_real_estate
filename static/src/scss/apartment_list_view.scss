@@ -1,0 +1,157 @@
+.apartment-options-dialog {
+    padding: 20px;
+
+    h4 {
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.5rem;
+        color: #4c4c4c;
+    }
+
+    .apartment-details {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+
+        p {
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .badge {
+            font-size: 0.9rem;
+            padding: 5px 10px;
+        }
+    }
+
+    .btn {
+        min-width: 140px;
+        padding: 10px 20px;
+        font-size: 1.1rem;
+    }
+}
+
+/* Make all rows in list view clickable */
+.o_list_view {
+    .o_data_row {
+        cursor: pointer !important;
+    }
+}
+
+/* Force apartment modal to be visible */
+.apartment-modal {
+    display: block !important;
+    z-index: 9999 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    padding-right: 17px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+
+    &.fade {
+        opacity: 1 !important;
+    }
+
+    &.show {
+        opacity: 1 !important;
+    }
+
+    .modal-dialog {
+        margin: 30px auto !important;
+        transform: translate(0, 0) !important;
+        max-width: 600px !important;
+        display: flex !important;
+        align-items: center !important;
+        min-height: calc(100% - 60px) !important;
+
+        &.modal-dialog-centered {
+            display: flex !important;
+            align-items: center !important;
+        }
+    }
+
+    .modal-content {
+        border-radius: 5px !important;
+        box-shadow: 0 5px 15px rgba(0,0,0,.5) !important;
+        border: 1px solid rgba(0,0,0,.2) !important;
+        width: 100% !important;
+    }
+
+    .modal-header {
+        background-color: #f8f9fa !important;
+        border-bottom: 1px solid #e9ecef !important;
+        padding: 15px 20px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+
+        .modal-title {
+            font-size: 1.5rem !important;
+            font-weight: bold !important;
+            margin: 0 !important;
+        }
+
+        .close {
+            font-size: 1.5rem !important;
+            font-weight: 700 !important;
+            line-height: 1 !important;
+            color: #000 !important;
+            text-shadow: 0 1px 0 #fff !important;
+            opacity: .5 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background-color: transparent !important;
+            border: 0 !important;
+            appearance: none !important;
+            cursor: pointer !important;
+
+            &:hover {
+                opacity: .75 !important;
+            }
+        }
+    }
+
+    .modal-body {
+        padding: 20px !important;
+        position: relative !important;
+        flex: 1 1 auto !important;
+    }
+
+    .modal-footer {
+        background-color: #f8f9fa !important;
+        border-top: 1px solid #e9ecef !important;
+        padding: 15px 20px !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+
+        .btn {
+            margin-left: 10px !important;
+        }
+    }
+}
+
+/* Ensure modal backdrop is visible */
+.modal-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 9998 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: #000 !important;
+    opacity: 0.5 !important;
+
+    &.fade {
+        opacity: 0.5 !important;
+    }
+
+    &.show {
+        opacity: 0.5 !important;
+    }
+}

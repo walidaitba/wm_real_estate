@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Project Form View -->
+    <record id="view_real_estate_project_form" model="ir.ui.view">
+        <field name="name">real.estate.project.form</field>
+        <field name="model">real.estate.project</field>
+        <field name="arch" type="xml">
+            <form string="Project">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_buildings" type="object" class="oe_stat_button" icon="fa-building">
+                            <field name="building_count" widget="statinfo" string="Buildings"/>
+                        </button>
+                        <button name="action_view_apartments" type="object" class="oe_stat_button" icon="fa-home">
+                            <field name="apartment_count" widget="statinfo" string="Apartments"/>
+                        </button>
+                        <button name="action_view_sold_apartments" type="object" class="oe_stat_button" icon="fa-home"
+                                context="{'search_default_sold_apartments': 1}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value text-danger"><field name="sold_apartment_count"/></span>
+                                <span class="o_stat_text">Sold</span>
+                            </div>
+                        </button>
+                        <button name="action_view_available_apartments" type="object" class="oe_stat_button" icon="fa-home"
+                                context="{'search_default_available_apartments': 1}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value text-success"><field name="available_apartment_count"/></span>
+                                <span class="o_stat_text">Available</span>
+                            </div>
+                        </button>
+                        <button name="action_view_reservations" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value text-warning"><field name="reservation_count"/></span>
+                                <span class="o_stat_text">Reserved</span>
+                            </div>
+                        </button>
+                    </div>
+                    <field name="logo" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Project Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="city"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Address">
+                            <field name="address"/>
+                        </page>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Project Tree View -->
+    <record id="view_real_estate_project_tree" model="ir.ui.view">
+        <field name="name">real.estate.project.tree</field>
+        <field name="model">real.estate.project</field>
+        <field name="arch" type="xml">
+            <tree string="Projects">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="city"/>
+                <field name="building_count"/>
+                <field name="apartment_count"/>
+                <field name="sold_apartment_count"/>
+                <field name="available_apartment_count"/>
+                <field name="reservation_count"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Project Search View -->
+    <record id="view_real_estate_project_search" model="ir.ui.view">
+        <field name="name">real.estate.project.search</field>
+        <field name="model">real.estate.project</field>
+        <field name="arch" type="xml">
+            <search string="Projects">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="city"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="City" name="group_by_city" domain="[]" context="{'group_by': 'city'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Project Kanban View -->
+    <record id="view_real_estate_project_kanban" model="ir.ui.view">
+        <field name="name">real.estate.project.kanban</field>
+        <field name="model">real.estate.project</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="city"/>
+                <field name="building_count"/>
+                <field name="apartment_count"/>
+                <field name="sold_apartment_count"/>
+                <field name="available_apartment_count"/>
+                <field name="reserved_apartment_count"/>
+                <field name="logo"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="o_kanban_image">
+                                <img t-att-src="kanban_image('real.estate.project', 'logo', record.id.raw_value)" alt="Project Image"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                                <div>
+                                    <field name="code"/> - <field name="city"/>
+                                </div>
+                                <div>
+                                    <span><t t-esc="record.building_count.value"/> <span t-translation="off">Buildings</span></span>
+                                </div>
+                                <div>
+                                    <span><t t-esc="record.apartment_count.value"/> <span t-translation="off">Apartments</span></span>
+                                </div>
+                                <div>
+                                    <span class="text-danger"><t t-esc="record.sold_apartment_count.value"/> <span t-translation="off">Sold</span></span>
+                                    <span class="text-success ml-2"><t t-esc="record.available_apartment_count.value"/> <span t-translation="off">Available</span></span>
+                                    <span class="text-warning ml-2"><t t-esc="record.reserved_apartment_count.value"/> <span t-translation="off">Reserved</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Project Action -->
+    <record id="action_real_estate_project" model="ir.actions.act_window">
+        <field name="name">Projects</field>
+        <field name="res_model">real.estate.project</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first real estate project!
+            </p>
+        </field>
+    </record>
+</odoo>

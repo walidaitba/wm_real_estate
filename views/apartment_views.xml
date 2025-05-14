@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Apartment Form View -->
+    <record id="view_real_estate_apartment_form" model="ir.ui.view">
+        <field name="name">real.estate.apartment.form</field>
+        <field name="model">real.estate.apartment</field>
+        <field name="arch" type="xml">
+            <form string="Apartment">
+                <header>
+                    <button name="action_mark_as_reserved" string="Mark as Reserved" type="object"
+                            class="oe_highlight" attrs="{'invisible': [('state', '!=', 'available')]}"/>
+                    <button name="action_mark_as_sold" string="Mark as Sold" type="object"
+                            class="oe_highlight" attrs="{'invisible': [('state', 'not in', ['available', 'reserved'])]}"/>
+                    <button name="action_mark_as_available" string="Mark as Available" type="object"
+                            attrs="{'invisible': [('state', '=', 'available')]}"/>
+                    <button name="action_create_reservation" string="Create Quotation" type="object"
+                            class="oe_highlight" attrs="{'invisible': [('state', '!=', 'available')]}"/>
+                    <button name="action_update_quantity" string="Update Quantity" type="object"
+                            help="Force update the inventory quantity based on apartment state"/>
+                    <field name="state" widget="statusbar" statusbar_visible="available,reserved,sold"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_reservations" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <field name="reservation_count" widget="statinfo" string="Quotations"/>
+                        </button>
+                        <button name="action_view_products" type="object" class="oe_stat_button" icon="fa-cubes">
+                            <field name="product_count" widget="statinfo" string="Products"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Apartment Number"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="context_project_readonly" invisible="1"/>
+                            <field name="context_building_readonly" invisible="1"/>
+                            <field name="building_id" attrs="{'readonly': [('context_building_readonly', '=', True)]}"/>
+                            <field name="project_id" attrs="{'readonly': [('context_project_readonly', '=', True)]}"/>
+                            <field name="floor"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="price" widget="monetary"/>
+                            <field name="area"/>
+                            <field name="rooms"/>
+                            <field name="bathrooms"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <!-- Locking information -->
+                    <group string="Reservation Status" attrs="{'invisible': [('is_locked', '=', False)]}">
+                        <field name="is_locked" invisible="1"/>
+                        <field name="locked_by_order_id" readonly="1" string="Locked By Quotation"/>
+                        <field name="lock_date" readonly="1" string="Locked Since"/>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                        <page string="Features">
+                            <field name="features"/>
+                        </page>
+                        <page string="Quotations">
+                            <field name="sale_order_line_ids">
+                                <tree>
+                                    <field name="order_id"/>
+                                    <field name="price_unit"/>
+                                    <field name="price_subtotal"/>
+                                    <field name="state" invisible="1"/>
+                                    <field name="order_partner_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Apartment Tree View -->
+    <record id="view_real_estate_apartment_tree" model="ir.ui.view">
+        <field name="name">real.estate.apartment.tree</field>
+        <field name="model">real.estate.apartment</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="building_id"/>
+                <field name="project_id"/>
+                <field name="floor"/>
+                <field name="price"/>
+                <field name="area"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Apartment Search View -->
+    <record id="view_real_estate_apartment_search" model="ir.ui.view">
+        <field name="name">real.estate.apartment.search</field>
+        <field name="model">real.estate.apartment</field>
+        <field name="arch" type="xml">
+            <search string="Apartments">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="building_id"/>
+                <field name="project_id"/>
+                <field name="floor"/>
+                <field name="price"/>
+                <field name="area"/>
+                <separator/>
+                <filter string="Available" name="available" domain="[('state', '=', 'available'), ('is_locked', '=', False)]"/>
+                <filter string="In Quotation" name="in_quotation" domain="[('state', '=', 'available'), ('is_locked', '=', True)]"/>
+                <filter string="Réservation en cours" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Reserved" name="reserved" domain="[('state', '=', 'reserved')]"/>
+                <filter string="Sold" name="sold" domain="[('state', '=', 'sold')]"/>
+                <separator/>
+                <filter string="Locked" name="locked" domain="[('is_locked', '=', True)]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Project" name="group_by_project" domain="[]" context="{'group_by': 'project_id'}"/>
+                    <filter string="Building" name="group_by_building" domain="[]" context="{'group_by': 'building_id'}"/>
+                    <filter string="Floor" name="group_by_floor" domain="[]" context="{'group_by': 'floor'}"/>
+                    <filter string="Status" name="group_by_state" domain="[]" context="{'group_by': 'state'}"/>
+                    <filter string="Locked By" name="group_by_locked_by" domain="[]" context="{'group_by': 'locked_by_order_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Apartment Kanban View -->
+    <record id="view_real_estate_apartment_kanban" model="ir.ui.view">
+        <field name="name">real.estate.apartment.kanban</field>
+        <field name="model">real.estate.apartment</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column" create="false" group_create="false" group_edit="false" group_delete="false">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="building_id"/>
+                <field name="project_id"/>
+                <field name="floor"/>
+                <field name="price"/>
+                <field name="area"/>
+                <field name="state"/>
+                <field name="product_tmpl_ids"/>
+
+                <!-- Add is_locked field -->
+                <field name="is_locked"/>
+                <field name="locked_by_order_id"/>
+
+                <!-- Define the column headers and their colors -->
+                <progressbar field="state" colors='{"available": "success", "in_progress": "info", "reserved": "warning", "sold": "danger"}'/>
+
+                <!-- Define the groups to display (available, in_progress, reserved, sold) -->
+                <field name="state" widget="state_selection" options="{
+                    'clickable': '1',
+                    'fold_field': 'fold',
+                    'group_by_tooltip': {
+                        'available': 'Available apartments',
+                        'in_progress': 'Apartments with reservation in progress',
+                        'reserved': 'Reserved apartments',
+                        'sold': 'Sold apartments'
+                    }
+                }"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="o_kanban_image">
+                                <!-- Use the first linked product's image -->
+                                <t t-set="product" t-value="record.product_tmpl_ids and record.product_tmpl_ids.raw_value and record.product_tmpl_ids.raw_value[0]"/>
+                                <img t-if="product" t-att-src="kanban_image('product.template', 'image_128', product)" alt="Apartment"/>
+                                <img t-else="" src="/web/static/src/img/placeholder.png" alt="Apartment"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <div>
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                                <div>
+                                    <field name="code"/>
+                                </div>
+                                <div>
+                                    <span>Building: <field name="building_id"/></span>
+                                </div>
+                                <div>
+                                    <span>Floor: <field name="floor"/></span>
+                                </div>
+                                <div>
+                                    <span>Price: <field name="price" widget="monetary"/></span>
+                                </div>
+                                <div>
+                                    <span>Area: <field name="area"/> m²</span>
+                                </div>
+                                <!-- Status indicator with color coding -->
+                                <div class="mt-2">
+                                    <span t-att-class="'badge ' +
+                                        ((record.state.raw_value == 'available' and record.is_locked.raw_value == false) and 'badge-success' or
+                                        (record.state.raw_value == 'available' and record.is_locked.raw_value == true) and 'badge-secondary' or
+                                        record.state.raw_value == 'in_progress' and 'badge-info' or
+                                        record.state.raw_value == 'reserved' and 'badge-warning' or
+                                        record.state.raw_value == 'sold' and 'badge-danger' or 'badge-secondary')">
+                                        <t t-if="record.state.raw_value == 'available' and record.is_locked.raw_value == true">
+                                            In Quotation
+                                        </t>
+                                        <t t-elif="record.state.raw_value == 'in_progress'">
+                                            Réservation en cours
+                                        </t>
+                                        <t t-else="">
+                                            <field name="state"/>
+                                        </t>
+                                    </span>
+                                </div>
+                                <!-- Show locked information if applicable -->
+                                <div t-if="record.is_locked.raw_value" class="mt-1">
+                                    <small class="text-muted">Locked by: <field name="locked_by_order_id"/></small>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Apartment Action (redirects to product view) -->
+    <record id="action_real_estate_apartment" model="ir.actions.act_window">
+        <field name="name">Apartments</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('is_apartment', '=', True)]</field>
+        <field name="context">{
+            'search_default_is_apartment': 1,
+            'search_default_groupby_project': 1,
+            'default_is_apartment': True,
+            'default_type': 'product'
+        }</field>
+
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No apartments found!
+            </p>
+            <p>
+                Apartments are managed as products in the inventory module.
+                Click the create button to add a new apartment.
+            </p>
+            <p>
+                Each apartment must be linked to a building and project.
+            </p>
+        </field>
+    </record>
+
+
+
+    <!-- Apartment Products Action -->
+    <record id="action_real_estate_apartment_products" model="ir.actions.act_window">
+        <field name="name">Apartment Products</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('is_apartment', '=', True)]</field>
+        <field name="context">{
+            'search_default_is_apartment': 1,
+            'search_default_groupby_project': 1,
+            'search_default_groupby_building': 1,
+            'search_default_groupby_apartment_state': 1,
+            'search_default_project_id': context_today().get('project_id', False),
+            'search_default_building_id': context_today().get('building_id', False),
+            'default_is_apartment': True,
+            'default_type': 'product'
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No apartment products found!
+            </p>
+            <p>
+                Apartments are managed as products in the inventory module.
+                Click the create button to add a new apartment.
+            </p>
+        </field>
+    </record>
+
+    <!-- Apartment Reservations Kanban Action -->
+    <record id="action_real_estate_apartment_reservations" model="ir.actions.act_window">
+        <field name="name">Apartment Reservations</field>
+        <field name="res_model">real.estate.apartment</field>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="view_real_estate_apartment_kanban"/>
+        <field name="domain">[]</field>
+        <field name="context">{
+            'create': False
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No apartments found!
+            </p>
+            <p>
+                This view shows all apartments and their reservation status.
+                You can filter by status using the search options.
+            </p>
+        </field>
+    </record>
+</odoo>

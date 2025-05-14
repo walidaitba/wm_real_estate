@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Action for viewing apartment quotations -->
+    <record id="action_real_estate_reservations" model="ir.actions.act_window">
+        <field name="name">Quotations</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">tree,form,calendar</field>
+        <field name="domain">[('state', 'in', ['draft', 'sent', 'sale']), ('has_apartment', '=', True)]</field>
+        <field name="context">{
+            'default_is_real_estate': True,
+            'search_default_my_quotation': 1
+        }</field>
+        <!-- Using standard view instead of custom view -->
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No apartment quotations found!
+            </p>
+            <p>
+                Create a new quotation to reserve an apartment for a customer.
+                Quotations follow this workflow:
+                <br/>1. Draft Quotation → 2. Confirmed Sale (Reservation) → 3. Handover → 4. Invoice
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for viewing active apartment reservations -->
+    <record id="action_real_estate_active_reservations" model="ir.actions.act_window">
+        <field name="name">Active Reservations</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">tree,form,calendar</field>
+        <field name="domain">[('state', '=', 'sale'), ('has_apartment', '=', True)]</field>
+        <field name="context">{
+            'default_is_real_estate': True
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No active reservations found!
+            </p>
+            <p>
+                Active reservations are confirmed sales orders with apartments.
+                These apartments are reserved and awaiting handover.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for creating a new reservation (quotation) -->
+    <record id="action_create_real_estate_reservation" model="ir.actions.act_window">
+        <field name="name">Create Reservation</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{
+            'default_is_real_estate': True,
+            'default_project_readonly': False
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new apartment reservation
+            </p>
+            <p>
+                Select a customer and add an apartment to reserve it.
+                The apartment status will be automatically updated to "Reserved".
+            </p>
+        </field>
+    </record>
+
+    <!-- Removed action_real_estate_sales as we no longer use the sold state -->
+</odoo>

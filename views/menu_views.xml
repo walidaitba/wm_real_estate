@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main Menu -->
+    <menuitem id="menu_real_estate_root"
+              name="Real Estate"
+              web_icon="wm_real_estate,static/description/icon.png"
+              sequence="10"/>
+
+    <!-- Dashboard Menu -->
+    <menuitem id="menu_real_estate_dashboard"
+              name="Dashboard"
+              parent="menu_real_estate_root"
+              action="action_real_estate_project"
+              sequence="1"/>
+
+    <!-- Quotations Menu  -->
+
+    <menuitem id="menu_real_estate_reservations_root"
+              name="Quotations"
+              parent="menu_real_estate_root"
+              action="action_real_estate_reservations"
+              sequence="10"/>
+
+    <!-- Reservations Menu (Apartment Kanban) -->
+    <menuitem id="menu_real_estate_apartment_reservations"
+              name="Reservations"
+              parent="menu_real_estate_root"
+              action="action_real_estate_apartment_reservations"
+              sequence="15"/>
+
+    <!-- Properties Menu -->
+    <menuitem id="menu_real_estate_properties"
+              name="Properties"
+              parent="menu_real_estate_root"
+              sequence="20"/>
+
+    <menuitem id="menu_real_estate_projects"
+              name="Projects"
+              parent="menu_real_estate_properties"
+              action="action_real_estate_project"
+              sequence="1"/>
+
+    <menuitem id="menu_real_estate_buildings"
+              name="Buildings"
+              parent="menu_real_estate_properties"
+              action="action_real_estate_building"
+              sequence="2"/>
+
+    <menuitem id="menu_real_estate_apartments"
+              name="Apartments"
+              parent="menu_real_estate_properties"
+              action="action_real_estate_apartment_products"
+              sequence="3"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_real_estate_configuration"
+              name="Configuration"
+              parent="menu_real_estate_root"
+              sequence="100"/>
+</odoo>

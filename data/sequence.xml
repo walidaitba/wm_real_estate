@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Apartment Sequence -->
+        <record id="seq_real_estate_apartment" model="ir.sequence">
+            <field name="name">Real Estate Apartment</field>
+            <field name="code">real.estate.apartment</field>
+            <field name="prefix">APT/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>
