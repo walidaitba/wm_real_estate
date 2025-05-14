@@ -5,7 +5,7 @@
         <field name="name">real.estate.project.form</field>
         <field name="model">real.estate.project</field>
         <field name="arch" type="xml">
-            <form string="Project">
+            <form string="Project" t-translation="on">
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_buildings" type="object" class="oe_stat_button" icon="fa-building">
@@ -18,20 +18,20 @@
                                 context="{'search_default_sold_apartments': 1}">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value text-danger"><field name="sold_apartment_count"/></span>
-                                <span class="o_stat_text">Sold</span>
+                                <span class="o_stat_text" t-translation="on">Sold</span>
                             </div>
                         </button>
                         <button name="action_view_available_apartments" type="object" class="oe_stat_button" icon="fa-home"
                                 context="{'search_default_available_apartments': 1}">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value text-success"><field name="available_apartment_count"/></span>
-                                <span class="o_stat_text">Available</span>
+                                <span class="o_stat_text" t-translation="on">Available</span>
                             </div>
                         </button>
                         <button name="action_view_reservations" type="object" class="oe_stat_button" icon="fa-file-text-o">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value text-warning"><field name="reservation_count"/></span>
-                                <span class="o_stat_text">Reserved</span>
+                                <span class="o_stat_text" t-translation="on">Reserved</span>
                             </div>
                         </button>
                     </div>
@@ -134,15 +134,15 @@
                                     <field name="code"/> - <field name="city"/>
                                 </div>
                                 <div>
-                                    <span><t t-esc="record.building_count.value"/> <span>Buildings</span></span>
+                                    <span><t t-esc="record.building_count.value"/> <span t-translation="on">Buildings</span></span>
                                 </div>
                                 <div>
-                                    <span><t t-esc="record.apartment_count.value"/> <span>Apartments</span></span>
+                                    <span><t t-esc="record.apartment_count.value"/> <span t-translation="on">Apartments</span></span>
                                 </div>
                                 <div>
-                                    <span class="text-danger"><t t-esc="record.sold_apartment_count.value"/> <span>Sold</span></span>
-                                    <span class="text-success ml-2"><t t-esc="record.available_apartment_count.value"/> <span>Available</span></span>
-                                    <span class="text-warning ml-2"><t t-esc="record.reserved_apartment_count.value"/> <span>Reserved</span></span>
+                                    <span class="text-danger"><t t-esc="record.sold_apartment_count.value"/> <span t-translation="on">Sold</span></span>
+                                    <span class="text-success ml-2"><t t-esc="record.available_apartment_count.value"/> <span t-translation="on">Available</span></span>
+                                    <span class="text-warning ml-2"><t t-esc="record.reserved_apartment_count.value"/> <span t-translation="on">Reserved</span></span>
                                 </div>
                             </div>
                         </div>

@@ -35,10 +35,7 @@
                 <field name="is_tbd_customer" invisible="1"/>
             </xpath>
 
-            <!-- Hide standard buttons for real estate orders -->
-            <xpath expr="//button[@name='action_confirm']" position="attributes">
-                <attribute name="attrs">{'invisible': ['|', ('state', 'not in', ['sent', 'draft']), ('is_real_estate', '=', True)]}</attribute>
-            </xpath>
+
 
             <!-- Hide payment buttons for real estate orders -->
             <xpath expr="//button[@name='payment_action_capture']" position="attributes">
@@ -49,15 +46,7 @@
                 <attribute name="attrs">{'invisible': ['|', '!', ('authorized_transaction_ids', '!=', []), ('is_real_estate', '=', True)]}</attribute>
             </xpath>
 
-            <!-- Add custom confirm button for real estate orders -->
-            <xpath expr="//header" position="inside">
-                <button name="action_confirm" string="Confirm" type="object" class="oe_highlight"
-                        attrs="{'invisible': ['|', ('state', 'not in', ['sent', 'draft']), ('is_real_estate', '=', False)]}"/>
 
-                <!-- View Delivery button for confirmed real estate orders -->
-                <button name="action_view_delivery" string="View Delivery" type="object" icon="fa-key"
-                        attrs="{'invisible': ['|', '|', ('has_apartment', '=', False), ('state', '!=', 'sale'), ('is_real_estate', '=', False)]}"/>
-            </xpath>
 
             <!-- Add real estate specific fields after partner_id -->
             <xpath expr="//field[@name='partner_id']" position="after">

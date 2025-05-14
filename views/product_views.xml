@@ -80,16 +80,8 @@
                     <div class="o_horizontal_separator mt-3 mb-2">Product Information</div>
                     <field name="type" string="Product Type"/>
                     <field name="categ_id" string="Product Category"/>
-                    <!-- dont touch this two fields because they are duplicates-->
-                    <!--
-                    <field name="default_code" placeholder="Internal Reference" string="Internal Reference"/>
-                    <field name="barcode" attrs="{'invisible': [('product_variant_count', '>', 1)]}" placeholder="Barcode" string="Barcode"/>
-                    -->
                     <field name="product_variant_count" invisible="1"/>
                     <field name="active" string="Active"/>
-                    <!--
-                    <field name="company_id" groups="base.group_multi_company" string="Company"/>
-                    -->
                 </group>
             </xpath>
 
@@ -104,8 +96,7 @@
                         class="oe_stat_button" icon="fa-calendar"
                         attrs="{'invisible': [('is_apartment', '=', False)]}">
                     <div class="o_field_widget o_stat_info">
-                        <span class="o_stat_text">Create</span>
-                        <span class="o_stat_text">Quotation</span>
+                        <span class="o_stat_text">Reserve</span>
                     </div>
                 </button>
                 <!-- Add Quantity button for apartments -->
@@ -299,7 +290,7 @@
                                             record.apartment_state.raw_value == 'reserved' and 'badge-warning' or
                                             record.apartment_state.raw_value == 'sold' and 'badge-danger' or 'badge-secondary')">
                                             <t t-if="record.apartment_state.raw_value == 'available' and record.is_locked.raw_value == true">
-                                                In Quotation
+                                                <span t-translation="on">In Quotation</span>
                                             </t>
                                             <t t-else="">
                                                 <field name="apartment_state"/>
@@ -308,25 +299,25 @@
                                     </div>
                                     <!-- Show locked information if applicable -->
                                     <div t-if="record.is_locked.raw_value" class="mt-1">
-                                        <small class="text-muted">Locked by: <field name="locked_by_order_id"/></small>
+                                        <small class="text-muted"><span t-translation="on">Locked by:</span> <field name="locked_by_order_id"/></small>
                                     </div>
                                     <div t-if="record.project_id.raw_value">
-                                        <strong t-translation="off">Project:</strong> <field name="project_id"/>
+                                        <strong t-translation="on">Project:</strong> <field name="project_id"/>
                                     </div>
                                     <div t-if="record.building_id.raw_value">
-                                        <strong t-translation="off">Building:</strong> <field name="building_id"/>
+                                        <strong t-translation="on">Building:</strong> <field name="building_id"/>
                                     </div>
                                     <div t-if="record.floor.raw_value">
-                                        <strong t-translation="off">Floor:</strong> <field name="floor"/>
+                                        <strong t-translation="on">Floor:</strong> <field name="floor"/>
                                     </div>
                                     <div t-if="record.area.raw_value">
-                                        <strong t-translation="off">Area:</strong> <field name="area"/> m²
+                                        <strong t-translation="on">Area:</strong> <field name="area"/> m²
                                     </div>
                                     <div t-if="record.rooms.raw_value">
-                                        <strong t-translation="off">Rooms:</strong> <field name="rooms"/>
+                                        <strong t-translation="on">Rooms:</strong> <field name="rooms"/>
                                     </div>
                                     <div t-if="record.bathrooms.raw_value">
-                                        <strong t-translation="off">Bathrooms:</strong> <field name="bathrooms"/>
+                                        <strong t-translation="on">Bathrooms:</strong> <field name="bathrooms"/>
                                     </div>
                                 </div>
                             </div>

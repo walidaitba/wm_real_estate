@@ -352,6 +352,7 @@ msgstr "Appartements"
 #. module: wm_real_estate
 #: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__project_id
 #: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__project_id
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
 msgid "Project"
 msgstr "Projet"
 
@@ -375,6 +376,7 @@ msgstr "Bâtiments"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
 msgid "Apartments"
 msgstr "Appartements"
 
@@ -980,13 +982,17 @@ msgstr "Réservation en cours"
 
 #. module: wm_real_estate
 #: model:ir.actions.act_window,name:wm_real_estate.action_real_estate_reservations
-#: model:ir.ui.menu,name:wm_real_estate.menu_real_estate_reservations_root
 #: model:ir.ui.menu,name:wm_real_estate.menu_real_estate_reservations_list
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_kanban_view
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
 msgid "Reservations"
+msgstr "Devis"
+
+#. module: wm_real_estate
+#: model:ir.ui.menu,name:wm_real_estate.menu_real_estate_reservations_root
+msgid "Quotations"
 msgstr "Devis"
 
 #. module: wm_real_estate
@@ -1057,6 +1063,8 @@ msgstr "Statut de l'Appartement"
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
 #: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__sold_apartment_count
 #: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__sold_apartment_count
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
 msgid "Sold"
 msgstr "Vendus"
 
@@ -1065,6 +1073,8 @@ msgstr "Vendus"
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
 #: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__available_apartment_count
 #: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_apartment_count
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
 msgid "Available"
 msgstr "Disponibles"
 
@@ -1073,6 +1083,8 @@ msgstr "Disponibles"
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
 #: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__reserved_apartment_count
 #: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__reserved_apartment_count
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
 msgid "Reserved"
 msgstr "Réservés"
 
@@ -1080,6 +1092,31 @@ msgstr "Réservés"
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
 msgid "Project:"
 msgstr "Projet :"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
+msgid "In Quotation"
+msgstr "En Devis"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
+msgid "Area:"
+msgstr "Surface :"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
+msgid "Rooms:"
+msgstr "Chambres :"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
+msgid "Bathrooms:"
+msgstr "Salles de bain :"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
+msgid "Locked by:"
+msgstr "Verrouillé par :"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_tree_real_estate
