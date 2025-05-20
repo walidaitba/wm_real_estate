@@ -11,9 +11,10 @@ class ProductTemplate(models.Model):
 
     # Real Estate specific fields
     is_apartment = fields.Boolean(string='Is Apartment', default=False)
+    is_store = fields.Boolean(string='Is Store', default=False)
     apartment_id = fields.Many2one('real.estate.apartment', string='Apartment')
 
-    # Direct fields for apartment properties
+    # Direct fields for apartment/store properties
     floor = fields.Integer(string='Floor')
     area = fields.Float(string='Area (m²)')
     rooms = fields.Integer(string='Number of Rooms', default=1)
@@ -153,6 +154,10 @@ class ProductTemplate(models.Model):
     def _onchange_is_apartment(self):
         """When marking as apartment, set product type to storable and update name placeholder"""
         if self.is_apartment:
+            # If is_store is also checked, uncheck it (mutual exclusivity)
+            if self.is_store:
+                self.is_store = False
+
             # Log the context for debugging
             _logger.info("DEBUG_APARTMENT_CREATION: _onchange_is_apartment context: %s", self.env.context)
             _logger.info("DEBUG_APARTMENT_CREATION: _onchange_is_apartment called from: %s",
@@ -167,9 +172,6 @@ class ProductTemplate(models.Model):
             # If this is a new record with no name yet, set a default name
             if not self.name or self.name == 'New Product':
                 self.name = 'New Apartment'
-
-            # Clear taxes for apartments
-            self.taxes_id = False
 
             # Log initial readonly state
             _logger.info("DEBUG_APARTMENT_CREATION: _onchange_is_apartment INITIAL: project_readonly=%s, building_readonly=%s",
@@ -220,6 +222,51 @@ class ProductTemplate(models.Model):
     # The _onchange_building_id_floor method has been removed as it was redundant and causing conflicts
     # Apartment name generation is now handled in _onchange_building_id and create methods
 
+    @api.onchange('is_store')
+    def _onchange_is_store(self):
+        """When marking as store, set product type to storable and update name placeholder"""
+        if self.is_store:
+            # If is_apartment is also checked, uncheck it (mutual exclusivity)
+            if self.is_apartment:
+                self.is_apartment = False
+
+            self.type = 'product'  # Storable product
+            # If this is a new record with no name yet, set a default name
+            if not self.name or self.name == 'New Product':
+                self.name = 'New Store'
+
+            # Set readonly flags based on context - same logic as apartments
+            # CASE 1: Creating from a building
+            if self.env.context.get('default_building_id'):
+                # When creating from a building, both building and project should be read-only
+                self.context_building_readonly = True
+                self.context_project_readonly = True
+
+            # CASE 2: Creating from a project
+            elif self.env.context.get('default_project_id'):
+                # When creating from a project, project should be read-only but building should be editable
+                self.context_project_readonly = True
+                self.context_building_readonly = False
+
+                # SPECIAL CASE: Explicitly mark as coming from project view
+                if self.env.context.get('from_project_view'):
+                    _logger.info("Creating from project view: Ensuring building_readonly=False")
+                    self.context_building_readonly = False
+
+            # CASE 3: Creating from stores page (neither default_building_id nor default_project_id)
+            else:
+                # When creating from stores page, both fields should be editable
+                self.context_project_readonly = False
+                self.context_building_readonly = False
+
+            # Override for force_building_id
+            if self.env.context.get('force_building_id'):
+                self.context_building_readonly = True
+
+            # CRITICAL DEBUG: Force building to be editable when coming from project view
+            if self.env.context.get('from_project_view') or self.env.context.get('force_building_editable'):
+                self.context_building_readonly = False
+
     @api.onchange('apartment_state')
     def _onchange_apartment_state(self):
         """When apartment state changes, schedule inventory update after save"""
@@ -227,9 +274,7 @@ class ProductTemplate(models.Model):
             # Log the state change
             _logger.info("Apartment state changed to %s for apartment %s", self.apartment_state, self.name)
 
-            # Note: We can't update the quantity directly in an onchange method
-            # because the changes won't persist. The quantity will be updated
-            # when the record is saved through the write method.
+            # Quantity management is now handled by Odoo's standard inventory management
 
     @api.onchange('project_id')
     def _onchange_project_id(self):
@@ -405,12 +450,19 @@ class ProductTemplate(models.Model):
             if not vals.get('list_price'):
                 vals['list_price'] = 0.0
 
-            # Note: We'll set the quantity after creation using _force_inventory_quantity
-            # Don't set qty_available directly as it won't affect inventory
-            _logger.info("Will set inventory quantity after product creation")
+        # If creating a store product
+        elif vals.get('is_store'):
+            # If we don't have a name, generate a temporary one
+            if not vals.get('name'):
+                vals['name'] = f"Store {int(time.time()) % 10000}"
+                _logger.info("Generated temporary store name: %s", vals['name'])
 
-            # Clear taxes for apartments
-            vals['taxes_id'] = [(5, 0, 0)]  # Clear all taxes
+            # Make sure we have a price
+            if not vals.get('list_price'):
+                vals['list_price'] = 0.0
+
+            # Quantity management is now handled by Odoo's standard inventory management
+            _logger.info("Quantity will be managed by Odoo's standard inventory system")
 
             # Check if we have a forced building_id from context
             force_building_id = self.env.context.get('force_building_id')
@@ -549,54 +601,14 @@ class ProductTemplate(models.Model):
                     # Set the name to "Apartment" followed by the number only if user hasn't entered a custom name
                     suggested_name = f"Apartment {apt_number}"
                     res.name = suggested_name
-                    res.default_code = apt_number
+                    res.default_code = f"APT-{apt_number}"
                     _logger.info("Generated apartment name %s for new apartment", suggested_name)
                 else:
                     _logger.info("Keeping user-entered apartment name: %s", res.name)
 
-                # Set initial inventory quantity based on apartment state
-                _logger.info("Setting initial inventory quantity for new apartment %s with state %s",
-                            res.name, res.apartment_state)
-
-                # IMPROVED: Force immediate quantity update with stronger cache invalidation
-                self._force_inventory_quantity(res)
-
-                # Verify the quantity was set correctly
-                res.invalidate_cache(['qty_available'])
-                self.env.clear_cache()
-
-                # Refresh the product to get the latest quantity
-                res = self.browse(res.id)
-
-                _logger.info("Initial quantity for %s: %s", res.name, res.qty_available)
-
-                # If quantity is still not set correctly, try again with direct method
-                if res.apartment_state == 'available' and res.qty_available < 1.0:
-                    _logger.warning("Initial quantity not set correctly. Trying direct method.")
-
-                    # Get the product variant and location
-                    variant = res.product_variant_ids[0]
-                    warehouse = self.env['stock.warehouse'].search([], limit=1)
-                    location = warehouse.lot_stock_id
-
-                    # Use direct method
-                    self._force_quantity_direct(variant.id, location.id, 1.0)
-
-                    # Invalidate cache again
-                    res.invalidate_cache(['qty_available'])
-                    self.env.clear_cache()
-
-                    # Refresh the product again
-                    res = self.browse(res.id)
-                    _logger.info("After direct update, initial quantity for %s: %s", res.name, res.qty_available)
-
-                # The post-commit hook will ensure the quantity is set correctly
-                # even if there are cache issues
-
-                # Schedule a post-commit update to ensure quantity is set correctly
-                self.env.cr.after('commit', lambda: self._post_commit_update_quantity(res.id))
-
-                _logger.info("Scheduled post-commit job to ensure quantity is set correctly")
+                # Quantity management is now handled by Odoo's standard inventory management
+                _logger.info("Quantity for new apartment %s will be managed by Odoo's standard inventory system",
+                            res.name)
 
                 # Update the apartment with any missing information
                 update_vals = {}
@@ -629,6 +641,43 @@ class ProductTemplate(models.Model):
                     res.project_id = res.apartment_id.project_id.id
             except Exception as e:
                 _logger.error("Error updating apartment after product creation: %s", str(e))
+        # Handle store naming
+        elif res.is_store and res.building_id:
+            try:
+                # Only generate a name if the user hasn't entered one or if it's a default name
+                default_names = ['New Store', 'New Product', f"Store {int(time.time()) % 10000}"]
+                if res.building_id and res.floor is not None and (not res.name or res.name in default_names):
+                    # Count existing stores on this floor in this building
+                    floor = res.floor or 0
+                    existing_count = self.env['product.template'].search_count([
+                        ('building_id', '=', res.building_id.id),
+                        ('floor', '=', floor),
+                        ('is_store', '=', True)
+                    ])
+
+                    # Generate store number
+                    building_prefix = res.building_id.code[0].upper() if res.building_id.code else 'S'
+                    store_number = f"{building_prefix}{floor:02d}{existing_count:02d}"  # Use existing_count without +1
+
+                    # Set the name to "Store" followed by the number only if user hasn't entered a custom name
+                    suggested_name = f"Store {store_number}"
+                    res.name = suggested_name
+                    res.default_code = f"STR-{store_number}"
+                    _logger.info("Generated store name %s for new store", suggested_name)
+                else:
+                    _logger.info("Keeping user-entered store name: %s", res.name)
+
+                # Update the stock quantity
+                _logger.info("Setting initial quantity for new store %s", res.name)
+            except Exception as e:
+                _logger.error("Error updating store after product creation: %s", str(e))
+
+        # Update stock quantity for apartments and stores
+        if res.is_apartment or res.is_store:
+            try:
+                res._update_stock_quantity()
+            except Exception as e:
+                _logger.error("Error updating initial stock quantity: %s", str(e))
 
         return res
 
@@ -643,11 +692,12 @@ class ProductTemplate(models.Model):
         # Store original values for comparison
         original_vals = {}
         for product in self:
-            if product.is_apartment:
+            if product.is_apartment or product.is_store:
                 original_vals[product.id] = {
                     'building_id': product.building_id.id if product.building_id else False,
                     'project_id': product.project_id.id if product.project_id else False,
                     'apartment_id': product.apartment_id.id if product.apartment_id else False,
+                    'apartment_state': product.apartment_state,
                 }
 
         # Handle project_id and building_id relationship
@@ -753,25 +803,15 @@ class ProductTemplate(models.Model):
         # Call super to perform the actual write
         res = super(ProductTemplate, self).write(vals)
 
-        # After write, update apartments if needed
+        # After write, update apartments if needed and ensure quantity is correct
         for product in self:
             if product.is_apartment and product.apartment_id:
                 try:
-                    # Update inventory quantity if apartment state changed
+                    # Update stock quantity if apartment state has changed
                     if 'apartment_state' in vals:
-                        _logger.info("Apartment state changed to %s for %s, updating inventory quantity",
+                        _logger.info("Apartment state changed to %s for %s, updating stock quantity",
                                     product.apartment_state, product.name)
-
-                        # Use our simplified method to set the quantity
-                        # It will determine the correct quantity based on apartment_state
-                        self._force_inventory_quantity(product)
-
-                    # Check if we need to force quantity to a specific value
-                    force_qty = self.env.context.get('force_qty_available')
-                    if force_qty is not None:
-                        _logger.info("Forcing quantity to %s for apartment %s after write",
-                                    force_qty, product.name)
-                        self._force_inventory_quantity(product, force_qty)
+                        product._update_stock_quantity()
 
                     # Check what has changed
                     update_vals = {}
@@ -812,6 +852,19 @@ class ProductTemplate(models.Model):
                         product.project_id = product.apartment_id.project_id.id
                 except Exception as e:
                     _logger.error("Error updating apartment from product: %s", str(e))
+
+            # Store handling
+            elif product.is_store:
+                try:
+                    # Update stock quantity if store state has changed
+                    if 'apartment_state' in vals or product.id in original_vals:
+                        _logger.info("Store state is %s for %s, updating stock quantity",
+                                    product.apartment_state, product.name)
+                        product._update_stock_quantity()
+                except Exception as e:
+                    _logger.error("Error updating store: %s", str(e))
+
+        # Quantity management is now handled by Odoo's standard inventory management
 
         return res
 
@@ -863,8 +916,13 @@ class ProductTemplate(models.Model):
                 apt_number = f"{building_prefix}{floor:02d}{existing_count+1:02d}"
                 vals['default_code'] = apt_number
             else:
-                # Generate a unique code based on the name
-                vals['default_code'] = f"APT-{int(time.time()) % 10000}"
+                # Generate a unique code based on the name and type
+                if vals.get('is_apartment', False):
+                    vals['default_code'] = f"APT-{int(time.time()) % 10000}"
+                elif vals.get('is_store', False):
+                    vals['default_code'] = f"STR-{int(time.time()) % 10000}"
+                else:
+                    vals['default_code'] = f"APT-{int(time.time()) % 10000}"
 
         # Make sure we have a floor
         if not vals.get('floor') and vals.get('floor') != 0:
@@ -928,155 +986,62 @@ class ProductTemplate(models.Model):
 
         return apartment_vals
 
-    def _force_inventory_quantity(self, product, quantity=None):
-        """
-        Force the inventory quantity for a product.
-        This is the single source of truth for setting quantities.
-
-        Args:
-            product: The product to update
-            quantity: The quantity to set. If None, will be determined based on apartment_state
-
-        Returns:
-            bool: True if successful, False otherwise
-        """
-        try:
-            # If quantity is not provided, determine it based on apartment state
-            if quantity is None:
-                if product.apartment_state == 'available':
-                    quantity = 1.0
-                else:
-                    quantity = 0.0
-
-            # For available apartments, always force quantity to 1
-            if product.is_apartment and product.apartment_state == 'available':
-                quantity = 1.0
+    def _update_stock_quantity(self):
+        """Update the stock quantity based on apartment/store state"""
+        for product in self:
+            if not (product.is_apartment or product.is_store):
+                continue
 
             # Get the product variant
-            if not product.product_variant_ids:
-                _logger.error("No product variant found for apartment %s", product.name)
-                return False
+            product_variant = product.product_variant_id
+            if not product_variant:
+                _logger.error("No product variant found for %s", product.name)
+                continue
 
-            variant = product.product_variant_ids[0]
+            # Get the stock location - use the default stock location
+            stock_location = self.env.ref('stock.stock_location_stock', raise_if_not_found=False)
+            if not stock_location:
+                # Fallback to searching for a stock location
+                stock_location = self.env['stock.location'].search([
+                    ('usage', '=', 'internal'),
+                    ('company_id', '=', self.env.company.id)
+                ], limit=1)
 
-            # Log current quantity before changes
-            _logger.info("Setting quantity for %s to %s (current: %s, state: %s)",
-                        product.name, quantity, product.qty_available, product.apartment_state)
+            if not stock_location:
+                _logger.error("No internal stock location found for company %s", self.env.company.name)
+                continue
 
-            # Get the main stock location
-            warehouse = self.env['stock.warehouse'].search([], limit=1)
-            if not warehouse:
-                # Create a default warehouse if none exists
-                warehouse = self.env['stock.warehouse'].create({
-                    'name': 'Default Warehouse',
-                    'code': 'DEF',
+            # Determine the quantity based on state
+            quantity = 0.0
+            if product.apartment_state == 'available':
+                quantity = 1.0
+
+            _logger.info("Setting quantity for %s to %s (state: %s)",
+                        product.name, quantity, product.apartment_state)
+
+            try:
+                # Create an inventory adjustment
+                inventory_adjustment = self.env['stock.quant'].with_context(inventory_mode=True).create({
+                    'product_id': product_variant.id,
+                    'location_id': stock_location.id,
+                    'inventory_quantity': quantity,
                 })
 
-            location = warehouse.lot_stock_id
+                # Apply the inventory adjustment
+                inventory_adjustment.action_apply_inventory()
 
-            # Use the standard Odoo method to update quantity
-            # This is more reliable than direct SQL operations
-            StockQuant = self.env['stock.quant']
-
-            # First, remove existing quants to avoid quantity inconsistencies
-            quants = StockQuant.search([
-                ('product_id', '=', variant.id),
-                ('location_id', '=', location.id)
-            ])
-
-            if quants:
-                quants.sudo().unlink()
-                _logger.info("Deleted existing quants for product %s", product.name)
-
-            # Create a new quant with the correct quantity
-            if quantity > 0:
-                StockQuant.sudo().create({
-                    'product_id': variant.id,
-                    'location_id': location.id,
-                    'quantity': quantity,
-                    'company_id': self.env.company.id,
-                    'in_date': fields.Datetime.now(),
-                })
-                _logger.info("Created new quant for product %s with quantity %s", product.name, quantity)
-
-            # Force a complete cache invalidation
-            self.env.cache.invalidate()
-            product.invalidate_cache(['qty_available'])
-            self.env.clear_cache()
-
-            # Refresh the product to get the latest quantity
-            product = self.env['product.template'].browse(product.id)
-
-            _logger.info("Successfully set quantity for %s to %s (verified: %s)",
-                        product.name, quantity, product.qty_available)
-
-            # If there's still an issue, try a more direct approach
-            if abs(product.qty_available - quantity) > 0.001:
-                _logger.warning("Quantity mismatch for %s: expected %s, got %s. Trying direct method.",
-                               product.name, quantity, product.qty_available)
-
-                # Try a more direct approach using SQL (as a last resort)
-                self._force_quantity_direct(variant.id, location.id, quantity)
-
-                # Invalidate cache again
-                self.env.cache.invalidate()
+                # Invalidate the cache to ensure qty_available is updated
                 product.invalidate_cache(['qty_available'])
-                self.env.clear_cache()
+                product_variant.invalidate_cache(['qty_available'])
 
-                # Refresh the product again
-                product = self.env['product.template'].browse(product.id)
-                _logger.info("After direct update, quantity for %s: %s", product.name, product.qty_available)
+                # Log success
+                _logger.info("Successfully updated stock quantity for %s to %s", product.name, quantity)
 
-            return True
-        except Exception as e:
-            _logger.error("Error setting quantity for %s: %s", product.name, str(e))
-            return False
+                # Force a refresh of the product
+                self.env.cr.commit()
 
-    def _force_quantity_direct(self, product_id, location_id, quantity):
-        """
-        Force quantity update using a more direct approach.
-        This is a fallback method when the standard approach fails.
-
-        Args:
-            product_id: The product variant ID
-            location_id: The stock location ID
-            quantity: The quantity to set
-        """
-        try:
-            # First, delete existing quants
-            self.env.cr.execute("""
-                DELETE FROM stock_quant
-                WHERE product_id = %s AND location_id = %s
-            """, (product_id, location_id))
-
-            # Then create a new quant with the correct quantity
-            if quantity > 0:
-                self.env.cr.execute("""
-                    INSERT INTO stock_quant (product_id, location_id, quantity, company_id, in_date)
-                    VALUES (%s, %s, %s, %s, NOW())
-                """, (product_id, location_id, quantity, self.env.company.id))
-
-            _logger.info("Direct quantity update completed for product_id %s", product_id)
-        except Exception as e:
-            _logger.error("Error in direct quantity update: %s", str(e))
-
-    def _update_inventory_quantity(self):
-        """Update inventory quantity based on apartment state"""
-        for product in self:
-            if product.is_apartment:
-                try:
-                    # Call our improved _force_inventory_quantity method
-                    # It will determine the correct quantity based on apartment_state
-                    result = self._force_inventory_quantity(product)
-                    if not result:
-                        _logger.warning("Failed to update inventory quantity for %s. Will try again later.", product.name)
-                        # Log the failure but don't create a cron job during the transaction
-                        # We'll try again later through the UI
-                        _logger.warning("Failed to update inventory quantity for %s. Please use the 'Update Quantity' button.", product.name)
-                except Exception as e:
-                    _logger.error("Error updating inventory quantity for product %s: %s", product.name, str(e))
-
-
+            except Exception as e:
+                _logger.error("Error updating stock quantity for %s: %s", product.name, str(e))
 
     def _prepare_apartment_update_vals(self, vals):
         """Prepare values for updating an existing apartment"""
@@ -1119,33 +1084,74 @@ class ProductTemplate(models.Model):
         return category
 
     def action_create_reservation(self):
-        """Create a new reservation (quotation) for this apartment"""
+        """Create a new reservation (quotation) for this property (apartment or store)"""
         self.ensure_one()
 
-        if not self.is_apartment:
-            raise UserError(_("This action is only available for apartments."))
+        if not (self.is_apartment or self.is_store):
+            raise UserError(_("This action is only available for real estate properties (apartments or stores)."))
 
-        # Check if apartment is available
+        # Check if property is available
         if self.apartment_state != 'available':
-            raise UserError(_("Only available apartments can be reserved."))
+            raise UserError(_("Only available properties can be reserved."))
 
-        # Check if we have an apartment_id
-        if not self.apartment_id:
-            raise UserError(_("This apartment is not properly linked to a real estate apartment."))
+        # For apartments, check if we have an apartment_id
+        if self.is_apartment and not self.apartment_id:
+            # Try to create the apartment if it doesn't exist
+            try:
+                _logger.info("Apartment ID not found. Attempting to create a new apartment record.")
 
-        # Create a new quotation with this apartment
+                # Prepare apartment values
+                apartment_vals = {
+                    'name': self.name,
+                    'code': self.default_code or f"APT-{int(time.time()) % 10000}",
+                    'building_id': self.building_id.id if self.building_id else False,
+                    'floor': self.floor or 0,
+                    'price': self.list_price or 0.0,
+                    'area': self.area or 0.0,
+                    'rooms': self.rooms or 1,
+                    'bathrooms': self.bathrooms or 1,
+                    'description': self.description or '',
+                    'state': self.apartment_state or 'available',
+                }
+
+                # Check if we have a building_id - this is required for apartments
+                if not apartment_vals.get('building_id'):
+                    raise UserError(_("Cannot create apartment without building. Please select a building first."))
+
+                # Create a new apartment with context to prevent circular reference
+                apartment = self.env['real.estate.apartment'].with_context(from_product_create=True).create(apartment_vals)
+
+                # Link the apartment to this product
+                self.apartment_id = apartment.id
+                _logger.info("Created and linked apartment %s with ID %s", apartment.name, apartment.id)
+
+                # Force a cache invalidation to ensure the link is saved
+                self.invalidate_cache()
+
+                # Refresh the record
+                self = self.browse(self.id)
+
+                if not self.apartment_id:
+                    raise UserError(_("Failed to link the apartment. Please try again or contact your administrator."))
+            except Exception as e:
+                _logger.error("Error creating apartment: %s", str(e))
+                raise UserError(_("Failed to create apartment: %s") % str(e))
+
+        # Create a new quotation with this apartment/store
         SaleOrder = self.env['sale.order']
 
-        # Generate a detailed description for the apartment
-        apartment = self.apartment_id
-        project_name = apartment.project_id.name if apartment.project_id else "N/A"
-        building_name = apartment.building_id.name if apartment.building_id else "N/A"
-        floor = apartment.floor if apartment.floor is not None else "N/A"
-        area = apartment.area if apartment.area else "N/A"
-        rooms = apartment.rooms if apartment.rooms else "N/A"
-        bathrooms = apartment.bathrooms if apartment.bathrooms else "N/A"
+        # Generate a detailed description for the property
+        if self.is_apartment:
+            # For apartments, use the apartment_id data
+            apartment = self.apartment_id
+            project_name = apartment.project_id.name if apartment.project_id else "N/A"
+            building_name = apartment.building_id.name if apartment.building_id else "N/A"
+            floor = apartment.floor if apartment.floor is not None else "N/A"
+            area = apartment.area if apartment.area else "N/A"
+            rooms = apartment.rooms if apartment.rooms else "N/A"
+            bathrooms = apartment.bathrooms if apartment.bathrooms else "N/A"
 
-        apartment_description = f"""
+            property_description = f"""
 Projet: {project_name}
 Bâtiment: {building_name}
 Appartement: {apartment.name}
@@ -1154,19 +1160,38 @@ Surface: {area} m²
 Pièces: {rooms}
 Salles de bain: {bathrooms}
 """
+        else:
+            # For stores, use the product data directly
+            project_name = self.project_id.name if self.project_id else "N/A"
+            building_name = self.building_id.name if self.building_id else "N/A"
+            floor = self.floor if self.floor is not None else "N/A"
+            area = self.area if self.area else "N/A"
+
+            property_description = f"""
+Projet: {project_name}
+Bâtiment: {building_name}
+Magasin: {self.name}
+Étage: {floor}
+Surface: {area} m²
+"""
 
         # Prepare the order values - without partner_id
+        order_line_vals = {
+            'product_id': self.product_variant_id.id,
+            'building_id': self.building_id.id if self.building_id else False,
+            'product_uom_qty': 1,
+            'price_unit': self.list_price,
+            'name': property_description,
+        }
+
+        # Add apartment_id only for apartments
+        if self.is_apartment:
+            order_line_vals['apartment_id'] = self.apartment_id.id
+
         order_vals = {
             'is_real_estate': True,
             'project_id': self.project_id.id if self.project_id else False,
-            'order_line': [(0, 0, {
-                'product_id': self.product_variant_id.id,
-                'apartment_id': self.apartment_id.id,
-                'building_id': self.building_id.id if self.building_id else False,
-                'product_uom_qty': 1,
-                'price_unit': self.list_price,
-                'name': apartment_description,
-            })],
+            'order_line': [(0, 0, order_line_vals)],
             'state': 'draft',  # Ensure it's a draft
         }
 
@@ -1174,7 +1199,8 @@ Salles de bain: {bathrooms}
         new_order = SaleOrder.create(order_vals)
 
         # Log the creation
-        _logger.info("Created new reservation %s for apartment %s", new_order.name, self.name)
+        property_type = 'apartment' if self.is_apartment else 'store'
+        _logger.info("Created new reservation %s for %s %s", new_order.name, property_type, self.name)
 
         # Return an action to open the new quotation
         return {
@@ -1188,21 +1214,45 @@ Salles de bain: {bathrooms}
             'context': {'form_view_initial_mode': 'edit'},
         }
 
+    @api.model
+    def action_update_all_quantities(self):
+        """Update quantity for all apartments and stores"""
+        # Find all apartment and store products
+        products = self.search([
+            '|',
+            ('is_apartment', '=', True),
+            ('is_store', '=', True)
+        ])
+
+        _logger.info("Updating quantities for %s products (apartments and stores)", len(products))
+
+        # Update quantities for all products
+        for product in products:
+            try:
+                product._update_stock_quantity()
+            except Exception as e:
+                _logger.error("Error updating quantity for %s: %s", product.name, str(e))
+
+        _logger.info("Finished updating quantities for all products")
+        return True
+
     def action_open_quants(self):
-        """Open the stock quants view for this apartment"""
+        """Open the stock quants view for this property (apartment or store)"""
         self.ensure_one()
 
-        if not self.is_apartment:
-            raise UserError(_("This action is only available for apartments."))
+        if not (self.is_apartment or self.is_store):
+            raise UserError(_("This action is only available for real estate properties (apartments or stores)."))
 
         # Get the product variant
         product_variant = self.product_variant_ids[0] if self.product_variant_ids else False
         if not product_variant:
-            raise UserError(_("No product variant found for this apartment."))
+            property_type = "apartment" if self.is_apartment else "store"
+            raise UserError(_("No product variant found for this %s.") % property_type)
 
         # Open the stock quants view
+        property_type = "Apartment" if self.is_apartment else "Store"
         return {
-            'name': _('Stock On Hand'),
+            'name': _('%s Stock On Hand') % property_type,
             'type': 'ir.actions.act_window',
             'res_model': 'stock.quant',
             'view_mode': 'list,form',
@@ -1213,123 +1263,7 @@ Salles de bain: {bathrooms}
             }
         }
 
-    def action_update_quantity(self):
-        """Update the quantity based on apartment state"""
-        self.ensure_one()
-
-        if not self.is_apartment:
-            raise UserError(_("This action is only available for apartments."))
-
-        # Use our improved method to set the quantity
-        # It will determine the correct quantity based on apartment_state
-        result = self._force_inventory_quantity(self)
-
-        if not result:
-            raise UserError(_("Failed to update quantity. Please try again."))
-
-        # Force a full cache invalidation to ensure UI is updated
-        self.env.cache.invalidate()
-        self.invalidate_cache(['qty_available'])
-        self.env.clear_cache()
-
-        # Reload the record to get fresh data
-        self = self.browse(self.id)
-
-        # Log the updated quantity
-        _logger.info("After action_update_quantity, quantity for %s: %s", self.name, self.qty_available)
-
-        # If quantity is still not correct, try the direct method
-        expected_qty = 1.0 if self.apartment_state == 'available' else 0.0
-        if abs(self.qty_available - expected_qty) > 0.001:
-            _logger.warning("Quantity still incorrect after update. Using direct method.")
-
-            # Get the product variant and location
-            variant = self.product_variant_ids[0] if self.product_variant_ids else False
-            if variant:
-                warehouse = self.env['stock.warehouse'].search([], limit=1)
-                if warehouse:
-                    location = warehouse.lot_stock_id
-                    # Use direct method
-                    self._force_quantity_direct(variant.id, location.id, expected_qty)
-
-                    # Invalidate cache again
-                    self.env.cache.invalidate()
-                    self.invalidate_cache(['qty_available'])
-                    self.env.clear_cache()
-
-                    # Reload the record again
-                    self = self.browse(self.id)
-                    _logger.info("After direct update in action_update_quantity, quantity for %s: %s",
-                                self.name, self.qty_available)
-
-        # Return a notification and reload the view to show updated quantity
-        message = _('The quantity has been updated to 1 for available apartment.') if self.apartment_state == 'available' else _('The quantity has been updated to 0.')
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Quantity Updated'),
-                'message': message,
-                'type': 'success',
-                'sticky': False,
-                'next': {
-                    'type': 'ir.actions.client',
-                    'tag': 'reload',
-                }
-            }
-        }
-
-    def _post_commit_update_quantity(self, product_id):
-        """Update quantity after the transaction is committed"""
-        try:
-            # Get the product with a new cursor to ensure we're in a new transaction
-            with api.Environment.manage():
-                new_cr = self.pool.cursor()
-                try:
-                    with api.Environment(new_cr, self.env.uid, self.env.context) as new_env:
-                        product = new_env['product.template'].browse(product_id)
-                        if product.exists() and product.is_apartment:
-                            _logger.info("Post-commit: Updating quantity for %s", product.name)
-
-                            # Use the standard method to update quantity
-                            if product.apartment_state == 'available':
-                                # Get the product variant and location
-                                if product.product_variant_ids:
-                                    variant = product.product_variant_ids[0]
-                                    warehouse = new_env['stock.warehouse'].search([], limit=1)
-                                    if warehouse:
-                                        location = warehouse.lot_stock_id
-
-                                        # Use the standard method to update quantity
-                                        StockQuant = new_env['stock.quant']
-
-                                        # First, remove existing quants
-                                        quants = StockQuant.search([
-                                            ('product_id', '=', variant.id),
-                                            ('location_id', '=', location.id)
-                                        ])
-
-                                        if quants:
-                                            quants.sudo().unlink()
-
-                                        # Create a new quant with quantity 1
-                                        StockQuant.sudo().create({
-                                            'product_id': variant.id,
-                                            'location_id': location.id,
-                                            'quantity': 1.0,
-                                            'company_id': new_env.company.id,
-                                            'in_date': fields.Datetime.now(),
-                                        })
-
-                                        new_cr.commit()
-                                        _logger.info("Post-commit: Successfully updated quantity for %s", product.name)
-                except Exception as e:
-                    _logger.error("Error in post-commit quantity update: %s", str(e))
-                    new_cr.rollback()
-                finally:
-                    new_cr.close()
-        except Exception as e:
-            _logger.error("Failed to create new cursor for post-commit update: %s", str(e))
+    # Quantity management is now handled by Odoo's standard inventory management
 
     def _get_or_create_building_category(self, building):
         """Get or create product category for building"""
@@ -1351,3 +1285,17 @@ Salles de bain: {bathrooms}
             })
 
         return category
+
+    @api.constrains('is_apartment', 'is_store')
+    def _check_apartment_store_exclusivity(self):
+        """Ensure a product can't be both an apartment and a store"""
+        for product in self:
+            if product.is_apartment and product.is_store:
+                raise UserError(_("A product cannot be both an apartment and a store. Please select only one option."))
+
+    @api.constrains('is_store', 'building_id')
+    def _check_building_required_store(self):
+        """Ensure building is set for stores"""
+        for product in self:
+            if product.is_store and not product.building_id:
+                raise UserError(_("Building is required for stores. Please select a building."))

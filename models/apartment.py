@@ -244,42 +244,7 @@ Salles de bain: {bathrooms}
             'context': {'form_view_initial_mode': 'edit'},
         }
 
-    def action_update_quantity(self):
-        """Force update the inventory quantity based on apartment state"""
-        self.ensure_one()
-
-        # Find all products linked to this apartment
-        products = self.env['product.template'].search([('apartment_id', '=', self.id)])
-
-        if not products:
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _('No Products Found'),
-                    'message': _('No products found for this apartment.'),
-                    'type': 'warning',
-                    'sticky': False,
-                }
-            }
-
-        # Update quantity for all products
-        for product in products:
-            if self.state == 'available':
-                self._set_inventory_quantity(product, 1.0)
-            else:
-                self._set_inventory_quantity(product, 0.0)
-
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Quantity Updated'),
-                'message': _('The quantity has been updated for all products linked to this apartment.'),
-                'type': 'success',
-                'sticky': False,
-            }
-        }
+    # Quantity management is now handled by Odoo's standard inventory management
 
     def action_mark_as_reserved(self):
         for record in self:
@@ -481,46 +446,14 @@ Salles de bain: {bathrooms}
         product = self.env['product.template'].with_context(from_apartment_create=True).create(product_vals)
         _logger.info("Created product %s for apartment %s", product.name, apartment.name)
 
-        # Always set quantity to 1 for newly created apartments
+        # Set the apartment state
         if apartment.state == 'available':
             product.with_context(from_apartment_update=True).write({
                 'apartment_state': 'available'
             })
-
-            # Force inventory quantity to 1 for available apartments
-            self._set_inventory_quantity(product, 1.0)
-
-            # Double-check that the quantity was set correctly
-            product.invalidate_cache(['qty_available'])
-            self.env.cache.invalidate()
-            self.env.clear_cache()
-
-            # Refresh the product to get the latest quantity
-            product = self.env['product.template'].browse(product.id)
-
-            if product.qty_available != 1.0:
-                _logger.warning("Quantity not set correctly for %s. Trying again with direct method.", product.name)
-
-                # Try again using the product's direct method
-                if product.product_variant_ids:
-                    variant = product.product_variant_ids[0]
-                    warehouse = self.env['stock.warehouse'].search([], limit=1)
-                    if warehouse:
-                        location = warehouse.lot_stock_id
-                        # Use the product's direct method
-                        product._force_quantity_direct(variant.id, location.id, 1.0)
-
-                # Invalidate cache again and refresh the product
-                self.env.cache.invalidate()
-                product.invalidate_cache(['qty_available'])
-                self.env.clear_cache()
-                product = self.env['product.template'].browse(product.id)
-
-            _logger.info("Set inventory quantity to 1 for new apartment %s. Final qty_available: %s",
-                        apartment.name, product.qty_available)
+            _logger.info("Set apartment state to 'available' for %s", apartment.name)
         else:
-            # Update inventory quantity based on apartment state
-            product._update_inventory_quantity()
+            _logger.info("Apartment %s has state %s", apartment.name, apartment.state)
 
         # Invalidate cache to ensure counts are updated
         self.env['real.estate.building'].invalidate_cache(['apartment_count'])
@@ -558,19 +491,9 @@ Salles de bain: {bathrooms}
                     if product.categ_id.id != building_categ.id:
                         product.with_context(from_apartment_update=True).categ_id = building_categ.id
 
-                    # Update inventory quantity based on apartment state
-                    # Determine the correct quantity based on apartment state
-                    quantity = 1.0 if apartment.state == 'available' else 0.0
-                    product._force_inventory_quantity(product, quantity)
-
-                    # Force a complete cache invalidation
-                    self.env.cache.invalidate()
-                    product.invalidate_cache(['qty_available'])
-                    self.env.clear_cache()
-
-                    # Log the final quantity
-                    _logger.info("Updated quantity for %s to match state %s. Final qty_available: %s",
-                                product.name, apartment.state, product.qty_available)
+                    # Quantity management is now handled by Odoo's standard inventory management
+                    _logger.info("Updated product %s to match apartment state %s",
+                                product.name, apartment.state)
 
     def _update_product_state(self, apartment):
         """Update product state based on apartment state"""
@@ -587,19 +510,13 @@ Salles de bain: {bathrooms}
                 }
                 product_with_context.write(vals)
 
-                # Update inventory quantity using the product's method
-                # Determine the correct quantity based on apartment state
-                quantity = 1.0 if apartment.state == 'available' else 0.0
-                product._force_inventory_quantity(product, quantity)
-
-                # Force a complete cache invalidation
-                self.env.cache.invalidate()
-                product.invalidate_cache(['qty_available'])
-                self.env.clear_cache()
-
-                # Log the final quantity
-                _logger.info("Updated quantity for %s to match state %s. Final qty_available: %s",
-                            product.name, apartment.state, product.qty_available)
+                # Update the stock quantity based on the new state
+                try:
+                    product_with_context._update_stock_quantity()
+                    _logger.info("Updated product %s to match apartment state %s and updated stock quantity",
+                                product.name, apartment.state)
+                except Exception as e:
+                    _logger.error("Error updating stock quantity for %s: %s", product.name, str(e))
 
     def _get_or_create_project_category(self, project):
         """Get or create product category for project"""
@@ -658,23 +575,4 @@ Salles de bain: {bathrooms}
 
         return res
 
-    def _set_inventory_quantity(self, product, quantity):
-        """Set the inventory quantity for a product"""
-        try:
-            # CRITICAL FIX: Call the product's method to force inventory quantity correctly
-            _logger.info("Using product._force_inventory_quantity to set quantity %s for %s",
-                        quantity, product.name)
-
-            # CRITICAL FIX: Call the method correctly with the product as the first parameter
-            result = product._force_inventory_quantity(product, quantity)
-
-            # Log the final quantity
-            _logger.info("Final quantity for %s: %s", product.name, product.qty_available)
-
-            # Log that the quantity has been set
-            _logger.info("Quantity has been set for %s", product.name)
-
-            return result
-        except Exception as e:
-            _logger.error("Error setting inventory quantity: %s", str(e))
-            return False
+    # Quantity management is now handled by Odoo's standard inventory management

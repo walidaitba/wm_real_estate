@@ -10,7 +10,7 @@
         * Apartments (Products)
     """,
     'author': 'webmania',
-    'website': '',
+    'website': 'https://www.webmania.ma/',
     'depends': [
         'base',
         'mail',
@@ -19,11 +19,13 @@
         'stock',           # Inventory management
         'sale_stock',      # Sales and inventory integration
         'account',         # Accounting/Invoicing module
+        'crm',             # CRM module for lead/opportunity management
     ],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
         'data/sequence.xml',
+        'data/server_actions.xml',
         'views/assets.xml',
         'views/project_views.xml',
         'views/building_views.xml',
@@ -33,6 +35,8 @@
         'views/sale_actions.xml',
         'views/menu_views.xml',
         'views/stock_menu_views.xml',
+        'views/crm_lead_views.xml',
+        'views/crm_actions.xml',
     ],
     'qweb': [],
     'demo': [],

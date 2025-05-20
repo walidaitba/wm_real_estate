@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Action for viewing apartment quotations -->
+    <!-- Action for viewing real estate quotations -->
     <record id="action_real_estate_reservations" model="ir.actions.act_window">
         <field name="name">Quotations</field>
         <field name="res_model">sale.order</field>
@@ -27,8 +27,8 @@
                 No active reservations found!
             </p>
             <p>
-                Active reservations are confirmed sales orders with apartments.
-                These apartments are reserved and awaiting handover.
+                Active reservations are confirmed sales orders with properties (apartments or stores).
+                These properties are reserved and awaiting handover.
             </p>
         </field>
     </record>
@@ -45,11 +45,32 @@
         }</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create a new apartment reservation
+                Create a new property reservation
             </p>
             <p>
-                Select a customer and add an apartment to reserve it.
-                The apartment status will be automatically updated to "Reserved".
+                Select a customer and add a property (apartment or store) to reserve it.
+                The property status will be automatically updated to "Reserved".
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for viewing real estate invoices -->
+    <record id="action_real_estate_invoices" model="ir.actions.act_window">
+        <field name="name">Invoices</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('move_type', '=', 'out_invoice'), ('invoice_origin', 'ilike', 'S')]</field>
+        <field name="context">{
+            'search_default_posted': 1,
+            'default_move_type': 'out_invoice',
+            'default_partner_id': context.get('partner_id', False)
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No invoices found!
+            </p>
+            <p>
+                This view shows all customer invoices related to real estate sales.
             </p>
         </field>
     </record>

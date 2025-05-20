@@ -13,20 +13,46 @@
               action="action_real_estate_project"
               sequence="1"/>
 
-    <!-- Quotations Menu  -->
-
-    <menuitem id="menu_real_estate_reservations_root"
-              name="Quotations"
+    <!-- Papers Menu (Parent) -->
+    <menuitem id="menu_real_estate_papers_root"
+              name="Papers"
               parent="menu_real_estate_root"
-              action="action_real_estate_reservations"
               sequence="10"/>
+
+    <!-- Quotations Submenu -->
+    <menuitem id="menu_real_estate_quotations"
+              name="Quotations"
+              parent="menu_real_estate_papers_root"
+              action="action_real_estate_reservations"
+              sequence="1"/>
+
+    <!-- Invoices Submenu -->
+    <menuitem id="menu_real_estate_invoices"
+              name="Invoices"
+              parent="menu_real_estate_papers_root"
+              action="action_real_estate_invoices"
+              sequence="2"/>
 
     <!-- Reservations Menu (Apartment Kanban) -->
     <menuitem id="menu_real_estate_apartment_reservations"
-              name="Reservations"
+              name="Apartment Reservations"
               parent="menu_real_estate_root"
               action="action_real_estate_apartment_reservations"
               sequence="15"/>
+
+    <!-- Reservations Menu (Store Kanban) -->
+    <menuitem id="menu_real_estate_store_reservations"
+              name="Store Reservations"
+              parent="menu_real_estate_root"
+              action="action_real_estate_store_reservations"
+              sequence="16"/>
+
+    <!-- CRM Opportunities Menu -->
+    <menuitem id="menu_real_estate_opportunities"
+              name="Opportunités"
+              parent="menu_real_estate_root"
+              action="crm.crm_lead_opportunities"
+              sequence="17"/>
 
     <!-- Properties Menu -->
     <menuitem id="menu_real_estate_properties"
@@ -51,6 +77,24 @@
               parent="menu_real_estate_properties"
               action="action_real_estate_apartment_products"
               sequence="3"/>
+
+    <menuitem id="menu_real_estate_stores"
+              name="Stores"
+              parent="menu_real_estate_properties"
+              action="action_real_estate_store"
+              sequence="4"/>
+
+    <menuitem id="menu_real_estate_create_apartment"
+              name="Create Apartment"
+              parent="menu_real_estate_properties"
+              action="action_create_apartment_product"
+              sequence="10"/>
+
+    <menuitem id="menu_real_estate_create_store"
+              name="Create Store"
+              parent="menu_real_estate_properties"
+              action="action_create_store_product"
+              sequence="11"/>
 
     <!-- Configuration Menu -->
     <menuitem id="menu_real_estate_configuration"

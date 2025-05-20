@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Server action to update all apartment and store quantities -->
+    <record id="action_update_all_quantities" model="ir.actions.server">
+        <field name="name">Update All Apartment/Store Quantities</field>
+        <field name="model_id" ref="model_product_template"/>
+        <field name="binding_model_id" ref="model_product_template"/>
+        <field name="state">code</field>
+        <field name="code">
+            env['product.template'].action_update_all_quantities()
+        </field>
+    </record>
+</odoo>

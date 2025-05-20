@@ -9,10 +9,12 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_buildings" type="object" class="oe_stat_button" icon="fa-building">
-                            <field name="building_count" widget="statinfo" string="Buildings"/>
+                            <field name="building_count" widget="statinfo" string="Buildings" translate="yes"/>
                         </button>
+
+                        <!-- Apartment buttons -->
                         <button name="action_view_apartments" type="object" class="oe_stat_button" icon="fa-home">
-                            <field name="apartment_count" widget="statinfo" string="Apartments"/>
+                            <field name="apartment_count" widget="statinfo" string="Apartments" translate="yes"/>
                         </button>
                         <button name="action_view_sold_apartments" type="object" class="oe_stat_button" icon="fa-home"
                                 context="{'search_default_sold_apartments': 1}">
@@ -28,9 +30,35 @@
                                 <span class="o_stat_text" t-translation="on">Available</span>
                             </div>
                         </button>
-                        <button name="action_view_reservations" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                        <button name="action_view_reservations" type="object" class="oe_stat_button" icon="fa-home">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value text-warning"><field name="reservation_count"/></span>
+                                <span class="o_stat_text" t-translation="on">Reserved</span>
+                            </div>
+                        </button>
+
+                        <!-- Store buttons -->
+                        <button name="action_view_stores" type="object" class="oe_stat_button" icon="fa-shopping-bag">
+                            <field name="store_count" widget="statinfo" string="Stores" translate="yes"/>
+                        </button>
+                        <button name="action_view_sold_stores" type="object" class="oe_stat_button" icon="fa-shopping-bag"
+                                context="{'search_default_sold_stores': 1}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value text-danger"><field name="sold_store_count"/></span>
+                                <span class="o_stat_text" t-translation="on">Sold</span>
+                            </div>
+                        </button>
+                        <button name="action_view_available_stores" type="object" class="oe_stat_button" icon="fa-shopping-bag"
+                                context="{'search_default_available_stores': 1}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value text-success"><field name="available_store_count"/></span>
+                                <span class="o_stat_text" t-translation="on">Available</span>
+                            </div>
+                        </button>
+                        <button name="action_view_reserved_stores" type="object" class="oe_stat_button" icon="fa-shopping-bag"
+                                context="{'search_default_reserved_stores': 1}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value text-warning"><field name="reserved_store_count"/></span>
                                 <span class="o_stat_text" t-translation="on">Reserved</span>
                             </div>
                         </button>
@@ -83,6 +111,10 @@
                 <field name="sold_apartment_count"/>
                 <field name="available_apartment_count"/>
                 <field name="reservation_count"/>
+                <field name="store_count"/>
+                <field name="sold_store_count"/>
+                <field name="available_store_count"/>
+                <field name="reserved_store_count"/>
             </tree>
         </field>
     </record>
@@ -119,6 +151,10 @@
                 <field name="sold_apartment_count"/>
                 <field name="available_apartment_count"/>
                 <field name="reserved_apartment_count"/>
+                <field name="store_count"/>
+                <field name="sold_store_count"/>
+                <field name="available_store_count"/>
+                <field name="reserved_store_count"/>
                 <field name="logo"/>
                 <templates>
                     <t t-name="kanban-box">
@@ -136,13 +172,25 @@
                                 <div>
                                     <span><t t-esc="record.building_count.value"/> <span t-translation="on">Buildings</span></span>
                                 </div>
-                                <div>
-                                    <span><t t-esc="record.apartment_count.value"/> <span t-translation="on">Apartments</span></span>
+
+                                <!-- Apartment information -->
+                                <div class="mt-2">
+                                    <strong class="text-primary"><span t-translation="on">Apartments:</span></strong> <t t-esc="record.apartment_count.value"/>
                                 </div>
                                 <div>
                                     <span class="text-danger"><t t-esc="record.sold_apartment_count.value"/> <span t-translation="on">Sold</span></span>
                                     <span class="text-success ml-2"><t t-esc="record.available_apartment_count.value"/> <span t-translation="on">Available</span></span>
                                     <span class="text-warning ml-2"><t t-esc="record.reserved_apartment_count.value"/> <span t-translation="on">Reserved</span></span>
+                                </div>
+
+                                <!-- Store information -->
+                                <div class="mt-2">
+                                    <strong class="text-info"><span t-translation="on">Stores:</span></strong> <t t-esc="record.store_count.value"/>
+                                </div>
+                                <div>
+                                    <span class="text-danger"><t t-esc="record.sold_store_count.value"/> <span t-translation="on">Sold</span></span>
+                                    <span class="text-success ml-2"><t t-esc="record.available_store_count.value"/> <span t-translation="on">Available</span></span>
+                                    <span class="text-warning ml-2"><t t-esc="record.reserved_store_count.value"/> <span t-translation="on">Reserved</span></span>
                                 </div>
                             </div>
                         </div>

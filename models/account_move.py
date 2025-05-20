@@ -39,49 +39,18 @@ class AccountMove(models.Model):
                 if sale_order.has_apartment and sale_order.is_real_estate:
                     _logger.info("Invoice %s for real estate order %s with apartments is paid", self.name, sale_order.name)
 
-                    # Case 1: This is a deposit invoice payment (10%)
-                    if sale_order.deposit_invoice_id and sale_order.deposit_invoice_id.id == self.id:
-                        _logger.info("Deposit invoice %s for reservation %s is paid", self.name, sale_order.name)
+                    # Check if all invoices for this sale order are paid
+                    all_invoices_paid = sale_order._check_all_invoices_paid()
 
-                        # If the order is in reservation state, confirm it automatically
-                        if sale_order.state == 'reservation':
-                            try:
-                                # Confirm the order
-                                sale_order.action_confirm()
+                    # If all invoices are paid, mark apartments/stores as sold
+                    if all_invoices_paid:
+                        _logger.info("All invoices for order %s are paid. Marking properties as sold.", sale_order.name)
 
-                                # Show a success message to the user
-                                message = _("""
-Deposit Payment Received
+                        # Update apartment/store states to sold if not already
+                        properties_updated = 0
 
-The deposit payment for order %s has been received.
-The order has been automatically confirmed and is now in 'Sale Order' state.
-A delivery order for the handover has been created.
-
-Next steps:
-1. Schedule the handover of keys/documents
-2. Validate the delivery when the handover is complete
-3. Create and send the final invoice
-""") % sale_order.name
-
-                                # Log the message
-                                self.env['mail.message'].create({
-                                    'body': message,
-                                    'message_type': 'notification',
-                                    'subtype_id': self.env.ref('mail.mt_note').id,
-                                    'model': 'sale.order',
-                                    'res_id': sale_order.id,
-                                })
-
-                                _logger.info("Confirmed order %s after deposit payment", sale_order.name)
-                            except Exception as e:
-                                _logger.error("Failed to confirm order %s after deposit payment: %s", sale_order.name, str(e))
-
-                    # Case 2: This is a final invoice payment (90%)
-                    elif sale_order.state == 'sale' and sale_order.is_deposit_invoiced:
-                        _logger.info("Final invoice %s for order %s is paid", self.name, sale_order.name)
-
-                        # Update apartment states to sold if not already
                         for line in sale_order.order_line:
+                            # Handle apartments
                             if line.apartment_id and line.apartment_id.state != 'sold':
                                 try:
                                     # Mark apartment as sold
@@ -96,32 +65,49 @@ Next steps:
                                     if line.product_id and line.product_id.product_tmpl_id.is_apartment:
                                         line.product_id.product_tmpl_id.with_context(from_apartment_update=True).apartment_state = 'sold'
 
-                                        # Ensure inventory quantity is updated
-                                        line.product_id.product_tmpl_id._update_inventory_quantity()
-
                                     # Log the state change
-                                    _logger.info("Apartment %s state changed to sold after final invoice payment",
+                                    _logger.info("Apartment %s state changed to sold after full payment",
                                                 line.apartment_id.name)
+                                    properties_updated += 1
                                 except Exception as e:
                                     _logger.error("Failed to update apartment %s state: %s", line.apartment_id.name, str(e))
 
-                        # Show a success message to the user
-                        message = _("""
-Final Payment Received
+                            # Handle stores
+                            elif line.product_id and line.product_id.product_tmpl_id.is_store and line.product_id.product_tmpl_id.apartment_state != 'sold':
+                                try:
+                                    # Mark store as sold
+                                    line.product_id.product_tmpl_id.with_context(from_sale_order=True).write({
+                                        'apartment_state': 'sold',
+                                        'is_locked': False,
+                                        'locked_by_order_id': False,
+                                    })
 
-The final payment for order %s has been received.
-All apartments in this order are now marked as 'Sold'.
+                                    # Log the state change
+                                    _logger.info("Store %s state changed to sold after full payment",
+                                                line.product_id.product_tmpl_id.name)
+                                    properties_updated += 1
+                                except Exception as e:
+                                    _logger.error("Failed to update store %s state: %s",
+                                                line.product_id.product_tmpl_id.name, str(e))
+
+                        if properties_updated > 0:
+                            # Show a success message to the user
+                            message = _("""
+Payment Complete
+
+All payments for order %s have been received.
+All properties in this order are now marked as 'Sold'.
 
 The real estate transaction is now complete.
 """) % sale_order.name
 
-                        # Log the message
-                        self.env['mail.message'].create({
-                            'body': message,
-                            'message_type': 'notification',
-                            'subtype_id': self.env.ref('mail.mt_note').id,
-                            'model': 'sale.order',
-                            'res_id': sale_order.id,
-                        })
+                            # Log the message
+                            self.env['mail.message'].create({
+                                'body': message,
+                                'message_type': 'notification',
+                                'subtype_id': self.env.ref('mail.mt_note').id,
+                                'model': 'sale.order',
+                                'res_id': sale_order.id,
+                            })
 
         return res

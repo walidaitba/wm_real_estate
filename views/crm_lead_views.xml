@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add Real Estate fields to CRM Lead form view -->
+    <record id="crm_lead_view_form_real_estate" model="ir.ui.view">
+        <field name="name">crm.lead.form.real.estate</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Add a new notebook page for Real Estate -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Immobilier" attrs="{'invisible': [('type', '!=', 'opportunity')]}">
+                    <group>
+                        <group>
+                            <field name="project_id" readonly="1"
+                                attrs="{'invisible': [('project_id', '=', False)]}"/>
+                            <field name="building_id" options="{'no_create': True, 'no_open': False}"/>
+                            <field name="property_type"/>
+                            <field name="apartment_id" options="{'no_create': True, 'no_open': False}"
+                                attrs="{'invisible': [('property_type', '!=', 'apartment')],
+                                        'required': [('property_type', '=', 'apartment')]}"/>
+                            <field name="store_product_id" options="{'no_create': True, 'no_open': False}"
+                                attrs="{'invisible': [('property_type', '!=', 'store')],
+                                        'required': [('property_type', '=', 'store')]}"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Add Real Estate fields to CRM Lead search view -->
+    <record id="crm_lead_view_search_real_estate" model="ir.ui.view">
+        <field name="name">crm.lead.search.real.estate</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='won']" position="after">
+                <separator/>
+                <filter string="Avec Propriété" name="with_property" domain="['|', ('apartment_id', '!=', False), ('store_product_id', '!=', False)]"/>
+                <separator/>
+                <filter string="Appartements" name="apartments" domain="[('property_type', '=', 'apartment')]"/>
+                <filter string="Magasins" name="stores" domain="[('property_type', '=', 'store')]"/>
+            </xpath>
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="property_type"/>
+                <field name="building_id"/>
+                <field name="apartment_id"/>
+                <field name="store_product_id"/>
+            </xpath>
+            <xpath expr="//group" position="inside">
+                <filter string="Type de propriété" name="property_type" context="{'group_by': 'property_type'}"/>
+                <filter string="Bâtiment" name="building" context="{'group_by': 'building_id'}"/>
+                <filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

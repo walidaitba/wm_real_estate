@@ -26,18 +26,23 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
         _onOpenRecord: function (event) {
             var record = this.model.get(event.data.id);
 
-            // Check if it's an apartment product
+            // Only handle product.template records, not real.estate.apartment records
+            // This ensures we don't interfere with the apartment kanban view
             if (this.modelName === 'product.template' &&
-                record && record.data && record.data.is_apartment === true) {
+                record && record.data && (record.data.is_apartment === true || record.data.is_store === true)) {
 
                 // Prevent default action
                 event.stopPropagation();
 
                 // Log the record data for debugging
-                debug("Apartment data: " + JSON.stringify(record.data));
+                if (record.data.is_apartment) {
+                    debug("Apartment data: " + JSON.stringify(record.data));
+                } else {
+                    debug("Store data: " + JSON.stringify(record.data));
+                }
 
-                // Show apartment options dialog
-                this._showApartmentOptions(record.data);
+                // Show property options dialog
+                this._showPropertyOptions(record.data);
 
                 return;
             }
@@ -47,19 +52,21 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
         },
 
         /**
-         * Show apartment options in a dialog
+         * Show property options in a dialog (for both apartments and stores)
          */
-        _showApartmentOptions: function (apartmentData) {
+        _showPropertyOptions: function (propertyData) {
             var self = this;
             var buttons = [];
+            var isApartment = propertyData.is_apartment === true;
+            var propertyType = isApartment ? 'apartment' : 'store';
 
-            debug("Showing apartment options dialog for: " + apartmentData.name);
+            debug("Showing " + propertyType + " options dialog for: " + propertyData.name);
 
-            // Add buttons based on apartment state
-            debug("Apartment state: " + apartmentData.apartment_state + ", qty_available: " + apartmentData.qty_available);
+            // Add buttons based on property state
+            debug(propertyType + " state: " + propertyData.apartment_state + ", qty_available: " + propertyData.qty_available);
 
-            if (apartmentData.apartment_state === 'available') {
-                // Always show the Reserve button for available apartments
+            if (propertyData.apartment_state === 'available') {
+                // Always show the Reserve button for available properties
                 buttons.push({
                     text: _t('Reserve'),
                     classes: 'btn-primary',
@@ -67,7 +74,7 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
                         self._rpc({
                             model: 'product.template',
                             method: 'action_create_reservation',
-                            args: [[apartmentData.id]],
+                            args: [[propertyData.id]],
                         }).then(function (action) {
                             dialog.close();
                             // Make sure action is valid before doing it
@@ -102,11 +109,11 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
                 click: function () {
                     dialog.close();
                     try {
-                        debug("Opening view details for apartment: " + apartmentData.id);
+                        debug("Opening view details for " + propertyType + ": " + propertyData.id);
                         self.do_action({
                             type: 'ir.actions.act_window',
                             res_model: 'product.template',
-                            res_id: apartmentData.id,
+                            res_id: propertyData.id,
                             views: [[false, 'form']],
                             view_mode: 'form',  // Added view_mode for compatibility
                             target: 'current',
@@ -116,7 +123,7 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
                         debug("Error opening view details: " + error);
                         self.displayNotification({
                             title: _t('Error'),
-                            message: _t('Could not open apartment details. Please try again.'),
+                            message: _t('Could not open property details. Please try again.'),
                             type: 'danger'
                         });
                     }
@@ -131,33 +138,70 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
 
             // Create and display the dialog
             var dialog = new Dialog(this, {
-                title: _t('Apartment Options: ') + apartmentData.name,
+                title: isApartment ? _t('Apartment Options: ') + propertyData.name : _t('Store Options: ') + propertyData.name,
                 size: 'medium',
                 buttons: buttons,
-                $content: this._prepareApartmentModalContent(apartmentData),
+                $content: this._preparePropertyModalContent(propertyData),
                 technical: false,
-                dialogClass: 'o_apartment_dialog'
+                dialogClass: 'o_property_dialog',
+                // Add a custom destroy method to handle the canBeRemoved error
+                destroy: function() {
+                    try {
+                        // Call the original destroy method
+                        Dialog.prototype.destroy.call(this);
+                    } catch (error) {
+                        debug("Error during dialog destroy: " + error);
+                        // Force remove the dialog from the DOM if there's an error
+                        if (this.$el) {
+                            this.$el.remove();
+                        }
+                    }
+                }
             });
+
+            // Add a custom close method to handle the canBeRemoved error
+            var originalClose = dialog.close;
+            dialog.close = function() {
+                try {
+                    // Call the original close method
+                    originalClose.call(this);
+                } catch (error) {
+                    debug("Error during dialog close: " + error);
+                    // Force remove the dialog from the DOM if there's an error
+                    if (this.$el) {
+                        this.$el.remove();
+                    }
+                    // Force destroy the dialog
+                    this.destroy();
+                }
+            };
 
             dialog.open();
         },
 
         /**
-         * Prepare the content for the apartment modal
+         * Prepare the content for the property modal (apartment or store)
          */
-        _prepareApartmentModalContent: function (apartment) {
-            var $content = $('<div>').addClass('p-3 apartment-modal-content');
+        _preparePropertyModalContent: function (property) {
+            var $content = $('<div>').addClass('p-3 property-modal-content');
+            var isApartment = property.is_apartment === true;
 
             // Status
-            var statusClass = apartment.apartment_state === 'available' ? 'success' :
-                             apartment.apartment_state === 'reserved' ? 'warning' : 'danger';
+            var statusClass = property.apartment_state === 'available' ? 'success' :
+                             property.apartment_state === 'reserved' ? 'warning' : 'danger';
 
-            var statusText = apartment.apartment_state === 'available' ? _t('Available') :
-                            apartment.apartment_state === 'reserved' ? _t('Reserved') : _t('Sold');
+            var statusText = property.apartment_state === 'available' ? _t('Available') :
+                            property.apartment_state === 'reserved' ? _t('Reserved') : _t('Sold');
 
             $content.append($('<div>').addClass('mb-3').append(
                 $('<strong>').text(_t('Status: ')),
                 $('<span>').addClass('badge badge-' + statusClass).text(statusText)
+            ));
+
+            // Property type indicator
+            $content.append($('<div>').addClass('mb-3').append(
+                $('<strong>').text(_t('Type: ')),
+                $('<span>').addClass('badge badge-info').text(isApartment ? _t('Apartment') : _t('Store'))
             ));
 
             // Create two columns
@@ -167,33 +211,35 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
 
             // We're not showing project and building fields as requested
 
-            if (apartment.floor !== undefined) {
+            if (property.floor !== undefined) {
                 $col2.append($('<div>').addClass('mb-2').append(
                     $('<strong>').text(_t('Floor: ')),
-                    document.createTextNode(apartment.floor)
+                    document.createTextNode(property.floor)
                 ));
             }
 
-            if (apartment.area !== undefined) {
+            if (property.area !== undefined) {
                 $col2.append($('<div>').addClass('mb-2').append(
                     $('<strong>').text(_t('Area: ')),
-                    document.createTextNode(apartment.area + ' m²')
+                    document.createTextNode(property.area + ' m²')
                 ));
             }
 
-            // Add rooms and bathrooms
-            if (apartment.rooms !== undefined) {
-                $col1.append($('<div>').addClass('mb-2').append(
-                    $('<strong>').text(_t('Rooms: ')),
-                    document.createTextNode(apartment.rooms)
-                ));
-            }
+            // Add rooms and bathrooms only for apartments
+            if (isApartment) {
+                if (property.rooms !== undefined) {
+                    $col1.append($('<div>').addClass('mb-2').append(
+                        $('<strong>').text(_t('Rooms: ')),
+                        document.createTextNode(property.rooms)
+                    ));
+                }
 
-            if (apartment.bathrooms !== undefined) {
-                $col2.append($('<div>').addClass('mb-2').append(
-                    $('<strong>').text(_t('Bathrooms: ')),
-                    document.createTextNode(apartment.bathrooms)
-                ));
+                if (property.bathrooms !== undefined) {
+                    $col2.append($('<div>').addClass('mb-2').append(
+                        $('<strong>').text(_t('Bathrooms: ')),
+                        document.createTextNode(property.bathrooms)
+                    ));
+                }
             }
 
             // Add columns to row
