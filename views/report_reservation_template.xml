@@ -7,9 +7,8 @@
                 <div class="col-6">
                     <!-- Left side - Client information -->
                     <div style="color: #000!important;background-color: #f1f1f1!important;padding: 16px;"> 
-                        <h3 style="font-size:21px; border-bottom: 1px solid black;"><strong>Acquereur:</strong></h3>
-                        <div class="mt-2"><strong>Nom complet:</strong> <span t-field="o.partner_id.name"/></div>
-                        <div class="mt-2"><strong>CIN:</strong> <span t-field="o.partner_id.cin"/></div>
+                        <h3 style="font-size:21px; border-bottom: 1px solid black;"><strong>Acquereur:</strong></h3>                        <div class="mt-2"><strong>Nom complet:</strong> <span t-field="o.partner_id.name"/></div>
+                        <div class="mt-2"><strong>CIN:</strong> <span t-field="o.partner_id.function"/></div>
                         <div class="mt-2"><strong>Adresse:</strong> <span t-field="o.partner_id.contact_address"/></div>
                         <div class="mt-2"><strong>Téléphone:</strong> <span t-field="o.partner_id.phone"/></div>
                         <div class="mt-2"><strong>Email:</strong> <span t-field="o.partner_id.email"/></div>
@@ -18,9 +17,7 @@
                 <div class="col-6">
                     <!-- Right side - Sales agent information -->
                     <div style="color: #000!important;background-color: #f1f1f1!important;padding: 16px;"> 
-                        <h3 style="font-size:21px; border-bottom: 1px solid black;"><strong>Representant:</strong></h3>
-                        <div class="mt-2"><strong>Nom complet:</strong> <span t-field="o.user_id.name"/></div>
-                        <div class="mt-2"><strong>CIN:</strong> <span t-field="o.user_id.cin"/></div>
+                        <h3 style="font-size:21px; border-bottom: 1px solid black;"><strong>Representant:</strong></h3>                        <div class="mt-2"><strong>Nom complet:</strong> <span t-field="o.user_id.name"/></div>
                         <div class="mt-2"><strong>Adresse:</strong> <span t-field="o.user_id.contact_address"/></div>
                         <div class="mt-2"><strong>Téléphone:</strong> <span t-field="o.user_id.phone"/></div>
                         <div class="mt-2"><strong>Email:</strong> <span t-field="o.user_id.email"/></div>

@@ -48,11 +48,13 @@
               sequence="16"/>
 
     <!-- CRM Opportunities Menu -->
+    <!--
     <menuitem id="menu_real_estate_opportunities"
               name="Opportunités"
               parent="menu_real_estate_root"
               action="crm.crm_lead_opportunities"
               sequence="17"/>
+    -->
 
     <!-- Properties Menu -->
     <menuitem id="menu_real_estate_properties"
@@ -101,4 +103,12 @@
               name="Configuration"
               parent="menu_real_estate_root"
               sequence="100"/>
+
+    <!-- Clients Menu -->
+    <menuitem id="menu_real_estate_clients"
+              name="Clients"
+              parent="menu_real_estate_root"
+              action="contacts.action_contacts"
+              sequence="30"/>
+
 </odoo>
