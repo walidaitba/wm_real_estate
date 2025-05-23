@@ -7,6 +7,12 @@ _logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    # Real Estate fields
+    project_id = fields.Many2one('real.estate.project', string='Project',
+                                help="Related real estate project for this invoice")
+    building_id = fields.Many2one('real.estate.building', string='Building',
+                                 help="Related building for this invoice")
+
     def action_post(self):
         """Override post action to handle apartment state when invoice is posted"""
         # Call super to post the invoice
@@ -21,7 +27,14 @@ class AccountMove(models.Model):
                 # Check if this sale order has apartments
                 if sale_order.has_apartment:
                     _logger.info("Posted invoice %s for sale order %s with apartments", self.name, sale_order.name)
-                    # No state change yet, we'll wait for payment
+                    # Set project and building from sale order
+                    if sale_order.project_id:
+                        self.project_id = sale_order.project_id.id
+                    # Get building from first line with apartment
+                    for line in sale_order.order_line:
+                        if line.building_id:
+                            self.building_id = line.building_id.id
+                            break
 
         return res
 

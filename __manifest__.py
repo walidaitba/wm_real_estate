@@ -37,6 +37,10 @@
         'views/stock_menu_views.xml',
         'views/crm_lead_views.xml',
         'views/crm_actions.xml',
+        'views/account_views.xml',  # Add invoice view customizations
+        'views/partner_views.xml',  # Add CIN field views
+        'views/report_reservation_template.xml',  # New reservation report template
+        'views/account_reports.xml',  # Report actions
     ],
     'qweb': [],
     'demo': [],

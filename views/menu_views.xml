@@ -28,7 +28,7 @@
 
     <!-- Invoices Submenu -->
     <menuitem id="menu_real_estate_invoices"
-              name="Invoices"
+              name="Factures"
               parent="menu_real_estate_papers_root"
               action="action_real_estate_invoices"
               sequence="2"/>

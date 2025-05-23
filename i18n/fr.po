@@ -804,9 +804,32 @@ msgid "Active"
 msgstr "Actif"
 
 #. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__company_id
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "External link"
-msgstr "Lien externe"
+msgid "Company"
+msgstr "Société"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_res_partner__cin
+#: model:ir.model.fields,field_description:wm_real_estate.field_res_users__cin
+msgid "CIN"
+msgstr "CIN"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,help:wm_real_estate.field_res_partner__cin
+#: model:ir.model.fields,help:wm_real_estate.field_res_users__cin
+msgid "Carte d'Identité Nationale"
+msgstr "Carte d'Identité Nationale"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Apartment Information"
+msgstr "Informations sur l'Appartement"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Store Information"
+msgstr "Informations sur le Magasin"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
@@ -815,8 +838,282 @@ msgstr "Informations sur le Produit"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Apartment Information"
-msgstr "Informations sur l'Appartement"
+msgid "Pricing"
+msgstr "Tarification"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_real_estate_project
+msgid "Real Estate Project"
+msgstr "Projet Immobilier"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_real_estate_building
+msgid "Real Estate Building"
+msgstr "Bâtiment Immobilier"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_real_estate_apartment
+msgid "Real Estate Apartment"
+msgstr "Appartement Immobilier"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_product_template
+msgid "Product Template"
+msgstr "Modèle de Produit"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_sale_order
+msgid "Sales Order"
+msgstr "Bon de Commande"
+
+#. module: wm_real_estate
+#: model:ir.actions.act_window,name:wm_real_estate.action_real_estate_sales
+#: model:ir.ui.menu,name:wm_real_estate.menu_real_estate_sales
+msgid "Sales Orders"
+msgstr "Bons de Commande"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_sale_order_line
+msgid "Sales Order Line"
+msgstr "Ligne de Bon de Commande"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Stores"
+msgstr "Magasins"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Available Apartments"
+msgstr "Appartements Disponibles"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Reserved Apartments"
+msgstr "Appartements Réservés"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Sold Apartments"
+msgstr "Appartements Vendus"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Available Stores"
+msgstr "Magasins Disponibles"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Reserved Stores"
+msgstr "Magasins Réservés"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Sold Stores"
+msgstr "Magasins Vendus"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Archived"
+msgstr "Archivé"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_apartment_products
+msgid "No apartments found!"
+msgstr "Aucun appartement trouvé !"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_store
+msgid "No stores found!"
+msgstr "Aucun magasin trouvé !"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_apartment_products
+msgid "Apartments are managed as products in the inventory module."
+msgstr "Les appartements sont gérés comme des produits dans le module d'inventaire."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_store
+msgid "Stores are managed as products in the inventory module."
+msgstr "Les magasins sont gérés comme des produits dans le module d'inventaire."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_apartment_products
+msgid "Click the create button to add a new apartment."
+msgstr "Cliquez sur le bouton créer pour ajouter un nouvel appartement."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_store
+msgid "Click the create button to add a new store."
+msgstr "Cliquez sur le bouton créer pour ajouter un nouveau magasin."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_apartment_products
+msgid "Each apartment must be linked to a building and project."
+msgstr "Chaque appartement doit être lié à un bâtiment et à un projet."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_store
+msgid "Each store must be linked to a building and project."
+msgstr "Chaque magasin doit être lié à un bâtiment et à un projet."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_apartment_product
+msgid "Create a new apartment"
+msgstr "Créer un nouvel appartement"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_store_product
+msgid "Create a new store"
+msgstr "Créer un nouveau magasin"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_apartment_product
+msgid "Fill in the apartment details including the project and building it belongs to."
+msgstr "Remplissez les détails de l'appartement, y compris le projet et le bâtiment auquel il appartient."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_store_product
+msgid "Fill in the store details including the project and building it belongs to."
+msgstr "Remplissez les détails du magasin, y compris le projet et le bâtiment auquel il appartient."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_apartment_product
+msgid "The apartment will be automatically added to the inventory as a product."
+msgstr "L'appartement sera automatiquement ajouté à l'inventaire en tant que produit."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_store_product
+msgid "The store will be automatically added to the inventory as a product."
+msgstr "Le magasin sera automatiquement ajouté à l'inventaire en tant que produit."
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__building_count
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
+msgid "Buildings"
+msgstr "Bâtiments"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__apartment_count
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__apartment_count
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__project_id
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__project_id
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
+msgid "Project"
+msgstr "Projet"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+msgid "General Information"
+msgstr "Informations Générales"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Description"
+msgstr "Description"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+msgid "Buildings"
+msgstr "Bâtiments"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+msgid "Create"
+msgstr "Créer"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+msgid "Create Building"
+msgstr "Créer un Bâtiment"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+msgid "Create Apartment"
+msgstr "Créer un Appartement"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "View Reservations"
+msgstr "Voir les Devis"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
+msgid "Real Estate Reservation"
+msgstr "Devis Immobilier"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Reserve"
+msgstr "Réserver"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Mark as Sold"
+msgstr "Marquer comme Vendu"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Mark as Available"
+msgstr "Marquer comme Disponible"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_kanban_view
+msgid "Buildings"
+msgstr "Bâtiments"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_kanban_view
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+msgid "Apartments:"
+msgstr "Appartements :"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+msgid "Stores:"
+msgstr "Magasins :"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_kanban_view
+msgid "Reservations"
+msgstr "Devis"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
@@ -829,117 +1126,19 @@ msgid "Apartments"
 msgstr "Appartements"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__reservation_count
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__reservation_count
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__reservation_count
-msgid "Reservation Count"
-msgstr "Nombre de Devis"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
+msgid "Sold"
+msgstr "Vendus"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__is_real_estate
-msgid "Real Estate"
-msgstr "Immobilier"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
+msgid "Available"
+msgstr "Disponibles"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__has_apartment
-msgid "Has Apartment"
-msgstr "A un Appartement"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Pricing"
-msgstr "Tarification"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Sales Price"
-msgstr "Prix de vente"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Cost"
-msgstr "Coût"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Description"
-msgstr "Description"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Internal Notes"
-msgstr "Notes internes"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
-msgid "Reservations"
-msgstr "Devis"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Inventory"
-msgstr "Inventaire"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Accounting"
-msgstr "Comptabilité"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Can be Sold"
-msgstr "Peut être vendu"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Can be Purchased"
-msgstr "Peut être acheté"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Can be Rented"
-msgstr "Peut être loué"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Can be Expensed"
-msgstr "Peut être passé en charge"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Invoicing"
-msgstr "Facturation"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Customer Taxes"
-msgstr "Taxes client"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Vendor Taxes"
-msgstr "Taxes fournisseur"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Income Account"
-msgstr "Compte de revenu"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Expense Account"
-msgstr "Compte de charge"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Customer Lead Time"
-msgstr "Délai client"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "days"
-msgstr "jours"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
+msgid "Reserved"
+msgstr "Réservés"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
@@ -957,73 +1156,155 @@ msgid "Area:"
 msgstr "Surface :"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Apartment Information"
-msgstr "Informations sur l'Appartement"
+#: code:addons/wm_real_estate/models/apartment.py:0
+#, python-format
+msgid "Cannot delete an apartment that is not in 'Available' state."
+msgstr "Impossible de supprimer un appartement qui n'est pas dans l'état 'Disponible'."
+
+#. module: wm_real_estate
+#: code:addons/wm_real_estate/models/apartment.py:0
+#, python-format
+msgid "Cannot change the state of an apartment that is linked to a confirmed sale order."
+msgstr "Impossible de changer l'état d'un appartement qui est lié à un bon de commande confirmé."
+
+#. module: wm_real_estate
+#: code:addons/wm_real_estate/models/product_template.py:0
+#, python-format
+msgid "Cannot create apartment without building_id. Please select a building first."
+msgstr "Impossible de créer un appartement sans building_id. Veuillez d'abord sélectionner un bâtiment."
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Save"
+msgstr "Enregistrer"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Discard"
+msgstr "Annuler"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Delete"
+msgstr "Supprimer"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__create_uid
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__create_uid
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__create_uid
+msgid "Created by"
+msgstr "Créé par"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__create_date
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__create_date
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__create_date
+msgid "Created on"
+msgstr "Créé le"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__write_uid
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__write_uid
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__write_uid
+msgid "Last Updated by"
+msgstr "Dernière mise à jour par"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__write_date
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__write_date
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__write_date
+msgid "Last Updated on"
+msgstr "Dernière mise à jour le"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Search..."
+msgstr "Rechercher..."
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Group By"
+msgstr "Regrouper par"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Product Information"
-msgstr "Informations sur le Produit"
+msgid "Apartment Number"
+msgstr "Numéro d'Appartement"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Pricing"
-msgstr "Tarification"
+msgid "Store Number"
+msgstr "Numéro de Magasin"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__project_id
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Project"
-msgstr "Projet"
+msgid "Product Name"
+msgstr "Nom du Produit"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__building_id
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Building"
-msgstr "Bâtiment"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
+msgid "Apartment"
+msgstr "Appartement"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__floor
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Floor"
-msgstr "Étage"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
+msgid "Property"
+msgstr "Propriété"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__area
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Area (m²)"
-msgstr "Surface (m²)"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
+msgid "Add an apartment"
+msgstr "Ajouter un appartement"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__rooms
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Number of Rooms"
-msgstr "Nombre de chambres"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
+msgid "Add a property"
+msgstr "Ajouter une propriété"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__bathrooms
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Number of Bathrooms"
-msgstr "Nombre de Salles de Bain"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Filters"
+msgstr "Filtres"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__apartment_state
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Apartment Status"
-msgstr "Statut de l'Appartement"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Notes"
+msgstr "Notes"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__type
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Product Type"
-msgstr "Type de Produit"
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__active
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__active
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__active
+msgid "Active"
+msgstr "Actif"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__categ_id
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Product Category"
-msgstr "Catégorie de Produit"
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__image
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__image
+msgid "Image"
+msgstr "Image"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Archive"
+msgstr "Archiver"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Unarchive"
+msgstr "Désarchiver"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
@@ -1036,28 +1317,9 @@ msgid "Select or create a building"
 msgstr "Sélectionner ou créer un bâtiment"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__default_code
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Internal Reference"
-msgstr "Référence interne"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__barcode
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Barcode"
-msgstr "Code-barres"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__active
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Active"
-msgstr "Actif"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__company_id
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-msgid "Company"
-msgstr "Société"
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__type
+msgid "Product Type"
+msgstr "Type de Produit"
 
 #. module: wm_real_estate
 #: model:ir.model.fields.selection,name:wm_real_estate.selection__product_template__type__consu
@@ -1075,85 +1337,308 @@ msgid "Storable Product"
 msgstr "Article stockable"
 
 #. module: wm_real_estate
-#: model:ir.model.fields.selection,name:wm_real_estate.selection__product_template__apartment_state__available
-msgid "Available"
-msgstr "Disponible"
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__categ_id
+msgid "Product Category"
+msgstr "Catégorie de Produit"
 
 #. module: wm_real_estate
-#: model:ir.model.fields.selection,name:wm_real_estate.selection__product_template__apartment_state__reserved
-msgid "Reserved"
-msgstr "Réservé"
+#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__payment_percentage
+msgid "Payment Percentage"
+msgstr "Pourcentage de Paiement"
 
 #. module: wm_real_estate
-#: model:ir.model.fields.selection,name:wm_real_estate.selection__product_template__apartment_state__sold
-msgid "Sold"
-msgstr "Vendu"
+#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__client_payment
+msgid "Client Payment"
+msgstr "Paiement Client"
 
 #. module: wm_real_estate
-#: model:ir.model.fields.selection,name:wm_real_estate.selection__real_estate_apartment__state__in_progress
-#: model:ir.model.fields.selection,name:wm_real_estate.selection__product_template__apartment_state__in_progress
-#: model:ir.model.fields.selection,name:wm_real_estate.selection__sale_order_line__apartment_status__in_progress
-msgid "Réservation en cours"
-msgstr "Réservation en cours"
+#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__remaining_amount
+msgid "Remaining Amount"
+msgstr "Montant Restant"
 
 #. module: wm_real_estate
-#: model:ir.actions.act_window,name:wm_real_estate.action_real_estate_reservations
-#: model:ir.ui.menu,name:wm_real_estate.menu_real_estate_reservations_list
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_kanban_view
+#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__total_amount
+msgid "Total Amount"
+msgstr "Montant Total"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__default_code
+msgid "Internal Reference"
+msgstr "Référence interne"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__barcode
+msgid "Barcode"
+msgstr "Code-barres"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__active
+msgid "Active"
+msgstr "Actif"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__company_id
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
-msgid "Reservations"
-msgstr "Devis"
+msgid "Company"
+msgstr "Société"
 
 #. module: wm_real_estate
-#: model:ir.ui.menu,name:wm_real_estate.menu_real_estate_papers_root
-msgid "Papers"
-msgstr "Documents"
+#: model:ir.model.fields,field_description:wm_real_estate.field_res_partner__cin
+#: model:ir.model.fields,field_description:wm_real_estate.field_res_users__cin
+msgid "CIN"
+msgstr "CIN"
 
 #. module: wm_real_estate
-#: model:ir.ui.menu,name:wm_real_estate.menu_real_estate_quotations
-msgid "Quotations"
-msgstr "Devis"
+#: model:ir.model.fields,help:wm_real_estate.field_res_partner__cin
+#: model:ir.model.fields,help:wm_real_estate.field_res_users__cin
+msgid "Carte d'Identité Nationale"
+msgstr "Carte d'Identité Nationale"
 
 #. module: wm_real_estate
-#: model:ir.ui.menu,name:wm_real_estate.menu_real_estate_invoices
-#: model:ir.actions.act_window,name:wm_real_estate.action_real_estate_invoices
-msgid "Invoices"
-msgstr "Factures"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Apartment Information"
+msgstr "Informations sur l'Appartement"
 
 #. module: wm_real_estate
-#: model:ir.actions.act_window,name:wm_real_estate.action_create_real_estate_reservation
-#: model:ir.ui.menu,name:wm_real_estate.menu_real_estate_create_reservation
-msgid "Create Reservation"
-msgstr "Créer un Devis"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Store Information"
+msgstr "Informations sur le Magasin"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
-msgid "Add an apartment"
-msgstr "Ajouter un appartement"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Product Information"
+msgstr "Informations sur le Produit"
 
 #. module: wm_real_estate
-#: model:ir.actions.act_window,name:wm_real_estate.action_real_estate_quotations
-#: model:ir.ui.menu,name:wm_real_estate.menu_real_estate_quotations
-msgid "Quotations"
-msgstr "Devis"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Pricing"
+msgstr "Tarification"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_real_estate_project
+msgid "Real Estate Project"
+msgstr "Projet Immobilier"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_real_estate_building
+msgid "Real Estate Building"
+msgstr "Bâtiment Immobilier"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_real_estate_apartment
+msgid "Real Estate Apartment"
+msgstr "Appartement Immobilier"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_product_template
+msgid "Product Template"
+msgstr "Modèle de Produit"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_sale_order
+msgid "Sales Order"
+msgstr "Bon de Commande"
 
 #. module: wm_real_estate
 #: model:ir.actions.act_window,name:wm_real_estate.action_real_estate_sales
 #: model:ir.ui.menu,name:wm_real_estate.menu_real_estate_sales
 msgid "Sales Orders"
-msgstr "Bons de commande"
+msgstr "Bons de Commande"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__is_real_estate
-msgid "Real Estate"
-msgstr "Immobilier"
+#: model:ir.model,name:wm_real_estate.model_sale_order_line
+msgid "Sales Order Line"
+msgstr "Ligne de Bon de Commande"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__has_apartment
-msgid "Has Apartment"
-msgstr "A un Appartement"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Stores"
+msgstr "Magasins"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Available Apartments"
+msgstr "Appartements Disponibles"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Reserved Apartments"
+msgstr "Appartements Réservés"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Sold Apartments"
+msgstr "Appartements Vendus"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Available Stores"
+msgstr "Magasins Disponibles"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Reserved Stores"
+msgstr "Magasins Réservés"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Sold Stores"
+msgstr "Magasins Vendus"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Archived"
+msgstr "Archivé"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_apartment_products
+msgid "No apartments found!"
+msgstr "Aucun appartement trouvé !"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_store
+msgid "No stores found!"
+msgstr "Aucun magasin trouvé !"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_apartment_products
+msgid "Apartments are managed as products in the inventory module."
+msgstr "Les appartements sont gérés comme des produits dans le module d'inventaire."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_store
+msgid "Stores are managed as products in the inventory module."
+msgstr "Les magasins sont gérés comme des produits dans le module d'inventaire."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_apartment_products
+msgid "Click the create button to add a new apartment."
+msgstr "Cliquez sur le bouton créer pour ajouter un nouvel appartement."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_store
+msgid "Click the create button to add a new store."
+msgstr "Cliquez sur le bouton créer pour ajouter un nouveau magasin."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_apartment_products
+msgid "Each apartment must be linked to a building and project."
+msgstr "Chaque appartement doit être lié à un bâtiment et à un projet."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_store
+msgid "Each store must be linked to a building and project."
+msgstr "Chaque magasin doit être lié à un bâtiment et à un projet."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_apartment_product
+msgid "Create a new apartment"
+msgstr "Créer un nouvel appartement"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_store_product
+msgid "Create a new store"
+msgstr "Créer un nouveau magasin"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_apartment_product
+msgid "Fill in the apartment details including the project and building it belongs to."
+msgstr "Remplissez les détails de l'appartement, y compris le projet et le bâtiment auquel il appartient."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_store_product
+msgid "Fill in the store details including the project and building it belongs to."
+msgstr "Remplissez les détails du magasin, y compris le projet et le bâtiment auquel il appartient."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_apartment_product
+msgid "The apartment will be automatically added to the inventory as a product."
+msgstr "L'appartement sera automatiquement ajouté à l'inventaire en tant que produit."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_store_product
+msgid "The store will be automatically added to the inventory as a product."
+msgstr "Le magasin sera automatiquement ajouté à l'inventaire en tant que produit."
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__building_count
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
+msgid "Buildings"
+msgstr "Bâtiments"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__apartment_count
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__apartment_count
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__project_id
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__project_id
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
+msgid "Project"
+msgstr "Projet"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+msgid "General Information"
+msgstr "Informations Générales"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Description"
+msgstr "Description"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+msgid "Buildings"
+msgstr "Bâtiments"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+msgid "Create"
+msgstr "Créer"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+msgid "Create Building"
+msgstr "Créer un Bâtiment"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+msgid "Create Apartment"
+msgstr "Créer un Appartement"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "View Reservations"
+msgstr "Voir les Devis"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
@@ -1161,69 +1646,82 @@ msgid "Real Estate Reservation"
 msgstr "Devis Immobilier"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
-msgid "This is a real estate reservation. The apartment will remain in \"Reserved\" status even after confirmation."
-msgstr "Ceci est un devis immobilier. L'appartement restera dans l'état \"Réservé\" même après confirmation."
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Reserve"
+msgstr "Réserver"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_sales_order_filter_real_estate
-msgid "With Apartments"
-msgstr "Avec Appartements"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Mark as Sold"
+msgstr "Marquer comme Vendu"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_sales_order_filter_real_estate
-msgid "Real Estate"
-msgstr "Immobilier"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Mark as Available"
+msgstr "Marquer comme Disponible"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_sales_order_filter_real_estate
-msgid "Apartment"
-msgstr "Appartement"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_kanban_view
+msgid "Buildings"
+msgstr "Bâtiments"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_sales_order_filter_real_estate
-msgid "Apartment Status"
-msgstr "Statut de l'Appartement"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_kanban_view
+msgid "Apartments"
+msgstr "Appartements"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__sold_apartment_count
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__sold_apartment_count
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+msgid "Apartments:"
+msgstr "Appartements :"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+msgid "Stores:"
+msgstr "Magasins :"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_kanban_view
+msgid "Reservations"
+msgstr "Devis"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
+msgid "Buildings"
+msgstr "Bâtiments"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
 msgid "Sold"
 msgstr "Vendus"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__available_apartment_count
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_apartment_count
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
 msgid "Available"
 msgstr "Disponibles"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__reserved_apartment_count
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__reserved_apartment_count
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
 msgid "Reserved"
 msgstr "Réservés"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
-msgid "Project:"
-msgstr "Projet :"
+msgid "Building:"
+msgstr "Bâtiment :"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
-msgid "In Quotation"
-msgstr "En Devis"
+msgid "Floor:"
+msgstr "Étage :"
 
 #. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
@@ -1231,239 +1729,577 @@ msgid "Area:"
 msgstr "Surface :"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
-msgid "Rooms:"
-msgstr "Chambres :"
+#: code:addons/wm_real_estate/models/apartment.py:0
+#, python-format
+msgid "Cannot delete an apartment that is not in 'Available' state."
+msgstr "Impossible de supprimer un appartement qui n'est pas dans l'état 'Disponible'."
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
-msgid "Bathrooms:"
-msgstr "Salles de bain :"
+#: code:addons/wm_real_estate/models/apartment.py:0
+#, python-format
+msgid "Cannot change the state of an apartment that is linked to a confirmed sale order."
+msgstr "Impossible de changer l'état d'un appartement qui est lié à un bon de commande confirmé."
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
-msgid "Locked by:"
-msgstr "Verrouillé par :"
+#: code:addons/wm_real_estate/models/product_template.py:0
+#, python-format
+msgid "Cannot create apartment without building_id. Please select a building first."
+msgstr "Impossible de créer un appartement sans building_id. Veuillez d'abord sélectionner un bâtiment."
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_tree_real_estate
-msgid "Quotation Number"
-msgstr "Numéro de devis"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Save"
+msgstr "Enregistrer"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_tree_real_estate_custom
-msgid "Order Number"
-msgstr "Numéro de commande"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Discard"
+msgstr "Annuler"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_tree_real_estate_custom
-msgid "Real Estate Orders"
-msgstr "Commandes Immobilières"
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Delete"
+msgstr "Supprimer"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_tree_real_estate
-msgid "Quotation Date"
-msgstr "Date du devis"
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__create_uid
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__create_uid
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__create_uid
+msgid "Created by"
+msgstr "Créé par"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_tree_real_estate
-msgid "Customer"
-msgstr "Client"
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__create_date
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__create_date
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__create_date
+msgid "Created on"
+msgstr "Créé le"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_tree_real_estate
-msgid "Salesperson"
-msgstr "Commercial"
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__write_uid
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__write_uid
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__write_uid
+msgid "Last Updated by"
+msgstr "Dernière mise à jour par"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_tree_real_estate
-msgid "Total"
-msgstr "Total"
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__write_date
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__write_date
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__write_date
+msgid "Last Updated on"
+msgstr "Dernière mise à jour le"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_tree_real_estate
-msgid "Status"
-msgstr "État"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_tree_real_estate
-msgid "Invoice Status"
-msgstr "État de la facture"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
-msgid "Confirm"
-msgstr "Confirmer"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
-msgid "Order Lines"
-msgstr "Lignes de commande"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
-msgid "Apartment Details"
-msgstr "Détails de l'Appartement"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
-msgid "This is a real estate reservation. The apartment will remain in \"Reserved\" status even after confirmation."
-msgstr "Ceci est un devis immobilier. L'appartement restera dans l'état \"Réservé\" même après confirmation."
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
-msgid "Unit Price"
-msgstr "Prix unitaire"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
-msgid "Quantity"
-msgstr "Quantité"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
-msgid "Subtotal"
-msgstr "Sous-total"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
-msgid "Taxes"
-msgstr "Taxes"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_tree_view
-msgid "Building Name"
-msgstr "Nom du bâtiment"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_tree_view
-msgid "Code"
-msgstr "Code"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_tree_view
-msgid "Project"
-msgstr "Projet"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_tree_view
-msgid "Floors"
-msgstr "Étages"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_tree_view
-msgid "Apartments"
-msgstr "Appartements"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_tree_view
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
-msgid "Available"
-msgstr "Disponibles"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
-msgid "Available"
-msgstr "Disponible"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_tree_view
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
-msgid "Reserved"
-msgstr "Réservés"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
-msgid "Reserved"
-msgstr "Réservé"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_tree_view
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
-msgid "Sold"
-msgstr "Vendus"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
-msgid "Sold"
-msgstr "Vendu"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_tree_view
-msgid "Project Name"
-msgstr "Nom du projet"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_tree_view
-msgid "Code"
-msgstr "Code"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_tree_view
-msgid "City"
-msgstr "Ville"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_tree_view
-msgid "Buildings"
-msgstr "Bâtiments"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_tree_view
-msgid "Apartments"
-msgstr "Appartements"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_tree_view
-msgid "Available"
-msgstr "Disponibles"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_tree_view
-msgid "Reserved"
-msgstr "Réservés"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_tree_view
-msgid "Sold"
-msgstr "Vendus"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_search_view
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_search_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
 msgid "Search..."
 msgstr "Rechercher..."
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_search_view
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_search_view
-msgid "Active"
-msgstr "Actif"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_search_view
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_search_view
-msgid "Archived"
-msgstr "Archivé"
-
-#. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_search_view
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_search_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
 msgid "Group By"
 msgstr "Regrouper par"
 
 #. module: wm_real_estate
-#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_search_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Apartment Number"
+msgstr "Numéro d'Appartement"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Store Number"
+msgstr "Numéro de Magasin"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Product Name"
+msgstr "Nom du Produit"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
+msgid "Apartment"
+msgstr "Appartement"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
+msgid "Property"
+msgstr "Propriété"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
+msgid "Add an apartment"
+msgstr "Ajouter un appartement"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
+msgid "Add a property"
+msgstr "Ajouter une propriété"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Filters"
+msgstr "Filtres"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Notes"
+msgstr "Notes"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__active
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__active
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__active
+msgid "Active"
+msgstr "Actif"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__image
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__image
+msgid "Image"
+msgstr "Image"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Archive"
+msgstr "Archiver"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Unarchive"
+msgstr "Désarchiver"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Select or create a project"
+msgstr "Sélectionner ou créer un projet"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Select or create a building"
+msgstr "Sélectionner ou créer un bâtiment"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__type
+msgid "Product Type"
+msgstr "Type de Produit"
+
+#. module: wm_real_estate
+#: model:ir.model.fields.selection,name:wm_real_estate.selection__product_template__type__consu
+msgid "Consumable"
+msgstr "Consommable"
+
+#. module: wm_real_estate
+#: model:ir.model.fields.selection,name:wm_real_estate.selection__product_template__type__service
+msgid "Service"
+msgstr "Service"
+
+#. module: wm_real_estate
+#: model:ir.model.fields.selection,name:wm_real_estate.selection__product_template__type__product
+msgid "Storable Product"
+msgstr "Article stockable"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__categ_id
+msgid "Product Category"
+msgstr "Catégorie de Produit"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__payment_percentage
+msgid "Payment Percentage"
+msgstr "Pourcentage de Paiement"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__client_payment
+msgid "Client Payment"
+msgstr "Paiement Client"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__remaining_amount
+msgid "Remaining Amount"
+msgstr "Montant Restant"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__total_amount
+msgid "Total Amount"
+msgstr "Montant Total"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__default_code
+msgid "Internal Reference"
+msgstr "Référence interne"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__barcode
+msgid "Barcode"
+msgstr "Code-barres"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__active
+msgid "Active"
+msgstr "Actif"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__company_id
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Company"
+msgstr "Société"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_res_partner__cin
+#: model:ir.model.fields,field_description:wm_real_estate.field_res_users__cin
+msgid "CIN"
+msgstr "CIN"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,help:wm_real_estate.field_res_partner__cin
+#: model:ir.model.fields,help:wm_real_estate.field_res_users__cin
+msgid "Carte d'Identité Nationale"
+msgstr "Carte d'Identité Nationale"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Apartment Information"
+msgstr "Informations sur l'Appartement"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Store Information"
+msgstr "Informations sur le Magasin"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Product Information"
+msgstr "Informations sur le Produit"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_form_view_real_estate
+msgid "Pricing"
+msgstr "Tarification"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_real_estate_project
+msgid "Real Estate Project"
+msgstr "Projet Immobilier"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_real_estate_building
+msgid "Real Estate Building"
+msgstr "Bâtiment Immobilier"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_real_estate_apartment
+msgid "Real Estate Apartment"
+msgstr "Appartement Immobilier"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_product_template
+msgid "Product Template"
+msgstr "Modèle de Produit"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_sale_order
+msgid "Sales Order"
+msgstr "Bon de Commande"
+
+#. module: wm_real_estate
+#: model:ir.actions.act_window,name:wm_real_estate.action_real_estate_sales
+#: model:ir.ui.menu,name:wm_real_estate.menu_real_estate_sales
+msgid "Sales Orders"
+msgstr "Bons de Commande"
+
+#. module: wm_real_estate
+#: model:ir.model,name:wm_real_estate.model_sale_order_line
+msgid "Sales Order Line"
+msgstr "Ligne de Bon de Commande"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Stores"
+msgstr "Magasins"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Available Apartments"
+msgstr "Appartements Disponibles"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Reserved Apartments"
+msgstr "Appartements Réservés"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Sold Apartments"
+msgstr "Appartements Vendus"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Available Stores"
+msgstr "Magasins Disponibles"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Reserved Stores"
+msgstr "Magasins Réservés"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Sold Stores"
+msgstr "Magasins Vendus"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_search_view_real_estate
+msgid "Archived"
+msgstr "Archivé"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_apartment_products
+msgid "No apartments found!"
+msgstr "Aucun appartement trouvé !"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_store
+msgid "No stores found!"
+msgstr "Aucun magasin trouvé !"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_apartment_products
+msgid "Apartments are managed as products in the inventory module."
+msgstr "Les appartements sont gérés comme des produits dans le module d'inventaire."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_store
+msgid "Stores are managed as products in the inventory module."
+msgstr "Les magasins sont gérés comme des produits dans le module d'inventaire."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_apartment_products
+msgid "Click the create button to add a new apartment."
+msgstr "Cliquez sur le bouton créer pour ajouter un nouvel appartement."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_store
+msgid "Click the create button to add a new store."
+msgstr "Cliquez sur le bouton créer pour ajouter un nouveau magasin."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_apartment_products
+msgid "Each apartment must be linked to a building and project."
+msgstr "Chaque appartement doit être lié à un bâtiment et à un projet."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_real_estate_store
+msgid "Each store must be linked to a building and project."
+msgstr "Chaque magasin doit être lié à un bâtiment et à un projet."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_apartment_product
+msgid "Create a new apartment"
+msgstr "Créer un nouvel appartement"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_store_product
+msgid "Create a new store"
+msgstr "Créer un nouveau magasin"
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_apartment_product
+msgid "Fill in the apartment details including the project and building it belongs to."
+msgstr "Remplissez les détails de l'appartement, y compris le projet et le bâtiment auquel il appartient."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_store_product
+msgid "Fill in the store details including the project and building it belongs to."
+msgstr "Remplissez les détails du magasin, y compris le projet et le bâtiment auquel il appartient."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_apartment_product
+msgid "The apartment will be automatically added to the inventory as a product."
+msgstr "L'appartement sera automatiquement ajouté à l'inventaire en tant que produit."
+
+#. module: wm_real_estate
+#: model_terms:ir.actions.act_window,help:wm_real_estate.action_create_store_product
+msgid "The store will be automatically added to the inventory as a product."
+msgstr "Le magasin sera automatiquement ajouté à l'inventaire en tant que produit."
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__building_count
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
+msgid "Buildings"
+msgstr "Bâtiments"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__apartment_count
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__apartment_count
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__project_id
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_apartment__project_id
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_form
 msgid "Project"
 msgstr "Projet"
 
 #. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+msgid "General Information"
+msgstr "Informations Générales"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Description"
+msgstr "Description"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+msgid "Buildings"
+msgstr "Bâtiments"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+msgid "Create"
+msgstr "Créer"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+msgid "Create Building"
+msgstr "Créer un Bâtiment"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+msgid "Create Apartment"
+msgstr "Créer un Appartement"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_form_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "View Reservations"
+msgstr "Voir les Devis"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_order_form_real_estate
+msgid "Real Estate Reservation"
+msgstr "Devis Immobilier"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Reserve"
+msgstr "Réserver"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Mark as Sold"
+msgstr "Marquer comme Vendu"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_apartment_form_view
+msgid "Mark as Available"
+msgstr "Marquer comme Disponible"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_kanban_view
+msgid "Buildings"
+msgstr "Bâtiments"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_kanban_view
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+msgid "Apartments:"
+msgstr "Appartements :"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+msgid "Stores:"
+msgstr "Magasins :"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_project_kanban_view
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.real_estate_building_kanban_view
+msgid "Reservations"
+msgstr "Devis"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
+msgid "Buildings"
+msgstr "Bâtiments"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
+msgid "Apartments"
+msgstr "Appartements"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
+msgid "Sold"
+msgstr "Vendus"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
+msgid "Available"
+msgstr "Disponibles"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.view_real_estate_project_kanban
+msgid "Reserved"
+msgstr "Réservés"
+
+#. module: wm_real_estate
 #: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
-msgid "Rooms:"
-msgstr "Chambres :"
+msgid "Building:"
+msgstr "Bâtiment :"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
+msgid "Floor:"
+msgstr "Étage :"
+
+#. module: wm_real_estate
+#: model_terms:ir.ui.view,arch_db:wm_real_estate.product_template_kanban_view_real_estate
+msgid "Area:"
+msgstr "Surface :"
 
 #. module: wm_real_estate
 #: code:addons/wm_real_estate/static/src/js/apartment_action.js:0
