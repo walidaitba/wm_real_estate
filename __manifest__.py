@@ -38,7 +38,7 @@
         'views/crm_lead_views.xml', #desactivate crm features for now
         'views/crm_actions.xml',
         'views/account_views.xml',  # Add invoice view customizations
-        'views/partner_views.xml',  # Add CIN field views (temporarily disabled)
+        'views/partner_views.xml',  # Customize partner form (function field as CIN)
         'views/report_reservation_template.xml',  # New reservation report template
         'views/account_reports.xml',  # Report actions
     ],
