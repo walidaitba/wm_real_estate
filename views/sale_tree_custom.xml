@@ -18,7 +18,7 @@
                 <field name="team_id" optional="hide"/>
                 <field name="activity_ids" widget="list_activity" optional="show"/>
                 <field name="apartment_status" optional="show" widget="badge"
-                       decoration-secondary="apartment_status == 'available'"
+                       decoration-secondary="apartment_status == 'disponible'"
                        decoration-info="apartment_status == 'reserved'"
                        decoration-success="apartment_status == 'sold'"/>
                 <field name="state"/>

@@ -90,9 +90,9 @@
                     <div class="col-md-6">
                         <label for="apartment_id" string="Available Property"/>
                         <field name="apartment_id"
-                               domain="[('building_id', '=', building_id), ('state', 'in', ['available', 'in_progress'])]"
+                               domain="[('building_id', '=', building_id), ('state', '=', 'disponible')]"
                                options="{'no_create': True, 'no_open': False}"
-                               context="{'default_state': 'available'}"
+                               context="{'default_state': 'disponible'}"
                                placeholder="Select an available property"
                                attrs="{'required': [('parent.is_real_estate', '=', True)]}"
                                on_change="1"/>
@@ -104,11 +104,6 @@
             <xpath expr="//field[@name='order_line']/form//field[@name='tax_id']" position="after">
                 <!-- Apartment details section with better organization -->
                 <div name="apartment_details_container" attrs="{'invisible': [('apartment_id', '=', False)]}">
-                    <!-- Hidden fields for technical use -->
-                    <field name="apartment_id" invisible="1"/>
-                    <field name="building_id" invisible="1"/>
-                    <field name="product_id" invisible="1"/>
-
                     <!-- Section title with visual enhancement -->
                     <div class="o_horizontal_separator mt-3 mb-3" style="background-color: #f8f9fa; padding: 8px; border-radius: 4px;">
                         <strong><i class="fa fa-building mr-2"></i>Property Details</strong>
@@ -121,12 +116,11 @@
                                 <div class="card-header bg-light">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0">
-                                            <field name="apartment_id" readonly="1" string="Apartment" nolabel="1"
-                                                   options="{'field_name': 'name'}" class="h5 mb-0"/>
+                                            <field name="apartment_id" readonly="1" string="Apartment" nolabel="1" class="h5 mb-0"/>
                                         </h5>
                                         <field name="apartment_status" readonly="1" nolabel="1" widget="badge"
-                                               decoration-success="apartment_status == 'available'"
-                                               decoration-warning="apartment_status == 'reserved'"
+                                               decoration-success="apartment_status == 'disponible'"
+                                               decoration-warning="apartment_status == 'prereserved'"
                                                decoration-danger="apartment_status == 'sold'"/>
                                     </div>
                                 </div>
@@ -140,18 +134,18 @@
                                             </div>
                                             <div class="mb-3">
                                                 <strong>Project:</strong>
-                                                <field name="apartment_id" readonly="1" nolabel="1"
-                                                       options="{'field_name': 'project_id'}"/>
+                                                <field name="apartment_id" readonly="1" nolabel="1" string="Project" 
+                                                       related="apartment_id.project_id"/>
                                             </div>
                                             <div class="mb-3">
                                                 <strong>Floor:</strong>
-                                                <field name="apartment_id" readonly="1" nolabel="1"
-                                                       options="{'field_name': 'floor'}"/>
+                                                <field name="apartment_id" readonly="1" nolabel="1" string="Floor"
+                                                       related="apartment_id.floor"/>
                                             </div>
                                             <div class="mb-3">
                                                 <strong>Code:</strong>
-                                                <field name="apartment_id" readonly="1" nolabel="1"
-                                                       options="{'field_name': 'code'}"/>
+                                                <field name="apartment_id" readonly="1" nolabel="1" string="Code"
+                                                       related="apartment_id.code"/>
                                             </div>
                                         </div>
 
@@ -159,23 +153,23 @@
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <strong>Area:</strong>
-                                                <field name="apartment_id" readonly="1" nolabel="1"
-                                                       options="{'field_name': 'area'}"/> m²
+                                                <field name="apartment_id" readonly="1" nolabel="1" string="Area"
+                                                       related="apartment_id.area"/> m²
                                             </div>
                                             <div class="mb-3">
                                                 <strong>Rooms:</strong>
-                                                <field name="apartment_id" readonly="1" nolabel="1"
-                                                       options="{'field_name': 'rooms'}"/>
+                                                <field name="apartment_id" readonly="1" nolabel="1" string="Rooms"
+                                                       related="apartment_id.rooms"/>
                                             </div>
                                             <div class="mb-3">
                                                 <strong>Bathrooms:</strong>
-                                                <field name="apartment_id" readonly="1" nolabel="1"
-                                                       options="{'field_name': 'bathrooms'}"/>
+                                                <field name="apartment_id" readonly="1" nolabel="1" string="Bathrooms"
+                                                       related="apartment_id.bathrooms"/>
                                             </div>
                                             <div class="mb-3">
                                                 <strong>Price:</strong>
-                                                <field name="apartment_id" readonly="1" nolabel="1"
-                                                       options="{'field_name': 'price'}" class="font-weight-bold"/>
+                                                <field name="apartment_id" readonly="1" nolabel="1" string="Price"
+                                                       related="apartment_id.price" class="font-weight-bold"/>
                                             </div>
                                         </div>
                                     </div>
@@ -183,14 +177,14 @@
                                     <!-- Description and features -->
                                     <div class="mt-3">
                                         <h6 class="border-bottom pb-2">Description</h6>
-                                        <field name="apartment_id" readonly="1" nolabel="1"
-                                               options="{'field_name': 'description'}" class="text-muted"/>
+                                        <field name="apartment_id" readonly="1" nolabel="1" string="Description"
+                                               related="apartment_id.description" class="text-muted"/>
                                     </div>
 
                                     <div class="mt-3">
                                         <h6 class="border-bottom pb-2">Features</h6>
-                                        <field name="apartment_id" readonly="1" nolabel="1"
-                                               options="{'field_name': 'features'}" class="text-muted"/>
+                                        <field name="apartment_id" readonly="1" nolabel="1" string="Features"
+                                               related="apartment_id.features" class="text-muted"/>
                                     </div>
                                 </div>
                             </div>
@@ -216,9 +210,8 @@
                 <!-- Add property state field after product_id -->
                 <field name="apartment_status" optional="show" widget="badge"
                        attrs="{'column_invisible': [('parent.is_real_estate', '=', False)]}"
-                       decoration-success="apartment_status == 'available'"
-                       decoration-warning="apartment_status == 'in_progress'"
-                       decoration-info="apartment_status == 'reserved'"
+                       decoration-success="apartment_status == 'disponible'"
+                       decoration-info="apartment_status == 'prereserved'"
                        decoration-danger="apartment_status == 'sold'"
                        string="Status"/>
             </xpath>
@@ -231,7 +224,7 @@
             <!-- Add decoration to order lines with apartments and limit to one line -->
             <xpath expr="//field[@name='order_line']/tree" position="attributes">
                 <attribute name="decoration-info">apartment_id != False</attribute>
-                <attribute name="decoration-danger">apartment_status == 'reserved' or apartment_status == 'sold'</attribute>
+                <attribute name="decoration-danger">apartment_status == 'prereserved' or apartment_status == 'sold'</attribute>
                 <attribute name="editable">bottom</attribute>
             </xpath>
 

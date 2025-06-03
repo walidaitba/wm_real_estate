@@ -30,13 +30,14 @@ class ProductTemplate(models.Model):
     context_building_readonly = fields.Boolean(string='Building Readonly', default=False,
                                              help="Technical field to make building field readonly based on context")
 
-    # State for apartments
+    # State for apartments - computed from apartment's actual state
     apartment_state = fields.Selection([
-        ('available', 'Available'),
-        ('in_progress', 'Réservation en cours'),
-        ('reserved', 'Reserved'),
-        ('sold', 'Sold'),
-    ], string='Apartment Status', default='available')
+        ('disponible', 'Disponible'),
+        ('prereserved', 'Préréservé'),
+        ('sold', 'Vendu'),
+    ], string='Apartment Status', compute='_compute_apartment_state', inverse='_inverse_apartment_state', 
+       store=True, readonly=False, default='disponible', required=True,
+       help="Status of the apartment. This field is synchronized with the apartment record.")
 
     # Locking mechanism fields
     is_locked = fields.Boolean(string='Locked', related='apartment_id.is_locked', readonly=True,
@@ -46,6 +47,32 @@ class ProductTemplate(models.Model):
                                        help="The quotation that has locked this apartment")
     lock_date = fields.Datetime(string='Lock Date', related='apartment_id.lock_date', readonly=True,
                               help="Date and time when the apartment was locked")
+
+    @api.depends('apartment_id.state', 'is_apartment', 'is_store')
+    def _compute_apartment_state(self):
+        """Compute apartment state from the linked apartment record"""
+        for product in self:
+            if product.is_apartment and product.apartment_id:
+                # For apartments, get the state from the linked apartment
+                product.apartment_state = product.apartment_id.state
+            elif product.is_store:
+                # For stores, use the stored value or default to disponible
+                if not product.apartment_state:
+                    product.apartment_state = 'disponible'
+            else:
+                # For non-real estate products, set to disponible
+                product.apartment_state = 'disponible'
+
+    def _inverse_apartment_state(self):
+        """Update apartment state when changed from product side"""
+        for product in self:
+            if product.is_apartment and product.apartment_id:
+                # Update the linked apartment's state
+                product.apartment_id.with_context(from_product_update=True).write({
+                    'state': product.apartment_state
+                })
+                _logger.info("Updated apartment %s state to %s from product", 
+                           product.apartment_id.name, product.apartment_state)
 
     @api.model
     def default_get(self, fields_list):
@@ -766,7 +793,7 @@ class ProductTemplate(models.Model):
                             'rooms': vals.get('rooms', product.rooms or 1),
                             'bathrooms': vals.get('bathrooms', product.bathrooms or 1),
                             'description': vals.get('description', product.description or ''),
-                            'state': vals.get('apartment_state', product.apartment_state or 'available'),
+                            'state': vals.get('apartment_state', product.apartment_state or 'disponible'),
                         }
 
                         # Prepare apartment values using the method to ensure consistency
@@ -780,7 +807,7 @@ class ProductTemplate(models.Model):
                             'rooms': vals.get('rooms', product.rooms or 1),
                             'bathrooms': vals.get('bathrooms', product.bathrooms or 1),
                             'description': vals.get('description', product.description or ''),
-                            'apartment_state': vals.get('apartment_state', product.apartment_state or 'available'),
+                            'apartment_state': vals.get('apartment_state', product.apartment_state or 'disponible'),
                         })
 
                         if apartment_vals:
@@ -978,7 +1005,7 @@ class ProductTemplate(models.Model):
             'rooms': vals.get('rooms', 1),
             'bathrooms': vals.get('bathrooms', 1),
             'description': vals.get('description', ''),
-            'state': vals.get('apartment_state', 'available'),
+            'state': vals.get('apartment_state', 'disponible'),
         }
 
         # Log the values for debugging
@@ -1013,7 +1040,7 @@ class ProductTemplate(models.Model):
 
             # Determine the quantity based on state
             quantity = 0.0
-            if product.apartment_state == 'available':
+            if product.apartment_state == 'disponible':
                 quantity = 1.0
 
             _logger.info("Setting quantity for %s to %s (state: %s)",
@@ -1091,8 +1118,8 @@ class ProductTemplate(models.Model):
             raise UserError(_("This action is only available for real estate properties (apartments or stores)."))
 
         # Check if property is available
-        if self.apartment_state != 'available':
-            raise UserError(_("Only available properties can be reserved."))
+        if self.apartment_state != 'disponible':
+            raise UserError(_("Only disponible properties can be reserved."))
 
         # For apartments, check if we have an apartment_id
         if self.is_apartment and not self.apartment_id:
@@ -1111,7 +1138,7 @@ class ProductTemplate(models.Model):
                     'rooms': self.rooms or 1,
                     'bathrooms': self.bathrooms or 1,
                     'description': self.description or '',
-                    'state': self.apartment_state or 'available',
+                    'state': self.apartment_state or 'disponible',
                 }
 
                 # Check if we have a building_id - this is required for apartments
@@ -1139,6 +1166,13 @@ class ProductTemplate(models.Model):
 
         # Create a new quotation with this apartment/store
         SaleOrder = self.env['sale.order']
+        
+        # Clear any type from context that might interfere with partner creation
+        clean_context = dict(self.env.context)
+        if 'type' in clean_context:
+            del clean_context['type']
+        
+        SaleOrder = SaleOrder.with_context(clean_context)
 
         # Generate a detailed description for the property
         if self.is_apartment:
@@ -1195,12 +1229,12 @@ Surface: {area} m²
             'state': 'draft',  # Ensure it's a draft
         }
 
-        # Create the quotation
+        # Create the quotation with a clean context
         new_order = SaleOrder.create(order_vals)
 
-        # Log the creation
-        property_type = 'apartment' if self.is_apartment else 'store'
-        _logger.info("Created new reservation %s for %s %s", new_order.name, property_type, self.name)
+        # Log the creation - using separate variables to avoid context leakage
+        apt_or_store = 'apartment' if self.is_apartment else 'store'
+        _logger.info("Created new reservation %s for %s %s", new_order.name, apt_or_store, self.name)
 
         # Return an action to open the new quotation
         return {
@@ -1213,6 +1247,160 @@ Surface: {area} m²
             'target': 'current',
             'context': {'form_view_initial_mode': 'edit'},
         }
+
+    def action_cancel_reservation(self):
+        """Cancel the reservation and return the apartment/store to disponible state"""
+        self.ensure_one()
+        
+        if self.apartment_state != 'prereserved':
+            raise UserError(_("Cannot cancel reservation: property is not in préréservé state"))
+            
+        # Find any related sale order lines for this property
+        sale_lines = self.env['sale.order.line'].search([
+            ('product_id.product_tmpl_id', '=', self.id),
+            ('order_id.state', 'in', ['draft', 'sent', 'sale'])
+        ])
+        
+        # Check if there are active orders that need to be handled
+        if sale_lines:
+            confirmed_orders = sale_lines.filtered(lambda l: l.order_id.state == 'sale')
+            if confirmed_orders:
+                # If there are confirmed orders, ask user for confirmation
+                order_names = ', '.join(confirmed_orders.mapped('order_id.name'))
+                raise UserError(_(
+                    "Cannot cancel reservation: there are confirmed sale orders (%s) for this property. "
+                    "Please cancel the sale orders first."
+                ) % order_names)
+            
+            # Cancel any draft or sent orders
+            draft_orders = sale_lines.filtered(lambda l: l.order_id.state in ['draft', 'sent']).mapped('order_id')
+            for order in draft_orders:
+                order.action_cancel()
+                _logger.info("Cancelled sale order %s when canceling reservation for %s", order.name, self.name)
+            
+        # Update apartment/store status
+        self.write({
+            'apartment_state': 'disponible',
+            'is_locked': False,
+            'locked_by_order_id': False,
+            'lock_date': False
+        })
+        
+        # If linked to an apartment record, update it too
+        if self.apartment_id:
+            self.apartment_id.write({
+                'state': 'disponible',
+                'is_locked': False,
+                'locked_by_order_id': False,
+                'lock_date': False
+            })
+            
+        # Log the action in the chatter
+        property_type = "apartment" if self.is_apartment else "store"
+        message = _("Reservation cancelled: %s returned to disponible state") % property_type
+        self.message_post(body=message, message_type='comment')
+        
+        # Show success notification
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Reservation Cancelled'),
+                'message': _('The reservation has been cancelled and the %s is now disponible.') % property_type,
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
+    def action_confirm_reservation(self):
+        """Confirm the reservation by opening the related quotation"""
+        self.ensure_one()
+        
+        if self.apartment_state != 'prereserved':
+            raise UserError(_("Can only confirm reservations for préréservé properties"))
+            
+        # Find the active sale order for this property
+        sale_lines = self.env['sale.order.line'].search([
+            ('product_id.product_tmpl_id', '=', self.id),
+            ('order_id.state', 'in', ['draft', 'sent'])
+        ])
+        
+        if not sale_lines:
+            raise UserError(_("No active quotation found for this property"))
+            
+        # Get the most recent quotation
+        active_order = sale_lines.mapped('order_id').sorted('create_date', reverse=True)[0]
+        
+        # Return an action to open the quotation
+        return {
+            'name': _('Confirm Reservation'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'sale.order',
+            'res_id': active_order.id,
+            'view_mode': 'form',
+            'views': [(False, 'form')],
+            'target': 'current',
+            'context': {
+                'form_view_initial_mode': 'edit',
+                'show_confirm_message': True
+            }
+        }
+
+    def action_view_reservation_document(self):
+        """View the reservation document (invoice) for sold properties"""
+        self.ensure_one()
+        
+        if self.apartment_state != 'sold':
+            raise UserError(_("Can only view reservation documents for sold properties"))
+            
+        # Find the confirmed sale order for this property
+        sale_lines = self.env['sale.order.line'].search([
+            ('product_id.product_tmpl_id', '=', self.id),
+            ('order_id.state', 'in', ['sale', 'done'])
+        ])
+        
+        if not sale_lines:
+            raise UserError(_("No confirmed sale order found for this property"))
+            
+        # Get the most recent confirmed order
+        confirmed_order = sale_lines.mapped('order_id').sorted('create_date', reverse=True)[0]
+        
+        # Look for invoices related to this order
+        invoices = self.env['account.move'].search([
+            ('invoice_origin', '=', confirmed_order.name),
+            ('move_type', '=', 'out_invoice'),
+            ('state', '!=', 'cancel')
+        ])
+        
+        if invoices:
+            # If there are multiple invoices, get the most recent one
+            invoice = invoices.sorted('create_date', reverse=True)[0]
+            
+            return {
+                'name': _('Reservation Document'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'account.move',
+                'res_id': invoice.id,
+                'view_mode': 'form',
+                'views': [(False, 'form')],
+                'target': 'current',
+                'context': {'form_view_initial_mode': 'readonly'}
+            }
+        else:
+            # If no invoice exists, show the confirmed sale order
+            return {
+                'name': _('Reservation Document'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'sale.order',
+                'res_id': confirmed_order.id,
+                'view_mode': 'form',
+                'views': [(False, 'form')],
+                'target': 'current',
+                'context': {
+                    'form_view_initial_mode': 'readonly',
+                    'hide_edit_button': True
+                }
+            }
 
     @api.model
     def action_update_all_quantities(self):

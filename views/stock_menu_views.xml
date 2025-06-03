@@ -24,7 +24,7 @@
         <field name="context">{
             'default_is_apartment': True,
             'default_type': 'product',
-            'default_apartment_state': 'available',
+            'default_apartment_state': 'disponible',
             'default_rooms': 1,
             'default_bathrooms': 1,
             'default_floor': 0,

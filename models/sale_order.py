@@ -15,11 +15,10 @@ class SaleOrderLine(models.Model):
 
     # Computed field to show apartment status including locked state
     apartment_status = fields.Selection([
-        ('available', 'Available'),
-        ('in_quotation', 'In Quotation'),
-        ('in_progress', 'Réservation en cours'),
-        ('reserved', 'Reserved'),
-        ('sold', 'Sold'),
+        ('disponible', 'Disponible'),
+        ('in_quotation', 'In Quotation'),  # This represents the locked state
+        ('prereserved', 'Préréservé'),
+        ('sold', 'Vendu'),
     ], string='Status', compute='_compute_apartment_status', store=True)
 
     @api.depends('apartment_id', 'apartment_id.state', 'apartment_id.is_locked', 'product_id', 'product_id.product_tmpl_id.apartment_state', 'product_id.product_tmpl_id.is_locked')
@@ -28,14 +27,14 @@ class SaleOrderLine(models.Model):
         for line in self:
             if line.apartment_id:
                 # Handle apartments
-                if line.apartment_id.state == 'available' and line.apartment_id.is_locked:
+                if line.apartment_id.state == 'disponible' and line.apartment_id.is_locked:
                     line.apartment_status = 'in_quotation'
                 else:
                     line.apartment_status = line.apartment_id.state
             elif line.product_id and line.product_id.product_tmpl_id.is_store:
                 # Handle stores
                 store_product = line.product_id.product_tmpl_id
-                if store_product.apartment_state == 'available' and store_product.is_locked:
+                if store_product.apartment_state == 'disponible' and store_product.is_locked:
                     line.apartment_status = 'in_quotation'
                 else:
                     line.apartment_status = store_product.apartment_state
@@ -46,14 +45,14 @@ class SaleOrderLine(models.Model):
     def _onchange_building_id(self):
         """When building is selected, filter apartments"""
         if self.building_id:
-            # If we have a building, filter apartments by this building and show only available or in_progress
-            return {'domain': {'apartment_id': [('building_id', '=', self.building_id.id), ('state', 'in', ['available', 'in_progress'])]}}
+            # If we have a building, filter apartments by this building and show only disponible
+            return {'domain': {'apartment_id': [('building_id', '=', self.building_id.id), ('state', '=', 'disponible')]}}
         elif self.order_id.project_id:
             # If we have a project but no building, filter apartments by project
-            return {'domain': {'apartment_id': [('project_id', '=', self.order_id.project_id.id), ('state', 'in', ['available', 'in_progress'])]}}
+            return {'domain': {'apartment_id': [('project_id', '=', self.order_id.project_id.id), ('state', '=', 'disponible')]}}
         else:
             # No filters except state
-            return {'domain': {'apartment_id': [('state', 'in', ['available', 'in_progress'])]}}
+            return {'domain': {'apartment_id': [('state', '=', 'disponible')]}}
 
     @api.onchange('apartment_id')
     def _onchange_apartment_id(self):
@@ -172,58 +171,59 @@ Surface: {area} m²
         # Create the sale order line
         res = super(SaleOrderLine, self).create(vals)
 
-        # If this is an apartment product, lock the apartment
+        # If this is an apartment product, mark it as prereserved
         if res.product_id and res.product_id.product_tmpl_id.is_apartment:
             # Find the apartment linked to this product
             apartment = self.env['real.estate.apartment'].search([
                 ('product_tmpl_ids', 'in', res.product_id.product_tmpl_id.id)
             ], limit=1)
 
-            if apartment and apartment.state == 'available':
-                # Check if apartment is already locked by another order
-                if apartment.is_locked and apartment.locked_by_order_id.id != res.order_id.id:
+            if apartment and apartment.state == 'disponible':
+                # Check if apartment is already prereserved by another order
+                if apartment.state == 'prereserved' or (apartment.is_locked and apartment.locked_by_order_id.id != res.order_id.id):
                     # If locked by another order that is not cancelled, raise an error
-                    if apartment.locked_by_order_id.state not in ['cancel']:
-                        raise UserError(_("This apartment is currently locked by another quotation. Please select another apartment."))
+                    if apartment.locked_by_order_id and apartment.locked_by_order_id.state not in ['cancel']:
+                        raise UserError(_("This apartment is currently reserved by another quotation. Please select another apartment."))
 
-                # Lock the apartment for this order and set state to "in_progress"
+                # Mark the apartment as prereserved when added to quotation
                 apartment.write({
+                    'state': 'prereserved',
                     'is_locked': True,
                     'locked_by_order_id': res.order_id.id,
-                    'lock_date': fields.Datetime.now(),
-                    'state': 'in_progress'
+                    'lock_date': fields.Datetime.now()
                 })
 
                 # Update the product state with context to prevent infinite recursion
                 if apartment.product_tmpl_ids:
                     for product in apartment.product_tmpl_ids:
-                        product.with_context(from_apartment_update=True).apartment_state = 'in_progress'
-                        # Quantity management is now handled by Odoo's standard inventory management
+                        # Update both state and lock status
+                        product.with_context(from_apartment_update=True).write({
+                            'apartment_state': 'prereserved',
+                            'is_locked': True
+                        })
 
                 # Set the apartment_id field if not already set
                 if not res.apartment_id:
                     res.apartment_id = apartment.id
 
-                # Log the locking
-                _logger.info("Apartment %s locked for quotation %s",
+                # Log the state change
+                _logger.info("Apartment %s marked as prereserved for quotation %s",
                             apartment.name, res.order_id.name)
 
-        # If this is a store product, update its state
+        # If this is a store product, mark it as prereserved
         elif res.product_id and res.product_id.product_tmpl_id.is_store:
             store_product = res.product_id.product_tmpl_id
 
-            if store_product.apartment_state == 'available':
-                # Update the store state to "in_progress"
+            if store_product.apartment_state == 'disponible':
+                # Update the store to prereserved state when added to quotation
                 store_product.with_context(from_sale_order=True).write({
-                    'apartment_state': 'in_progress',
+                    'apartment_state': 'prereserved',
                     'is_locked': True,
                     'locked_by_order_id': res.order_id.id,
                 })
 
-                # Quantity management is now handled by Odoo's standard inventory management
-
                 # Log the state change
-                _logger.info("Store %s state changed to in_progress for quotation %s",
+                _logger.info("Store %s marked as prereserved for quotation %s",
                             store_product.name, res.order_id.name)
 
         return res
@@ -233,27 +233,18 @@ Surface: {area} m²
         for line in self:
             # Handle apartments
             if line.apartment_id and line.apartment_id.is_locked and line.apartment_id.locked_by_order_id.id == line.order_id.id:
-                # Unlock apartment when removed from sale order and set state back to available
-                if line.apartment_id.state == 'in_progress':
-                    line.apartment_id.write({
-                        'is_locked': False,
-                        'locked_by_order_id': False,
-                        'lock_date': False,
-                        'state': 'available'
-                    })
+                # Unlock apartment when removed from sale order and set state back to disponible
+                line.apartment_id.write({
+                    'is_locked': False,
+                    'locked_by_order_id': False,
+                    'lock_date': False,
+                    'state': 'disponible'
+                })
 
-                    # Update the product state with context to prevent infinite recursion
-                    if line.apartment_id.product_tmpl_ids:
-                        for product in line.apartment_id.product_tmpl_ids:
-                            product.with_context(from_apartment_update=True).apartment_state = 'available'
-                            # Quantity management is now handled by Odoo's standard inventory management
-                else:
-                    # Just unlock without changing state
-                    line.apartment_id.write({
-                        'is_locked': False,
-                        'locked_by_order_id': False,
-                        'lock_date': False
-                    })
+                # Update the product state with context to prevent infinite recursion
+                if line.apartment_id.product_tmpl_ids:
+                    for product in line.apartment_id.product_tmpl_ids:
+                        product.with_context(from_apartment_update=True).apartment_state = 'disponible'
 
                 # Log the unlocking
                 _logger.info("Apartment %s unlocked when removed from quotation %s",
@@ -263,22 +254,17 @@ Surface: {area} m²
             elif line.product_id and line.product_id.product_tmpl_id.is_store:
                 store_product = line.product_id.product_tmpl_id
 
-                # Check if this store is in progress and locked by this order
-                if (store_product.apartment_state == 'in_progress' and
-                    store_product.is_locked and
-                    store_product.locked_by_order_id.id == line.order_id.id):
-
-                    # Reset store state to available
+                # Only unlock stores that are locked by this order
+                if store_product.is_locked and store_product.locked_by_order_id.id == line.order_id.id:
+                    # Reset store state to disponible
                     store_product.with_context(from_sale_order=True).write({
-                        'apartment_state': 'available',
+                        'apartment_state': 'disponible',
                         'is_locked': False,
                         'locked_by_order_id': False,
                     })
 
-                    # Quantity management is now handled by Odoo's standard inventory management
-
                     # Log the state change
-                    _logger.info("Store %s state changed back to available when removed from quotation %s",
+                    _logger.info("Store %s state changed back to disponible when removed from quotation %s",
                                 store_product.name, line.order_id.name)
 
         return super(SaleOrderLine, self).unlink()
@@ -367,11 +353,15 @@ class SaleOrder(models.Model):
             tbd_partner = self.env['res.partner'].search([('name', '=', 'TBD Customer')], limit=1)
             if not tbd_partner:
                 # Create the TBD partner if it doesn't exist
-                tbd_partner = self.env['res.partner'].create({
+                partner_vals = {
                     'name': 'TBD Customer',
                     'comment': 'This is a temporary customer used for draft real estate orders. Please select a real customer before confirming the order.',
                     'active': True,
-                })
+                    'type': 'contact',  # Explicitly set the type to 'contact'
+                }
+                
+                # Create the partner with a clean context to avoid inheriting unwanted values
+                tbd_partner = self.env['res.partner'].with_context(clean_context=True).create(partner_vals)
                 _logger.info("Created TBD Customer partner for draft real estate orders")
 
             # Set the temporary partner_id
@@ -622,13 +612,13 @@ Price: %(currency)s %(price).2f
         if not self.has_apartment:
             raise UserError(_("Cannot create a reservation without apartments."))
 
-        # Check if all apartments are available
+        # Check if all apartments are disponible
         unavailable_apartments = self.order_line.filtered(
-            lambda l: l.apartment_id and l.apartment_id.state != 'available'
+            lambda l: l.apartment_id and l.apartment_id.state != 'disponible'
         )
         if unavailable_apartments:
             apartment_names = ', '.join(unavailable_apartments.mapped('apartment_id.name'))
-            raise UserError(_("The following apartments are not available: %s") % apartment_names)
+            raise UserError(_("The following apartments are not disponible: %s") % apartment_names)
 
         # Confirm the order using standard Odoo method (call super directly to avoid recursion)
         super(SaleOrder, self).action_confirm()
@@ -639,7 +629,7 @@ Price: %(currency)s %(price).2f
             'tag': 'display_notification',
             'params': {
                 'title': _('Reservation Created'),
-                'message': _('The quotation has been confirmed and the apartment is now reserved.'),
+                'message': _('The quotation has been confirmed and the apartment is now prereserved.'),
                 'type': 'success',
                 'sticky': False,
                 'next': {
@@ -685,43 +675,43 @@ Price: %(currency)s %(price).2f
             for line in self.order_line:
                 # Handle apartments
                 if line.apartment_id:
-                    # When confirming the order, set the apartment to 'reserved'
-                    if line.apartment_id.state != 'reserved':
-                        # Mark apartment as reserved
+                    # When confirming the order, set the apartment to 'sold'
+                    if line.apartment_id.state != 'sold':
+                        # Mark apartment as sold
                         line.apartment_id.with_context(from_sale_order=True).write({
-                            'state': 'reserved',
-                            'is_locked': False,  # Remove the lock since it's now reserved
+                            'state': 'sold',
+                            'is_locked': False,  # Remove the lock since it's now sold
                             'locked_by_order_id': False,
                             'lock_date': False
                         })
 
                         # Update the product state with context to prevent infinite recursion
                         if line.product_id and line.product_id.product_tmpl_id.is_apartment:
-                            line.product_id.product_tmpl_id.with_context(from_apartment_update=True).apartment_state = 'reserved'
+                            line.product_id.product_tmpl_id.with_context(from_apartment_update=True).apartment_state = 'sold'
 
                             # Quantity management is now handled by Odoo's standard inventory management
 
                         # Log the state change
-                        _logger.info("Apartment %s state changed to reserved when order %s was confirmed",
+                        _logger.info("Apartment %s state changed to sold when order %s was confirmed",
                                     line.apartment_id.name, self.name)
 
                 # Handle stores
                 elif line.product_id and line.product_id.product_tmpl_id.is_store:
                     store_product = line.product_id.product_tmpl_id
 
-                    # When confirming the order, set the store to 'reserved'
-                    if store_product.apartment_state != 'reserved':
-                        # Mark store as reserved
+                    # When confirming the order, set the store to 'sold'
+                    if store_product.apartment_state != 'sold':
+                        # Mark store as sold
                         store_product.with_context(from_sale_order=True).write({
-                            'apartment_state': 'reserved',
-                            'is_locked': False,  # Remove the lock since it's now reserved
+                            'apartment_state': 'sold',
+                            'is_locked': False,  # Remove the lock since it's now sold
                             'locked_by_order_id': False,
                         })
 
                         # Quantity management is now handled by Odoo's standard inventory management
 
                         # Log the state change
-                        _logger.info("Store %s state changed to reserved when order %s was confirmed",
+                        _logger.info("Store %s state changed to sold when order %s was confirmed",
                                     store_product.name, self.name)
 
             # Log the confirmation
@@ -741,75 +731,27 @@ Price: %(currency)s %(price).2f
         """Check payment status after confirmation"""
         self.ensure_one()
 
-        # Check if all invoices are paid
-        all_paid = self._check_all_invoices_paid()
+        # Note: With auto workflow modules, invoices are created automatically
+        # and properties are marked as sold during invoice creation (in account_move.py)
+        # This method is kept for backward compatibility but the main logic 
+        # has been moved to account_move.action_post()
+        
+        _logger.info("Checking payment status for order %s after confirmation (auto workflow mode)", self.name)
+        
+        # Just log that the order was confirmed successfully
+        # Properties will be marked as sold when the invoice is created
+        message = _("""
+Order Confirmed
 
-        if all_paid:
-            _logger.info("All invoices for order %s are paid after confirmation. Marking properties as sold.", self.name)
-
-            # Update apartment/store states to sold
-            properties_updated = 0
-
-            for line in self.order_line:
-                # Handle apartments
-                if line.apartment_id and line.apartment_id.state != 'sold':
-                    try:
-                        # Mark apartment as sold
-                        line.apartment_id.with_context(from_sale_order=True).write({
-                            'state': 'sold',
-                            'is_locked': False,
-                            'locked_by_order_id': False,
-                            'lock_date': False
-                        })
-
-                        # Update the product state with context to prevent infinite recursion
-                        if line.product_id and line.product_id.product_tmpl_id.is_apartment:
-                            line.product_id.product_tmpl_id.with_context(from_apartment_update=True).apartment_state = 'sold'
-
-                        # Log the state change
-                        _logger.info("Apartment %s state changed to sold after full payment",
-                                    line.apartment_id.name)
-                        properties_updated += 1
-                    except Exception as e:
-                        _logger.error("Failed to update apartment %s state: %s", line.apartment_id.name, str(e))
-
-                # Handle stores
-                elif line.product_id and line.product_id.product_tmpl_id.is_store and line.product_id.product_tmpl_id.apartment_state != 'sold':
-                    try:
-                        # Mark store as sold
-                        line.product_id.product_tmpl_id.with_context(from_sale_order=True).write({
-                            'apartment_state': 'sold',
-                            'is_locked': False,
-                            'locked_by_order_id': False,
-                        })
-
-                        # Log the state change
-                        _logger.info("Store %s state changed to sold after full payment",
-                                    line.product_id.product_tmpl_id.name)
-                        properties_updated += 1
-                    except Exception as e:
-                        _logger.error("Failed to update store %s state: %s",
-                                    line.product_id.product_tmpl_id.name, str(e))
-
-            if properties_updated > 0:
-                # Show a success message to the user
-                message = _("""
-Payment Complete
-
-All payments for order %s have been received.
-All properties in this order are now marked as 'Sold'.
-
-The real estate transaction is now complete.
+Order %s has been confirmed successfully.
+Properties will be marked as 'Sold' when the invoice is created by the auto workflow.
 """) % self.name
 
-                # Log the message
-                self.env['mail.message'].create({
-                    'body': message,
-                    'message_type': 'notification',
-                    'subtype_id': self.env.ref('mail.mt_note').id,
-                    'model': 'sale.order',
-                    'res_id': self.id,
-                })
+        self.message_post(
+            body=message,
+            message_type='notification',
+            subtype_id=self.env.ref('mail.mt_note').id,
+        )
 
     def _create_invoices(self, grouped=False, final=False, date=None):
         """Override to handle apartment state when invoice is created"""
@@ -1119,9 +1061,9 @@ Please review and validate the delivery when complete.
                     _logger.info("Apartment %s unlocked when order %s was cancelled",
                                 line.apartment_id.name, self.name)
 
-                # If the apartment is in_progress or reserved by this order, make it available again
-                # Only do this for in_progress or reserved apartments, not sold ones
-                if line.apartment_id.state in ['in_progress', 'reserved']:
+                # If the apartment is prereserved by this order, make it disponible again
+                # Only do this for prereserved apartments, not sold ones
+                if line.apartment_id.state == 'prereserved':
                     # Check if this is the only active order for this apartment
                     other_orders = self.env['sale.order.line'].search([
                         ('apartment_id', '=', line.apartment_id.id),
@@ -1130,14 +1072,13 @@ Please review and validate the delivery when complete.
                     ])
 
                     if not other_orders:
-                        # Mark apartment as available when order is cancelled
-                        line.apartment_id.with_context(from_sale_order=True).state = 'available'
+                        # Mark apartment as disponible when order is cancelled
+                        line.apartment_id.with_context(from_sale_order=True).state = 'disponible'
                         # Update the product state with context to prevent infinite recursion
                         if line.product_id and line.product_id.product_tmpl_id.is_apartment:
-                            line.product_id.product_tmpl_id.with_context(from_apartment_update=True).apartment_state = 'available'
-                            # Quantity management is now handled by Odoo's standard inventory management
+                            line.product_id.product_tmpl_id.with_context(from_apartment_update=True).apartment_state = 'disponible'
 
-                        _logger.info("Apartment %s state changed to available when order %s was cancelled",
+                        _logger.info("Apartment %s state changed to disponible when order %s was cancelled",
                                     line.apartment_id.name, self.name)
 
             # Handle stores
@@ -1153,9 +1094,9 @@ Please review and validate the delivery when complete.
                     _logger.info("Store %s unlocked when order %s was cancelled",
                                 store_product.name, self.name)
 
-                # If the store is in_progress or reserved, make it available again
-                # Only do this for in_progress or reserved stores, not sold ones
-                if store_product.apartment_state in ['in_progress', 'reserved']:
+                # If the store is prereserved, make it disponible again
+                # Only do this for prereserved stores, not sold ones
+                if store_product.apartment_state == 'prereserved':
                     # Check if this is the only active order for this store
                     other_orders = self.env['sale.order.line'].search([
                         ('product_id.product_tmpl_id', '=', store_product.id),
@@ -1164,11 +1105,11 @@ Please review and validate the delivery when complete.
                     ])
 
                     if not other_orders:
-                        # Mark store as available when order is cancelled
-                        store_product.with_context(from_sale_order=True).apartment_state = 'available'
+                        # Mark store as disponible when order is cancelled
+                        store_product.with_context(from_sale_order=True).apartment_state = 'disponible'
                         # Quantity management is now handled by Odoo's standard inventory management
 
-                        _logger.info("Store %s state changed to available when order %s was cancelled",
+                        _logger.info("Store %s state changed to disponible when order %s was cancelled",
                                     store_product.name, self.name)
 
         return res

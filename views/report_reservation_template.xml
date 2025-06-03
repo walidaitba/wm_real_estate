@@ -3,8 +3,9 @@
     <template id="report_reservation_document">
         <t t-call="web.external_layout">
             <t t-set="o" t-value="o.with_context(lang=lang)"/>
-            <!-- Project Image -->            <div class="row mb-4">
-                <div class="col-12 text-center">
+            <!-- Project Image -->
+                <div class="row mb-4">
+                <div class="col-12 text-center" style="margin-top: -50px;">
                     <img t-if="o.invoice_line_ids.mapped('product_id.project_id')[0].logo" t-att-src="image_data_uri(o.invoice_line_ids.mapped('product_id.project_id')[0].logo)" style="max-height: 120px;" alt="Project Logo"/>
                 </div>
             </div>

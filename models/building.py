@@ -30,7 +30,6 @@ class RealEstateBuilding(models.Model):
         return res
 
     name = fields.Char(string='Building Name', required=True, tracking=True)
-    code = fields.Char(string='Building Code', required=True, tracking=True)
 
     project_id = fields.Many2one('real.estate.project', string='Project',
                                 required=True, tracking=True,
@@ -60,7 +59,7 @@ class RealEstateBuilding(models.Model):
                                      string='Sold Apartments')
 
     available_apartment_count = fields.Integer(compute='_compute_sold_available_apartment_count',
-                                     string='Available Apartments')
+                                     string='Disponible Apartments')
 
     reservation_count = fields.Integer(compute='_compute_reservation_count',
                                 string='Reservation Count')
@@ -120,25 +119,18 @@ class RealEstateBuilding(models.Model):
             available_count = self.env['product.template'].search_count([
                 ('is_apartment', '=', True),
                 ('building_id', '=', building.id),
-                ('apartment_state', '=', 'available')
+                ('apartment_state', '=', 'disponible')
             ])
 
             # Count reserved apartments for this building
             reserved_count = self.env['product.template'].search_count([
                 ('is_apartment', '=', True),
                 ('building_id', '=', building.id),
-                ('apartment_state', '=', 'reserved')
-            ])
-
-            # Count in_progress apartments for this building
-            in_progress_count = self.env['product.template'].search_count([
-                ('is_apartment', '=', True),
-                ('building_id', '=', building.id),
-                ('apartment_state', '=', 'in_progress')
+                ('apartment_state', '=', 'prereserved')
             ])
 
             # Calculate total for verification
-            total_by_state = sold_count + available_count + reserved_count + in_progress_count
+            total_by_state = sold_count + available_count + reserved_count
 
             # Get total count for comparison
             total_count = self.env['product.template'].search_count([
@@ -147,8 +139,8 @@ class RealEstateBuilding(models.Model):
             ])
 
             # Log for debugging
-            _logger.info("Building %s: sold=%s, available=%s, reserved=%s, in_progress=%s, total_by_state=%s, total_count=%s",
-                        building.name, sold_count, available_count, reserved_count, in_progress_count,
+            _logger.info("Building %s: sold=%s, available=%s, reserved=%s, total_by_state=%s, total_count=%s",
+                        building.name, sold_count, available_count, reserved_count,
                         total_by_state, total_count)
 
             building.sold_apartment_count = sold_count
@@ -189,14 +181,14 @@ class RealEstateBuilding(models.Model):
             available_count = self.env['product.template'].search_count([
                 ('is_store', '=', True),
                 ('building_id', '=', building.id),
-                ('apartment_state', '=', 'available')
+                ('apartment_state', '=', 'disponible')
             ])
 
             # Count reserved stores for this building
             reserved_count = self.env['product.template'].search_count([
                 ('is_store', '=', True),
                 ('building_id', '=', building.id),
-                ('apartment_state', '=', 'reserved')
+                ('apartment_state', '=', 'prereserved')
             ])
 
             # Log for debugging
@@ -215,11 +207,11 @@ class RealEstateBuilding(models.Model):
     @api.depends('apartment_ids.state')
     def _compute_reservation_count(self):
         for building in self:
-            # Count only apartments with 'reserved' state in this building
+            # Count only apartments with 'prereserved' state in this building
             reservation_count = self.env['product.template'].search_count([
                 ('is_apartment', '=', True),
                 ('building_id', '=', building.id),
-                ('apartment_state', '=', 'reserved')
+                ('apartment_state', '=', 'prereserved')
             ])
 
             # Log for debugging
@@ -261,7 +253,7 @@ class RealEstateBuilding(models.Model):
             # Ensure the create button is available and that new apartments have quantity 1
             'create': True,
             'default_type': 'product',  # Ensure product type is set correctly
-            'default_apartment_state': 'available',  # Set default state to available
+            'default_apartment_state': 'disponible',  # Set default state to disponible
             'default_qty_available': 1.0,  # Ensure quantity is 1
             'force_qty_available': 1.0,  # Force quantity to 1 after save
         }
@@ -301,13 +293,13 @@ class RealEstateBuilding(models.Model):
     def action_view_reservations(self):
         self.ensure_one()
         return {
-            'name': _('Reserved Apartments'),
+            'name': _('Préréservé Apartments'),
             'view_mode': 'tree,form',
             'res_model': 'product.template',
             'domain': [
                 ('is_apartment', '=', True),
                 ('building_id', '=', self.id),
-                ('apartment_state', '=', 'reserved')
+                ('apartment_state', '=', 'prereserved')
             ],
             'type': 'ir.actions.act_window',
             'target': 'current',
@@ -369,13 +361,13 @@ class RealEstateBuilding(models.Model):
         self.ensure_one()
 
         return {
-            'name': _('Available Apartments'),
+            'name': _('Disponible Apartments'),
             'view_mode': 'tree,form',
             'res_model': 'product.template',
             'domain': [
                 ('is_apartment', '=', True),
                 ('building_id', '=', self.id),
-                ('apartment_state', '=', 'available')
+                ('apartment_state', '=', 'disponible')
             ],
             'type': 'ir.actions.act_window',
             'target': 'current',
@@ -392,7 +384,7 @@ class RealEstateBuilding(models.Model):
                 'from_button_box': True,
                 # Ensure quantity is set to 1 for new apartments
                 'default_type': 'product',
-                'default_apartment_state': 'available',
+                'default_apartment_state': 'disponible',
                 'default_qty_available': 1.0,
                 'force_qty_available': 1.0,
             },
@@ -426,7 +418,7 @@ class RealEstateBuilding(models.Model):
             'from_button_box': True,
             # Ensure quantity is set correctly
             'default_type': 'product',
-            'default_apartment_state': 'available',
+            'default_apartment_state': 'disponible',
             'default_qty_available': 1.0,
             'force_qty_available': 1.0,
         }
@@ -503,13 +495,13 @@ class RealEstateBuilding(models.Model):
         self.ensure_one()
 
         return {
-            'name': _('Available Stores'),
+            'name': _('Disponible Stores'),
             'view_mode': 'tree,form',
             'res_model': 'product.template',
             'domain': [
                 ('is_store', '=', True),
                 ('building_id', '=', self.id),
-                ('apartment_state', '=', 'available')
+                ('apartment_state', '=', 'disponible')
             ],
             'type': 'ir.actions.act_window',
             'target': 'current',
@@ -539,13 +531,13 @@ class RealEstateBuilding(models.Model):
         self.ensure_one()
 
         return {
-            'name': _('Reserved Stores'),
+            'name': _('Préréservé Stores'),
             'view_mode': 'tree,form',
             'res_model': 'product.template',
             'domain': [
                 ('is_store', '=', True),
                 ('building_id', '=', self.id),
-                ('apartment_state', '=', 'reserved')
+                ('apartment_state', '=', 'prereserved')
             ],
             'type': 'ir.actions.act_window',
             'target': 'current',
@@ -562,7 +554,7 @@ class RealEstateBuilding(models.Model):
                 'from_button_box': True,
                 # Ensure quantity is set correctly
                 'default_type': 'product',
-                'default_apartment_state': 'reserved',
+                'default_apartment_state': 'prereserved',
                 'default_qty_available': 0.0,
                 'force_qty_available': 0.0,
             },

@@ -40,7 +40,8 @@ class RealEstateApartment(models.Model):
         return res
 
     name = fields.Char(string='Apartment Number', required=True, tracking=True)
-    code = fields.Char(string='Apartment Code', required=True, tracking=True)
+    code = fields.Char(string='Apartment Code', tracking=True, 
+                       help="Unique identifier code for the apartment")
 
     building_id = fields.Many2one('real.estate.building', string='Building',
                                  required=True, tracking=True,
@@ -51,11 +52,10 @@ class RealEstateApartment(models.Model):
     floor = fields.Integer(string='Floor', required=True, tracking=True)
 
     state = fields.Selection([
-        ('available', 'Available'),
-        ('in_progress', 'Réservation en cours'),
-        ('reserved', 'Reserved'),
-        ('sold', 'Sold'),
-    ], string='Status', default='available', required=True, tracking=True)
+        ('disponible', 'Disponible'),
+        ('prereserved', 'Préréservé'),
+        ('sold', 'Vendu'),
+    ], string='Status', default='disponible', required=True, tracking=True)
 
     # Fields for locking mechanism
     is_locked = fields.Boolean(string='Locked', default=False,
@@ -178,8 +178,8 @@ class RealEstateApartment(models.Model):
         self.ensure_one()
 
         # Check if apartment is available
-        if self.state != 'available':
-            raise UserError(_("Only available apartments can be reserved."))
+        if self.state != 'disponible':
+            raise UserError(_("Only disponible apartments can be reserved."))
 
         # Find the product linked to this apartment
         product = self.env['product.template'].search([
@@ -248,16 +248,16 @@ Salles de bain: {bathrooms}
 
     def action_mark_as_reserved(self):
         for record in self:
-            if record.state == 'available':
+            if record.state == 'disponible':
                 record.state = 'reserved'
                 # Update product state
                 self._update_product_state(record)
             else:
-                raise UserError(_("Only available apartments can be reserved."))
+                raise UserError(_("Only disponible apartments can be reserved."))
 
     def action_mark_as_sold(self):
         for record in self:
-            if record.state in ['available', 'reserved']:
+            if record.state in ['disponible', 'reserved']:
                 record.state = 'sold'
                 # Update product state
                 self._update_product_state(record)
@@ -273,11 +273,11 @@ Salles de bain: {bathrooms}
                     ('order_id.state', 'not in', ['cancel', 'done'])
                 ])
                 if active_sales > 0:
-                    raise UserError(_("Cannot mark as available. There are active reservations for this apartment."))
-                record.state = 'available'
+                    raise UserError(_("Cannot mark as disponible. There are active reservations for this apartment."))
+                record.state = 'disponible'
                 # Update product state - this will also update the quantity
                 self._update_product_state(record)
-                _logger.info("Updated product state and quantity for apartment %s marked as available", record.name)
+                _logger.info("Updated product state and quantity for apartment %s marked as disponible", record.name)
             elif record.state == 'sold':
                 # Check if there are confirmed sales
                 confirmed_sales = self.env['sale.order.line'].search_count([
@@ -285,13 +285,13 @@ Salles de bain: {bathrooms}
                     ('order_id.state', '=', 'sale')
                 ])
                 if confirmed_sales > 0:
-                    raise UserError(_("Cannot mark as available. This apartment has been sold."))
-                record.state = 'available'
+                    raise UserError(_("Cannot mark as disponible. This apartment has been sold."))
+                record.state = 'disponible'
                 # Update product state - this will also update the quantity
                 self._update_product_state(record)
-                _logger.info("Updated product state and quantity for apartment %s marked as available", record.name)
+                _logger.info("Updated product state and quantity for apartment %s marked as disponible", record.name)
             else:
-                raise UserError(_("This apartment is already available."))
+                raise UserError(_("This apartment is already disponible."))
 
     @api.model
     def create(self, vals):
@@ -447,11 +447,11 @@ Salles de bain: {bathrooms}
         _logger.info("Created product %s for apartment %s", product.name, apartment.name)
 
         # Set the apartment state
-        if apartment.state == 'available':
+        if apartment.state == 'disponible':
             product.with_context(from_apartment_update=True).write({
-                'apartment_state': 'available'
+                'apartment_state': 'disponible'
             })
-            _logger.info("Set apartment state to 'available' for %s", apartment.name)
+            _logger.info("Set apartment state to 'disponible' for %s", apartment.name)
         else:
             _logger.info("Apartment %s has state %s", apartment.name, apartment.state)
 
@@ -574,5 +574,34 @@ Salles de bain: {bathrooms}
             self.env['real.estate.project'].browse(list(projects_to_update)).invalidate_cache(['apartment_count'])
 
         return res
+
+    def cancel_reservation(self):
+        """Cancel the prereservation and return the apartment to disponible state"""
+        for apartment in self:
+            if apartment.state != 'prereserved':
+                raise UserError(_("Only préréservé apartments can have their reservation cancelled."))
+
+            # Clear any locks
+            apartment.write({
+                'state': 'disponible',
+                'is_locked': False,
+                'locked_by_order_id': False,
+                'lock_date': False,
+            })
+
+            # Update related product templates
+            if apartment.product_tmpl_ids:
+                apartment.product_tmpl_ids.write({
+                    'apartment_state': 'disponible',
+                    'is_locked': False,
+                    'locked_by_order_id': False,
+                    'lock_date': False,
+                })
+
+            # Log the cancellation
+            msg = _("Reservation cancelled: Apartment returned to disponible state")
+            apartment.message_post(body=msg, message_type='notification')
+
+        return True
 
     # Quantity management is now handled by Odoo's standard inventory management

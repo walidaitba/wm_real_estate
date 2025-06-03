@@ -111,15 +111,19 @@
             <!-- Keep the original pricing section -->
             <xpath expr="//group[@name='group_standard_price']" position="attributes">
                 <attribute name="string">Pricing</attribute>
-            </xpath>
-
-            <!-- Add Create Reservation button to button box for apartments and stores with available status -->
+            </xpath>            <!-- Add Create Reservation button to button box for apartments and stores with disponible status -->
             <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
                 <button name="action_create_reservation" type="object"
                         class="oe_stat_button" icon="fa-calendar"
-                        attrs="{'invisible': ['|', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('apartment_state', '!=', 'available')]}">
+                        attrs="{'invisible': ['|', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('apartment_state', '!=', 'disponible')]}">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_text">Reserve</span>
+                    </div>
+                </button>                <button name="action_cancel_reservation" type="object"
+                        class="oe_stat_button btn-warning" icon="fa-times-circle"
+                        attrs="{'invisible': ['|', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('apartment_state', '!=', 'prereserved')]}">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Cancel Reservation</span>
                     </div>
                 </button>
             </xpath>
@@ -158,7 +162,7 @@
         <field name="model">product.template</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
-            <tree decoration-info="apartment_state == 'available'" decoration-warning="apartment_state == 'reserved'" decoration-danger="apartment_state == 'sold'">
+            <tree decoration-info="apartment_state == 'disponible'" decoration-danger="apartment_state == 'prereserved'" decoration-success="apartment_state == 'sold'">
                 <field name="id" invisible="1"/>
                 <field name="is_apartment" invisible="1"/>
                 <field name="is_store" invisible="1"/>
@@ -214,14 +218,13 @@
                 <separator/>
                 <filter string="Apartments" name="is_apartment" domain="[('is_apartment', '=', True)]"/>
                 <filter string="Stores" name="is_store" domain="[('is_store', '=', True)]"/>
+                <separator/>                <filter string="Disponible Apartments" name="disponible_apartments" domain="[('is_apartment', '=', True), ('apartment_state', '=', 'disponible')]"/>
+                <filter string="Préréservé Apartments" name="prereserved_apartments" domain="[('is_apartment', '=', True), ('apartment_state', '=', 'prereserved')]"/>
+                <filter string="Vendu Apartments" name="sold_apartments" domain="[('is_apartment', '=', True), ('apartment_state', '=', 'sold')]"/>
                 <separator/>
-                <filter string="Available Apartments" name="available_apartments" domain="[('is_apartment', '=', True), ('apartment_state', '=', 'available')]"/>
-                <filter string="Reserved Apartments" name="reserved_apartments" domain="[('is_apartment', '=', True), ('apartment_state', '=', 'reserved')]"/>
-                <filter string="Sold Apartments" name="sold_apartments" domain="[('is_apartment', '=', True), ('apartment_state', '=', 'sold')]"/>
-                <separator/>
-                <filter string="Available Stores" name="available_stores" domain="[('is_store', '=', True), ('apartment_state', '=', 'available')]"/>
-                <filter string="Reserved Stores" name="reserved_stores" domain="[('is_store', '=', True), ('apartment_state', '=', 'reserved')]"/>
-                <filter string="Sold Stores" name="sold_stores" domain="[('is_store', '=', True), ('apartment_state', '=', 'sold')]"/>
+                <filter string="Disponible Stores" name="disponible_stores" domain="[('is_store', '=', True), ('apartment_state', '=', 'disponible')]"/>
+                <filter string="Préréservé Stores" name="prereserved_stores" domain="[('is_store', '=', True), ('apartment_state', '=', 'prereserved')]"/>
+                <filter string="Vendu Stores" name="sold_stores" domain="[('is_store', '=', True), ('apartment_state', '=', 'sold')]"/>
                 <separator/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
             </filter>
@@ -261,18 +264,15 @@
                 <field name="rooms"/>
                 <field name="bathrooms"/>
                 <field name="is_locked"/>
-                <field name="locked_by_order_id"/>
-
-                <!-- Define the column headers and their colors -->
-                <progressbar field="apartment_state" colors='{"available": "success", "reserved": "warning", "sold": "danger"}'/>
-
-                <!-- Define the groups to display (only available and reserved) -->
+                <field name="locked_by_order_id"/>                <!-- Define the column headers and their colors -->
+                <progressbar field="apartment_state" colors='{"disponible": "info", "prereserved": "danger", "sold": "success"}'/>                <!-- Define the groups to display -->
                 <field name="apartment_state" widget="state_selection" options="{
                     'clickable': '1',
                     'fold_field': 'fold',
                     'group_by_tooltip': {
-                        'available': 'Available apartments',
-                        'reserved': 'Reserved apartments'
+                        'disponible': 'Disponible apartments',
+                        'prereserved': 'Préréservé apartments',
+                        'sold': 'Vendu apartments'
                     }
                 }"/>
 
@@ -295,12 +295,10 @@
                                 <!-- Real Estate specific fields -->
                                 <div t-if="record.is_apartment.raw_value or record.is_store.raw_value" class="mt-2">
                                     <!-- Status indicator with color coding -->
-                                    <div t-if="record.apartment_state.raw_value" class="mb-2">
-                                        <span t-att-class="'badge ' +
-                                            ((record.apartment_state.raw_value == 'available' and record.is_locked.raw_value == false) and 'badge-success' or
-                                            (record.apartment_state.raw_value == 'available' and record.is_locked.raw_value == true) and 'badge-info' or
-                                            record.apartment_state.raw_value == 'reserved' and 'badge-warning' or
-                                            record.apartment_state.raw_value == 'sold' and 'badge-danger' or 'badge-secondary')">
+                                    <div t-if="record.apartment_state.raw_value" class="mb-2">                                        <span t-att-class="'badge ' +
+                                            ((record.apartment_state.raw_value == 'disponible') and 'badge-info' or
+                                            record.apartment_state.raw_value == 'prereserved' and 'badge-danger' or
+                                            record.apartment_state.raw_value == 'sold' and 'badge-success' or 'badge-secondary')">
                                             <t t-if="record.apartment_state.raw_value == 'available' and record.is_locked.raw_value == true">
                                                 <span t-translation="on">In Quotation</span>
                                             </t>
@@ -361,11 +359,10 @@
         <field name="context">{
             'search_default_is_apartment': 1,
             'search_default_groupby_project': 1,
-            'search_default_groupby_building': 1,
-            'search_default_groupby_apartment_state': 1,
+            'search_default_groupby_building': 1,            'search_default_groupby_apartment_state': 1,
             'default_is_apartment': True,
             'default_type': 'product',
-            'default_apartment_state': 'available',
+            'default_apartment_state': 'disponible',
             'default_rooms': 1,
             'default_bathrooms': 1,
             'default_floor': 0,
@@ -398,12 +395,11 @@
         <field name="domain">[('is_store', '=', True)]</field>
         <field name="context">{
             'search_default_is_store': 1,
-            'search_default_groupby_project': 1,
-            'search_default_groupby_building': 1,
+            'search_default_groupby_project': 1,            'search_default_groupby_building': 1,
             'search_default_groupby_apartment_state': 1,
             'default_is_store': True,
             'default_type': 'product',
-            'default_apartment_state': 'available',
+            'default_apartment_state': 'disponible',
             'default_floor': 0,
             'default_area': 0.0,
             'default_context_project_readonly': False,

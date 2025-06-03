@@ -21,7 +21,7 @@ class CrmLead(models.Model):
                                   help="Appartement que le client recherche")
 
     store_product_id = fields.Many2one('product.template', string='Magasin',
-                                     domain="[('is_store', '=', True), ('apartment_state', '=', 'available'), ('building_id', '=', building_id)]",
+                                     domain="[('is_store', '=', True), ('apartment_state', '=', 'disponible'), ('building_id', '=', building_id)]",
                                      help="Magasin que le client recherche")
 
     # No reservation-related fields needed

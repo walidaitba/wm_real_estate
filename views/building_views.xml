@@ -8,55 +8,12 @@
             <form string="Building" t-translation="on">
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <!-- Apartment buttons -->
+                        <!-- Apartment and Store total buttons -->
                         <button name="action_view_apartments" type="object" class="oe_stat_button" icon="fa-home">
                             <field name="apartment_count" widget="statinfo" string="Apartments" translate="yes"/>
                         </button>
-                        <button name="action_view_sold_apartments" type="object" class="oe_stat_button" icon="fa-home"
-                                context="{'search_default_sold_apartments': 1}">
-                            <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_value text-danger"><field name="sold_apartment_count"/></span>
-                                <span class="o_stat_text" t-translation="on">Sold</span>
-                            </div>
-                        </button>
-                        <button name="action_view_available_apartments" type="object" class="oe_stat_button" icon="fa-home"
-                                context="{'search_default_available_apartments': 1}">
-                            <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_value text-success"><field name="available_apartment_count"/></span>
-                                <span class="o_stat_text" t-translation="on">Available</span>
-                            </div>
-                        </button>
-                        <button name="action_view_reservations" type="object" class="oe_stat_button" icon="fa-home">
-                            <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_value text-warning"><field name="reservation_count"/></span>
-                                <span class="o_stat_text" t-translation="on">Reserved</span>
-                            </div>
-                        </button>
-
-                        <!-- Store buttons -->
                         <button name="action_view_stores" type="object" class="oe_stat_button" icon="fa-shopping-bag">
                             <field name="store_count" widget="statinfo" string="Stores" translate="yes"/>
-                        </button>
-                        <button name="action_view_sold_stores" type="object" class="oe_stat_button" icon="fa-shopping-bag"
-                                context="{'search_default_sold_stores': 1}">
-                            <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_value text-danger"><field name="sold_store_count"/></span>
-                                <span class="o_stat_text" t-translation="on">Sold</span>
-                            </div>
-                        </button>
-                        <button name="action_view_available_stores" type="object" class="oe_stat_button" icon="fa-shopping-bag"
-                                context="{'search_default_available_stores': 1}">
-                            <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_value text-success"><field name="available_store_count"/></span>
-                                <span class="o_stat_text" t-translation="on">Available</span>
-                            </div>
-                        </button>
-                        <button name="action_view_reserved_stores" type="object" class="oe_stat_button" icon="fa-shopping-bag"
-                                context="{'search_default_reserved_stores': 1}">
-                            <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_value text-warning"><field name="reserved_store_count"/></span>
-                                <span class="o_stat_text" t-translation="on">Reserved</span>
-                            </div>
                         </button>
                     </div>
                     <div class="oe_title">
@@ -66,7 +23,6 @@
                     </div>
                     <group>
                         <group>
-                            <field name="code"/>
                             <field name="project_id" attrs="{'readonly': [('context_project_readonly', '=', True)]}"/>
                             <field name="context_project_readonly" invisible="1"/>
                             <field name="floors"/>
@@ -76,6 +32,38 @@
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>
+                    <!-- Status Overview -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <!-- Apartments Row -->
+                            <div class="d-flex align-items-center mb-2">
+                                <strong class="mr-3">Apartments:</strong>
+                                <span class="text-success mr-3">
+                                    <field name="sold_apartment_count" readonly="1" nolabel="1"/> Vendu
+                                </span>
+                                <span class="text-info mr-3">
+                                    <field name="available_apartment_count" readonly="1" nolabel="1"/> Disponible
+                                </span>
+                                <span class="text-danger">
+                                    <field name="reservation_count" readonly="1" nolabel="1"/> Préréservé
+                                </span>
+                            </div>
+                            
+                            <!-- Stores Row -->
+                            <div class="d-flex align-items-center">
+                                <strong class="mr-3">Stores:</strong>
+                                <span class="text-success mr-3">
+                                    <field name="sold_store_count" readonly="1" nolabel="1"/> Vendu
+                                </span>
+                                <span class="text-info mr-3">
+                                    <field name="available_store_count" readonly="1" nolabel="1"/> Disponible
+                                </span>
+                                <span class="text-danger">
+                                    <field name="reserved_store_count" readonly="1" nolabel="1"/> Préréservé
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                     <notebook>
                         <page string="Description">
                             <field name="description"/>
@@ -98,7 +86,6 @@
         <field name="arch" type="xml">
             <tree string="Buildings">
                 <field name="name"/>
-                <field name="code"/>
                 <field name="project_id"/>
                 <field name="floors"/>
                 <field name="apartment_count"/>
@@ -120,7 +107,6 @@
         <field name="arch" type="xml">
             <search string="Buildings">
                 <field name="name"/>
-                <field name="code"/>
                 <field name="project_id"/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Group By">

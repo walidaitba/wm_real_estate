@@ -11,7 +11,6 @@ class RealEstateProject(models.Model):
     _order = 'name'
 
     name = fields.Char(string='Project Name', required=True, tracking=True)
-    code = fields.Char(string='Project Code', required=True, tracking=True)
     city = fields.Char(string='City', required=True, tracking=True)
     address = fields.Text(string='Address')
     description = fields.Text(string='Description')
@@ -34,10 +33,10 @@ class RealEstateProject(models.Model):
                                      string='Sold Apartments')
 
     available_apartment_count = fields.Integer(compute='_compute_sold_available_apartment_count',
-                                     string='Available Apartments')
+                                     string='Disponible Apartments')
 
     reserved_apartment_count = fields.Integer(compute='_compute_sold_available_apartment_count',
-                                     string='Reserved Apartments')
+                                     string='Préréservé Apartments')
 
     reservation_count = fields.Integer(compute='_compute_reservation_count',
                                 string='Reservation Count')
@@ -50,10 +49,10 @@ class RealEstateProject(models.Model):
                                 string='Sold Stores')
 
     available_store_count = fields.Integer(compute='_compute_sold_available_store_count',
-                                string='Available Stores')
+                                string='Disponible Stores')
 
     reserved_store_count = fields.Integer(compute='_compute_sold_available_store_count',
-                                string='Reserved Stores')
+                                string='Préréservé Stores')
 
     @api.depends('building_ids')
     def _compute_building_count(self):
@@ -98,25 +97,18 @@ class RealEstateProject(models.Model):
             available_count = self.env['product.template'].search_count([
                 ('is_apartment', '=', True),
                 ('project_id', '=', project.id),
-                ('apartment_state', '=', 'available')
+                ('apartment_state', '=', 'disponible')
             ])
 
             # Count reserved apartments for this project
             reserved_count = self.env['product.template'].search_count([
                 ('is_apartment', '=', True),
                 ('project_id', '=', project.id),
-                ('apartment_state', '=', 'reserved')
-            ])
-
-            # Count in_progress apartments for this project
-            in_progress_count = self.env['product.template'].search_count([
-                ('is_apartment', '=', True),
-                ('project_id', '=', project.id),
-                ('apartment_state', '=', 'in_progress')
+                ('apartment_state', '=', 'prereserved')
             ])
 
             # Calculate total for verification
-            total_by_state = sold_count + available_count + reserved_count + in_progress_count
+            total_by_state = sold_count + available_count + reserved_count
 
             # Get total count for comparison
             total_count = self.env['product.template'].search_count([
@@ -125,8 +117,8 @@ class RealEstateProject(models.Model):
             ])
 
             # Log for debugging
-            _logger.info("Project %s: sold=%s, available=%s, reserved=%s, in_progress=%s, total_by_state=%s, total_count=%s",
-                        project.name, sold_count, available_count, reserved_count, in_progress_count,
+            _logger.info("Project %s: sold=%s, available=%s, reserved=%s, total_by_state=%s, total_count=%s",
+                        project.name, sold_count, available_count, reserved_count,
                         total_by_state, total_count)
 
             project.sold_apartment_count = sold_count
@@ -141,11 +133,11 @@ class RealEstateProject(models.Model):
     @api.depends('building_ids.apartment_ids.state')
     def _compute_reservation_count(self):
         for project in self:
-            # Count only apartments with 'reserved' state in this project
+            # Count only apartments with 'prereserved' state in this project
             reservation_count = self.env['product.template'].search_count([
                 ('is_apartment', '=', True),
                 ('project_id', '=', project.id),
-                ('apartment_state', '=', 'reserved')
+                ('apartment_state', '=', 'prereserved')
             ])
 
             # Log for debugging
@@ -185,14 +177,14 @@ class RealEstateProject(models.Model):
             available_count = self.env['product.template'].search_count([
                 ('is_store', '=', True),
                 ('project_id', '=', project.id),
-                ('apartment_state', '=', 'available')
+                ('apartment_state', '=', 'disponible')
             ])
 
             # Count reserved stores for this project
             reserved_count = self.env['product.template'].search_count([
                 ('is_store', '=', True),
                 ('project_id', '=', project.id),
-                ('apartment_state', '=', 'reserved')
+                ('apartment_state', '=', 'prereserved')
             ])
 
             # Log for debugging
@@ -256,7 +248,7 @@ class RealEstateProject(models.Model):
             'force_building_editable': True,  # CRITICAL FIX: Force building field to be editable
             # Ensure the create button is available and that new apartments have quantity 1
             'create': True,
-            'default_apartment_state': 'available',
+            'default_apartment_state': 'disponible',
             'default_type': 'product',
             'default_qty_available': 1.0,
             'force_qty_available': 1.0,
@@ -373,7 +365,7 @@ class RealEstateProject(models.Model):
             'domain': [
                 ('is_apartment', '=', True),
                 ('project_id', '=', self.id),
-                ('apartment_state', '=', 'available')
+                ('apartment_state', '=', 'disponible')
             ],
             'type': 'ir.actions.act_window',
             'target': 'current',
@@ -393,7 +385,7 @@ class RealEstateProject(models.Model):
                 'force_building_editable': True,  # CRITICAL FIX: Force building field to be editable
                 # Quantity management is now handled by Odoo's standard inventory management
                 'default_type': 'product',
-                'default_apartment_state': 'available',
+                'default_apartment_state': 'disponible',
             },
             'help': """<p class="o_view_nocontent_smiling_face">
                         No available apartments found for this project
@@ -428,7 +420,7 @@ class RealEstateProject(models.Model):
             'force_building_editable': True,  # CRITICAL FIX: Force building field to be editable
             # Quantity management is now handled by Odoo's standard inventory management
             'default_type': 'product',
-            'default_apartment_state': 'available',
+            'default_apartment_state': 'disponible',
         }
 
         domain = [('is_store', '=', True), ('project_id', '=', self.id)]

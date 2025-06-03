@@ -7,15 +7,15 @@
         <field name="arch" type="xml">
             <form string="Apartment">
                 <header>
-                    <button name="action_mark_as_reserved" string="Mark as Reserved" type="object"
-                            class="oe_highlight" attrs="{'invisible': [('state', '!=', 'available')]}"/>
-                    <button name="action_mark_as_sold" string="Mark as Sold" type="object"
-                            class="oe_highlight" attrs="{'invisible': [('state', 'not in', ['available', 'reserved'])]}"/>
-                    <button name="action_mark_as_available" string="Mark as Available" type="object"
-                            attrs="{'invisible': [('state', '=', 'available')]}"/>
                     <button name="action_create_reservation" string="Create Quotation" type="object"
-                            class="oe_highlight" attrs="{'invisible': [('state', '!=', 'available')]}"/>
-                    <field name="state" widget="statusbar" statusbar_visible="available,reserved,sold"/>
+                            class="oe_highlight" attrs="{'invisible': [('state', '!=', 'disponible')]}"/>
+                    <button name="cancel_reservation" string="Cancel Reservation" type="object"
+                            class="btn btn-warning" attrs="{'invisible': [('state', '!=', 'prereserved')]}"/>
+                    <button name="action_mark_as_sold" string="Mark as Sold" type="object"
+                            class="oe_highlight" attrs="{'invisible': [('state', 'not in', ['disponible', 'prereserved'])]}"/>
+                    <button name="action_mark_as_available" string="Mark as Disponible" type="object"
+                            attrs="{'invisible': [('state', '=', 'disponible')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="disponible,prereserved,sold"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -33,7 +33,6 @@
                     </div>
                     <group>
                         <group>
-                            <field name="code"/>
                             <field name="context_project_readonly" invisible="1"/>
                             <field name="context_building_readonly" invisible="1"/>
                             <field name="building_id" attrs="{'readonly': [('context_building_readonly', '=', True)]}"/>
@@ -91,7 +90,6 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
-                <field name="code"/>
                 <field name="building_id"/>
                 <field name="project_id"/>
                 <field name="floor"/>
@@ -109,18 +107,15 @@
         <field name="arch" type="xml">
             <search string="Apartments">
                 <field name="name"/>
-                <field name="code"/>
                 <field name="building_id"/>
                 <field name="project_id"/>
                 <field name="floor"/>
                 <field name="price"/>
                 <field name="area"/>
                 <separator/>
-                <filter string="Available" name="available" domain="[('state', '=', 'available'), ('is_locked', '=', False)]"/>
-                <filter string="In Quotation" name="in_quotation" domain="[('state', '=', 'available'), ('is_locked', '=', True)]"/>
-                <filter string="Réservation en cours" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
-                <filter string="Reserved" name="reserved" domain="[('state', '=', 'reserved')]"/>
-                <filter string="Sold" name="sold" domain="[('state', '=', 'sold')]"/>
+                <filter string="Disponible" name="disponible" domain="[('state', '=', 'disponible')]"/>
+                <filter string="Préréservé" name="prereserved" domain="[('state', '=', 'prereserved')]"/>
+                <filter string="Vendu" name="sold" domain="[('state', '=', 'sold')]"/>
                 <separator/>
                 <filter string="Locked" name="locked" domain="[('is_locked', '=', True)]"/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
@@ -144,7 +139,6 @@
                 <!-- This view is ONLY for real.estate.apartment model, not for stores -->
                 <field name="id"/>
                 <field name="name"/>
-                <field name="code"/>
                 <field name="building_id"/>
                 <field name="project_id"/>
                 <field name="floor"/>
@@ -158,17 +152,16 @@
                 <field name="locked_by_order_id"/>
 
                 <!-- Define the column headers and their colors -->
-                <progressbar field="state" colors='{"available": "success", "in_progress": "info", "reserved": "warning", "sold": "danger"}'/>
+                <progressbar field="state" colors='{"disponible": "info", "prereserved": "danger", "sold": "success"}'/>
 
-                <!-- Define the groups to display (available, in_progress, reserved, sold) -->
+                <!-- Define the groups to display -->
                 <field name="state" widget="state_selection" options="{
                     'clickable': '1',
                     'fold_field': 'fold',
                     'group_by_tooltip': {
-                        'available': 'Available apartments',
-                        'in_progress': 'Apartments with reservation in progress',
-                        'reserved': 'Reserved apartments',
-                        'sold': 'Sold apartments'
+                        'disponible': 'Disponible apartments',
+                        'prereserved': 'Préréservé apartments',
+                        'sold': 'Vendu apartments'
                     }
                 }"/>
 
@@ -188,9 +181,6 @@
                                     </strong>
                                 </div>
                                 <div>
-                                    <field name="code"/>
-                                </div>
-                                <div>
                                     <span>Building: <field name="building_id"/></span>
                                 </div>
                                 <div>
@@ -205,16 +195,12 @@
                                 <!-- Status indicator with color coding -->
                                 <div class="mt-2">
                                     <span t-att-class="'badge ' +
-                                        ((record.state.raw_value == 'available' and record.is_locked.raw_value == false) and 'badge-success' or
-                                        (record.state.raw_value == 'available' and record.is_locked.raw_value == true) and 'badge-secondary' or
-                                        record.state.raw_value == 'in_progress' and 'badge-info' or
-                                        record.state.raw_value == 'reserved' and 'badge-warning' or
-                                        record.state.raw_value == 'sold' and 'badge-danger' or 'badge-secondary')">
-                                        <t t-if="record.state.raw_value == 'available' and record.is_locked.raw_value == true">
+                                        (record.state.raw_value == 'disponible' and 'badge-info' or
+                                         record.state.raw_value == 'prereserved' and 'badge-danger' or
+                                         record.state.raw_value == 'sold' and 'badge-success' or
+                                         'badge-secondary')">
+                                        <t t-if="record.state.raw_value == 'disponible' and record.is_locked.raw_value == true">
                                             In Quotation
-                                        </t>
-                                        <t t-elif="record.state.raw_value == 'in_progress'">
-                                            Réservation en cours
                                         </t>
                                         <t t-else="">
                                             <field name="state"/>
@@ -259,17 +245,16 @@
                 <field name="locked_by_order_id"/>
 
                 <!-- Define the column headers and their colors -->
-                <progressbar field="apartment_state" colors='{"available": "success", "in_progress": "info", "reserved": "warning", "sold": "danger"}'/>
+                <progressbar field="apartment_state" colors='{"disponible": "info", "prereserved": "danger", "sold": "success"}'/>
 
-                <!-- Define the groups to display (available, in_progress, reserved, sold) -->
+                <!-- Define the groups to display -->
                 <field name="apartment_state" widget="state_selection" options="{
                     'clickable': '1',
                     'fold_field': 'fold',
                     'group_by_tooltip': {
-                        'available': 'Available stores',
-                        'in_progress': 'Stores with reservation in progress',
-                        'reserved': 'Reserved stores',
-                        'sold': 'Sold stores'
+                        'disponible': 'Stores disponibles',
+                        'prereserved': 'Stores préréservés',
+                        'sold': 'Stores vendus'
                     }
                 }"/>
 
@@ -303,16 +288,12 @@
                                 <!-- Status indicator with color coding -->
                                 <div class="mt-2">
                                     <span t-att-class="'badge ' +
-                                        ((record.apartment_state.raw_value == 'available' and record.is_locked.raw_value == false) and 'badge-success' or
-                                        (record.apartment_state.raw_value == 'available' and record.is_locked.raw_value == true) and 'badge-secondary' or
-                                        record.apartment_state.raw_value == 'in_progress' and 'badge-info' or
-                                        record.apartment_state.raw_value == 'reserved' and 'badge-warning' or
-                                        record.apartment_state.raw_value == 'sold' and 'badge-danger' or 'badge-secondary')">
-                                        <t t-if="record.apartment_state.raw_value == 'available' and record.is_locked.raw_value == true">
+                                        (record.apartment_state.raw_value == 'disponible' and 'badge-info' or
+                                         record.apartment_state.raw_value == 'prereserved' and 'badge-danger' or
+                                         record.apartment_state.raw_value == 'sold' and 'badge-success' or
+                                         'badge-secondary')">
+                                        <t t-if="record.apartment_state.raw_value == 'disponible' and record.is_locked.raw_value == true">
                                             In Quotation
-                                        </t>
-                                        <t t-elif="record.apartment_state.raw_value == 'in_progress'">
-                                            Réservation en cours
                                         </t>
                                         <t t-else="">
                                             <field name="apartment_state"/>
@@ -424,6 +405,7 @@
         <field name="res_model">real.estate.apartment</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="view_id" ref="view_real_estate_apartment_kanban"/>
+        <field name="search_view_id" ref="view_real_estate_apartment_search"/>
         <field name="domain">[]</field>
         <field name="context">{
             'create': False,
@@ -446,6 +428,7 @@
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban</field>
         <field name="view_id" ref="view_real_estate_store_kanban"/>
+        <field name="search_view_id" ref="product_template_search_view_real_estate"/>
         <field name="domain">[('is_store', '=', True)]</field>
         <field name="context">{
             'create': False,

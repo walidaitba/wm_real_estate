@@ -61,14 +61,13 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
             var propertyType = isApartment ? 'apartment' : 'store';
 
             debug("Showing " + propertyType + " options dialog for: " + propertyData.name);
-
-            // Add buttons based on property state
             debug(propertyType + " state: " + propertyData.apartment_state + ", qty_available: " + propertyData.qty_available);
 
-            if (propertyData.apartment_state === 'available') {
-                // Always show the Reserve button for available properties
+            // Add buttons based on property state
+            if (propertyData.apartment_state === 'disponible') {
+                // For disponible properties: only Reserve and View Details buttons (no Cancel)
                 buttons.push({
-                    text: _t('Reserve'),
+                    text: _t('Réserver'),
                     classes: 'btn-primary',
                     click: function () {
                         self._rpc({
@@ -77,15 +76,14 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
                             args: [[propertyData.id]],
                         }).then(function (action) {
                             dialog.close();
-                            // Make sure action is valid before doing it
                             if (action && action.type) {
                                 debug("Executing action: " + JSON.stringify(action));
                                 self.do_action(action);
                             } else {
                                 debug("Invalid action received: " + JSON.stringify(action));
                                 self.displayNotification({
-                                    title: _t('Error'),
-                                    message: _t('Could not create reservation. Please try again or contact your administrator.'),
+                                    title: _t('Erreur'),
+                                    message: _t('Impossible de créer la réservation. Veuillez réessayer.'),
                                     type: 'danger'
                                 });
                             }
@@ -93,8 +91,110 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
                             dialog.close();
                             debug("Error creating reservation: " + JSON.stringify(error));
                             self.displayNotification({
-                                title: _t('Error'),
-                                message: _t('Could not create reservation. Please try again or contact your administrator.'),
+                                title: _t('Erreur'),
+                                message: _t('Impossible de créer la réservation. Veuillez réessayer.'),
+                                type: 'danger'
+                            });
+                        });
+                    }
+                });
+            } else if (propertyData.apartment_state === 'prereserved') {
+                // For prereserved properties: Cancel Reservation and Confirm Reservation buttons
+                buttons.push({
+                    text: _t('Annuler la réservation'),
+                    classes: 'btn-warning',
+                    click: function () {
+                        self._rpc({
+                            model: 'product.template',
+                            method: 'action_cancel_reservation',
+                            args: [[propertyData.id]],
+                        }).then(function (result) {
+                            dialog.close();
+                            if (result) {
+                                debug("Reservation cancelled successfully");
+                                // Reload the view to reflect the changes
+                                self.reload();
+                            } else {
+                                debug("Error cancelling reservation");
+                                self.displayNotification({
+                                    title: _t('Erreur'),
+                                    message: _t('Impossible d\'annuler la réservation. Veuillez réessayer.'),
+                                    type: 'danger'
+                                });
+                            }
+                        }).guardedCatch(function (error) {
+                            dialog.close();
+                            debug("Error cancelling reservation: " + JSON.stringify(error));
+                            self.displayNotification({
+                                title: _t('Erreur'),
+                                message: _t('Impossible d\'annuler la réservation. Veuillez réessayer.'),
+                                type: 'danger'
+                            });
+                        });
+                    }
+                });
+
+                buttons.push({
+                    text: _t('Confirmer la réservation'),
+                    classes: 'btn-success',
+                    click: function () {
+                        self._rpc({
+                            model: 'product.template',
+                            method: 'action_confirm_reservation',
+                            args: [[propertyData.id]],
+                        }).then(function (action) {
+                            dialog.close();
+                            if (action && action.type) {
+                                debug("Executing confirm reservation action: " + JSON.stringify(action));
+                                self.do_action(action);
+                            } else {
+                                debug("Invalid action received from confirm reservation: " + JSON.stringify(action));
+                                self.displayNotification({
+                                    title: _t('Erreur'),
+                                    message: _t('Impossible d\'ouvrir le devis. Veuillez réessayer.'),
+                                    type: 'danger'
+                                });
+                            }
+                        }).guardedCatch(function (error) {
+                            dialog.close();
+                            debug("Error confirming reservation: " + JSON.stringify(error));
+                            self.displayNotification({
+                                title: _t('Erreur'),
+                                message: _t('Impossible d\'ouvrir le devis. Veuillez réessayer.'),
+                                type: 'danger'
+                            });
+                        });
+                    }
+                });
+            } else if (propertyData.apartment_state === 'sold') {
+                // For sold properties: only Fiche Reservation button
+                buttons.push({
+                    text: _t('Fiche de Réservation'),
+                    classes: 'btn-info',
+                    click: function () {
+                        self._rpc({
+                            model: 'product.template',
+                            method: 'action_view_reservation_document',
+                            args: [[propertyData.id]],
+                        }).then(function (action) {
+                            dialog.close();
+                            if (action && action.type) {
+                                debug("Executing view reservation document action: " + JSON.stringify(action));
+                                self.do_action(action);
+                            } else {
+                                debug("Invalid action received from view reservation document: " + JSON.stringify(action));
+                                self.displayNotification({
+                                    title: _t('Erreur'),
+                                    message: _t('Impossible d\'ouvrir le document de réservation. Veuillez réessayer.'),
+                                    type: 'danger'
+                                });
+                            }
+                        }).guardedCatch(function (error) {
+                            dialog.close();
+                            debug("Error viewing reservation document: " + JSON.stringify(error));
+                            self.displayNotification({
+                                title: _t('Erreur'),
+                                message: _t('Impossible d\'ouvrir le document de réservation. Veuillez réessayer.'),
                                 type: 'danger'
                             });
                         });
@@ -102,106 +202,76 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
                 });
             }
 
-            // Add view details button
-            buttons.push({
-                text: _t('View Details'),
-                classes: 'btn-secondary',
-                click: function () {
-                    dialog.close();
-                    try {
-                        debug("Opening view details for " + propertyType + ": " + propertyData.id);
-                        self.do_action({
-                            type: 'ir.actions.act_window',
-                            res_model: 'product.template',
-                            res_id: propertyData.id,
-                            views: [[false, 'form']],
-                            view_mode: 'form',  // Added view_mode for compatibility
-                            target: 'current',
-                            context: {'form_view_ref': 'wm_real_estate.product_template_form_view_real_estate'}
-                        });
-                    } catch (error) {
-                        debug("Error opening view details: " + error);
-                        self.displayNotification({
-                            title: _t('Error'),
-                            message: _t('Could not open property details. Please try again.'),
-                            type: 'danger'
-                        });
+            // Add view details button only for disponible properties
+            if (propertyData.apartment_state === 'disponible') {
+                buttons.push({
+                    text: isApartment ? _t('Voir l\'appartement') : _t('Voir le magasin'),
+                    classes: 'btn-secondary',
+                    click: function () {
+                        dialog.close();
+                        try {
+                            debug("Opening view details for " + propertyType + ": " + propertyData.id);
+                            self.do_action({
+                                type: 'ir.actions.act_window',
+                                res_model: 'product.template',
+                                res_id: propertyData.id,
+                                views: [[false, 'form']],
+                                view_mode: 'form',  // Added view_mode for compatibility
+                                target: 'current',
+                                context: {'form_view_ref': 'wm_real_estate.product_template_form_view_real_estate'}
+                            });
+                        } catch (error) {
+                            debug("Error opening view details: " + error);
+                            self.displayNotification({
+                                title: _t('Erreur'),
+                                message: _t('Impossible d\'ouvrir les détails de la propriété. Veuillez réessayer.'),
+                                type: 'danger'
+                            });
+                        }
                     }
-                }
-            });
-
-            // Add cancel button
-            buttons.push({
-                text: _t('Cancel'),
-                close: true
-            });
+                });
+            }
 
             // Create and display the dialog
             var dialog = new Dialog(this, {
-                title: isApartment ? _t('Apartment Options: ') + propertyData.name : _t('Store Options: ') + propertyData.name,
+                title: isApartment ? _t('Options Appartement : ') + propertyData.name : _t('Options Magasin : ') + propertyData.name,
                 size: 'medium',
                 buttons: buttons,
                 $content: this._preparePropertyModalContent(propertyData),
                 technical: false,
-                dialogClass: 'o_property_dialog',
-                // Add a custom destroy method to handle the canBeRemoved error
-                destroy: function() {
-                    try {
-                        // Call the original destroy method
-                        Dialog.prototype.destroy.call(this);
-                    } catch (error) {
-                        debug("Error during dialog destroy: " + error);
-                        // Force remove the dialog from the DOM if there's an error
-                        if (this.$el) {
-                            this.$el.remove();
-                        }
-                    }
-                }
+                dialogClass: 'o_property_dialog'
             });
-
-            // Add a custom close method to handle the canBeRemoved error
-            var originalClose = dialog.close;
-            dialog.close = function() {
-                try {
-                    // Call the original close method
-                    originalClose.call(this);
-                } catch (error) {
-                    debug("Error during dialog close: " + error);
-                    // Force remove the dialog from the DOM if there's an error
-                    if (this.$el) {
-                        this.$el.remove();
-                    }
-                    // Force destroy the dialog
-                    this.destroy();
-                }
-            };
 
             dialog.open();
         },
 
         /**
-         * Prepare the content for the property modal (apartment or store)
+         * Prepare the content for the property modal
          */
         _preparePropertyModalContent: function (property) {
             var $content = $('<div>').addClass('p-3 property-modal-content');
             var isApartment = property.is_apartment === true;
 
-            // Status
-            var statusClass = property.apartment_state === 'available' ? 'success' :
-                             property.apartment_state === 'reserved' ? 'warning' : 'danger';
+            // Status with updated colors
+            var statusClass = 
+                property.apartment_state === 'disponible' ? 'info' :
+                property.apartment_state === 'prereserved' ? 'danger' : 
+                property.apartment_state === 'sold' ? 'success' : 'secondary';
 
-            var statusText = property.apartment_state === 'available' ? _t('Available') :
-                            property.apartment_state === 'reserved' ? _t('Reserved') : _t('Sold');
+            var statusText = 
+                property.apartment_state === 'disponible' ? _t('Disponible') :
+                property.apartment_state === 'prereserved' ? _t('Préréservé') : 
+                property.apartment_state === 'sold' ? _t('Vendu') : '';
 
             $content.append($('<div>').addClass('mb-3').append(
-                $('<strong>').text(_t('Status: ')),
+                $('<strong>').text(_t('Statut : ')),
                 $('<span>').addClass('badge badge-' + statusClass).text(statusText)
             ));
 
             // Property type indicator
             $content.append($('<div>').addClass('mb-3').append(
-                $('<strong>').text(_t('Type: ')),
-                $('<span>').addClass('badge badge-info').text(isApartment ? _t('Apartment') : _t('Store'))
+                $('<strong>').text(_t('Type : ')),
+                $('<span>').addClass('badge badge-info').text(isApartment ? _t('Appartement') : _t('Magasin'))
             ));
 
             // Create two columns
@@ -213,14 +283,14 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
 
             if (property.floor !== undefined) {
                 $col2.append($('<div>').addClass('mb-2').append(
-                    $('<strong>').text(_t('Floor: ')),
+                    $('<strong>').text(_t('Étage : ')),
                     document.createTextNode(property.floor)
                 ));
             }
 
             if (property.area !== undefined) {
                 $col2.append($('<div>').addClass('mb-2').append(
-                    $('<strong>').text(_t('Area: ')),
+                    $('<strong>').text(_t('Surface : ')),
                     document.createTextNode(property.area + ' m²')
                 ));
             }
@@ -229,14 +299,14 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
             if (isApartment) {
                 if (property.rooms !== undefined) {
                     $col1.append($('<div>').addClass('mb-2').append(
-                        $('<strong>').text(_t('Rooms: ')),
+                        $('<strong>').text(_t('chambres : ')),
                         document.createTextNode(property.rooms)
                     ));
                 }
 
                 if (property.bathrooms !== undefined) {
                     $col2.append($('<div>').addClass('mb-2').append(
-                        $('<strong>').text(_t('Bathrooms: ')),
+                        $('<strong>').text(_t('Salles de bain : ')),
                         document.createTextNode(property.bathrooms)
                     ));
                 }

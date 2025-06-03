@@ -2,26 +2,26 @@
 <odoo>
     <!-- Main Menu -->
     <menuitem id="menu_real_estate_root"
-              name="Real Estate"
+              name="Immobilier"
               web_icon="wm_real_estate,static/description/icon.png"
               sequence="10"/>
 
     <!-- Dashboard Menu -->
     <menuitem id="menu_real_estate_dashboard"
-              name="Dashboard"
+              name="Tableau de bord"
               parent="menu_real_estate_root"
               action="action_real_estate_project"
               sequence="1"/>
 
     <!-- Papers Menu (Parent) -->
     <menuitem id="menu_real_estate_papers_root"
-              name="Papers"
+              name="Documents"
               parent="menu_real_estate_root"
               sequence="10"/>
 
     <!-- Quotations Submenu -->
     <menuitem id="menu_real_estate_quotations"
-              name="Quotations"
+              name="Devis"
               parent="menu_real_estate_papers_root"
               action="action_real_estate_reservations"
               sequence="1"/>
@@ -35,14 +35,14 @@
 
     <!-- Reservations Menu (Apartment Kanban) -->
     <menuitem id="menu_real_estate_apartment_reservations"
-              name="Apartment Reservations"
+              name="Réservations Appartements"
               parent="menu_real_estate_root"
               action="action_real_estate_apartment_reservations"
               sequence="15"/>
 
     <!-- Reservations Menu (Store Kanban) -->
     <menuitem id="menu_real_estate_store_reservations"
-              name="Store Reservations"
+              name="Réservations Magasins"
               parent="menu_real_estate_root"
               action="action_real_estate_store_reservations"
               sequence="16"/>
@@ -58,42 +58,42 @@
 
     <!-- Properties Menu -->
     <menuitem id="menu_real_estate_properties"
-              name="Properties"
+              name="Propriétés"
               parent="menu_real_estate_root"
               sequence="20"/>
 
     <menuitem id="menu_real_estate_projects"
-              name="Projects"
+              name="Projets"
               parent="menu_real_estate_properties"
               action="action_real_estate_project"
               sequence="1"/>
 
     <menuitem id="menu_real_estate_buildings"
-              name="Buildings"
+              name="Bâtiments"
               parent="menu_real_estate_properties"
               action="action_real_estate_building"
               sequence="2"/>
 
     <menuitem id="menu_real_estate_apartments"
-              name="Apartments"
+              name="Appartements"
               parent="menu_real_estate_properties"
               action="action_real_estate_apartment_products"
               sequence="3"/>
 
     <menuitem id="menu_real_estate_stores"
-              name="Stores"
+              name="Magasins"
               parent="menu_real_estate_properties"
               action="action_real_estate_store"
               sequence="4"/>
 
     <menuitem id="menu_real_estate_create_apartment"
-              name="Create Apartment"
+              name="Créer Appartement"
               parent="menu_real_estate_properties"
               action="action_create_apartment_product"
               sequence="10"/>
 
     <menuitem id="menu_real_estate_create_store"
-              name="Create Store"
+              name="Créer Magasin"
               parent="menu_real_estate_properties"
               action="action_create_store_product"
               sequence="11"/>
