@@ -8,7 +8,7 @@ class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
     def button_validate(self):
-        """Override validate button to handle apartment/store state when delivery is validated"""
+        """Override validate button to handle apartment/store/équipement state when delivery is validated"""
         # Call super to validate the picking
         res = super(StockPicking, self).button_validate()
 
@@ -75,6 +75,30 @@ class StockPicking(models.Model):
                                 except Exception as e:
                                     _logger.error("Failed to update store %s state: %s",
                                                 store_product.name, str(e))
+
+                        # Handle équipements
+                        elif line.product_id and line.product_id.product_tmpl_id.is_equipement:
+                            equipement_product = line.product_id.product_tmpl_id
+
+                            if equipement_product.apartment_state != 'sold':
+                                try:
+                                    # Mark équipement as sold
+                                    equipement_product.with_context(from_sale_order=True).write({
+                                        'apartment_state': 'sold',
+                                        'is_locked': False,
+                                        'locked_by_order_id': False,
+                                    })
+
+                                    # Quantity management is now handled by Odoo's standard inventory management
+
+                                    # Log the state change
+                                    _logger.info("Équipement %s state changed to sold after delivery validation",
+                                                equipement_product.name)
+
+                                    stores_updated += 1  # Use same counter for simplicity
+                                except Exception as e:
+                                    _logger.error("Failed to update équipement %s state: %s",
+                                                equipement_product.name, str(e))
 
                     # Log a message suggesting to create an invoice manually
                     _logger.info("Delivery validated for order %s. Invoice should be created manually.",

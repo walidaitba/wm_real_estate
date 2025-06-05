@@ -5,53 +5,51 @@
         <field name="name">product.template.form.real.estate</field>
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
-        <field name="arch" type="xml">
-            <!-- Add is_apartment and is_store checkboxes directly under product name but outside the h1 tag -->
+        <field name="arch" type="xml">            <!-- Add is_apartment, is_store, and is_equipement checkboxes directly under product name but outside the h1 tag -->
             <xpath expr="//div[hasclass('oe_title')]" position="after">
                 <div class="d-flex align-items-center mb-2">
                     <field name="is_apartment" widget="boolean" class="mr-2"/>
                     <label for="is_apartment" string="Is Apartment" class="mb-0 mr-4"/>
                     <field name="is_store" widget="boolean" class="mr-2"/>
-                    <label for="is_store" string="Is Store" class="mb-0"/>
+                    <label for="is_store" string="Is Store" class="mb-0 mr-4"/>
+                    <field name="is_equipement" widget="boolean" class="mr-2"/>
+                    <label for="is_equipement" string="Is Équipement" class="mb-0"/>
                 </div>
-            </xpath>
-
-            <!-- Replace the product name label with conditional labels -->
+            </xpath>            <!-- Replace the product name label with conditional labels -->
             <xpath expr="//div[hasclass('oe_title')]/label[@for='name']" position="replace">
-                <label for="name" attrs="{'invisible': ['|', ('is_apartment', '=', True), ('is_store', '=', True)]}" class="o_form_label oe_edit_only">Product Name</label>
+                <label for="name" attrs="{'invisible': ['|', '|', ('is_apartment', '=', True), ('is_store', '=', True), ('is_equipement', '=', True)]}" class="o_form_label oe_edit_only">Product Name</label>
                 <label for="name" attrs="{'invisible': [('is_apartment', '=', False)]}" class="o_form_label oe_edit_only">Apartment Number</label>
                 <label for="name" attrs="{'invisible': [('is_store', '=', False)]}" class="o_form_label oe_edit_only">Store Number</label>
-            </xpath>
-
-            <!-- Change the placeholder based on is_apartment and is_store -->
+                <label for="name" attrs="{'invisible': [('is_equipement', '=', False)]}" class="o_form_label oe_edit_only">Équipement Name</label>
+            </xpath>            <!-- Change the placeholder based on is_apartment, is_store, and is_equipement -->
             <xpath expr="//div[hasclass('oe_title')]/h1/field[@name='name']" position="replace">
                 <field name="name" placeholder="Apartment Number" attrs="{'invisible': [('is_apartment', '=', False)]}" force_save="1"/>
                 <field name="name" placeholder="Store Number" attrs="{'invisible': [('is_store', '=', False)]}" force_save="1"/>
-                <field name="name" placeholder="Product Name" attrs="{'invisible': ['|', ('is_apartment', '=', True), ('is_store', '=', True)]}" force_save="1"/>
+                <field name="name" placeholder="Équipement Name" attrs="{'invisible': [('is_equipement', '=', False)]}" force_save="1"/>
+                <field name="name" placeholder="Product Name" attrs="{'invisible': ['|', '|', ('is_apartment', '=', True), ('is_store', '=', True), ('is_equipement', '=', True)]}" force_save="1"/>
             </xpath>
 
 
             <!-- Replace the group_general with our custom layout -->
-            <xpath expr="//group[@name='group_general']" position="replace">
-                <group name="group_general">
+            <xpath expr="//group[@name='group_general']" position="replace">                <group name="group_general">
                     <!-- Apartment fields (shown only when is_apartment is true) -->
                     <div class="o_horizontal_separator mt-3 mb-2" attrs="{'invisible': [('is_apartment', '=', False)]}">Apartment Information</div>
                     <div class="o_horizontal_separator mt-3 mb-2" attrs="{'invisible': [('is_store', '=', False)]}">Store Information</div>
+                    <div class="o_horizontal_separator mt-3 mb-2" attrs="{'invisible': [('is_equipement', '=', False)]}">Équipement Information</div>
 
-                    <!-- Project field - shown for both apartments and stores -->
+                    <!-- Project field - shown for apartments, stores, and équipements -->
                     <field name="project_id"
-                           attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)],
-                                  'required': ['|', ('is_apartment', '=', True), ('is_store', '=', True)],
+                           attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)],
+                                  'required': ['|', '|', ('is_apartment', '=', True), ('is_store', '=', True), ('is_equipement', '=', True)],
                                   'readonly': [('context_project_readonly', '=', True)]}"
                            options="{'no_create_edit': False, 'no_open': False}"
                            help="Select the real estate project"
                            placeholder="Select or create a project"
                            string="Project"/>
 
-                    <!-- Building field - shown for both apartments and stores -->
-                    <field name="building_id"
-                           attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)],
-                                  'required': ['|', ('is_apartment', '=', True), ('is_store', '=', True)],
+                    <!-- Building field - shown for apartments, stores, and équipements -->                    <field name="building_id"
+                           attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)],
+                                  'required': ['|', '|', ('is_apartment', '=', True), ('is_store', '=', True), ('is_equipement', '=', True)],
                                   'readonly': [('context_building_readonly', '=', True)]}"
                            domain="[('project_id', '=', project_id)]"
                            options="{'no_create_edit': False, 'no_open': False}"
@@ -63,14 +61,14 @@
                     <field name="context_project_readonly" invisible="1"/>
                     <field name="context_building_readonly" invisible="1"/>
 
-                    <!-- Floor field - shown for both apartments and stores -->
+                    <!-- Floor field - shown for apartments, stores, and équipements -->
                     <field name="floor"
-                           attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)],
-                                  'required': ['|', ('is_apartment', '=', True), ('is_store', '=', True)]}"
+                           attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)],
+                                  'required': ['|', '|', ('is_apartment', '=', True), ('is_store', '=', True), ('is_equipement', '=', True)]}"
                            help="Floor number where located"
                            string="Floor"/>
 
-                    <!-- Area field - shown for both apartments and stores -->
+                    <!-- Area field - shown for apartments and stores only -->
                     <field name="area"
                            attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)],
                                   'required': ['|', ('is_apartment', '=', True), ('is_store', '=', True)]}"
@@ -87,11 +85,9 @@
                     <field name="bathrooms"
                            attrs="{'invisible': [('is_apartment', '=', False)]}"
                            help="Number of bathrooms in the apartment"
-                           string="Number of Bathrooms"/>
-
-                    <!-- Status field - shown for both apartments and stores -->
+                           string="Number of Bathrooms"/>                    <!-- Status field - shown for apartments, stores, and équipements -->
                     <field name="apartment_state"
-                           attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)]}"
+                           attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)]}"
                            help="Current status"
                            string="Status"/>
 
@@ -112,16 +108,15 @@
             <xpath expr="//group[@name='group_standard_price']" position="attributes">
                 <attribute name="string">Pricing</attribute>
             </xpath>            <!-- Add Create Reservation button to button box for apartments and stores with disponible status -->
-            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
-                <button name="action_create_reservation" type="object"
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">                <button name="action_create_reservation" type="object"
                         class="oe_stat_button" icon="fa-calendar"
-                        attrs="{'invisible': ['|', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('apartment_state', '!=', 'disponible')]}">
+                        attrs="{'invisible': ['|', '&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False), ('apartment_state', '!=', 'disponible')]}">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_text">Reserve</span>
                     </div>
                 </button>                <button name="action_cancel_reservation" type="object"
                         class="oe_stat_button btn-warning" icon="fa-times-circle"
-                        attrs="{'invisible': ['|', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('apartment_state', '!=', 'prereserved')]}">
+                        attrs="{'invisible': ['|', '&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False), ('apartment_state', '!=', 'prereserved')]}">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_text">Cancel Reservation</span>
                     </div>
@@ -138,20 +133,19 @@
         <field name="arch" type="xml">
             <field name="name" position="attributes">
                 <attribute name="string">Apartment Number</attribute>
-            </field>
-            <field name="name" position="after">
+            </field>            <field name="name" position="after">
                 <field name="is_apartment" invisible="1"/>
                 <field name="is_store" invisible="1"/>
+                <field name="is_equipement" invisible="1"/>
                 <field name="active" invisible="1"/>
                 <field name="company_id" invisible="1" groups="base.group_multi_company"/>
-                <field name="project_id" optional="show" attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)]}"/>
-                <field name="building_id" optional="show" attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)]}"/>
-                <field name="floor" optional="show" attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)]}"/>
+                <field name="project_id" optional="show" attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)]}"/>
+                <field name="building_id" optional="show" attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)]}"/>
+                <field name="floor" optional="show" attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)]}"/>
                 <field name="area" optional="show" attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)]}"/>
-                <field name="rooms" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
-                <field name="bathrooms" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
-                <field name="apartment_state" optional="show" attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)]}"/>
-                <field name="qty_available" optional="show" attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)]}"/>
+                <field name="rooms" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>                <field name="bathrooms" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
+                <field name="apartment_state" optional="show" attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)]}"/>
+                <field name="qty_available" optional="show" attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)]}"/>
             </field>
         </field>
     </record>
@@ -213,11 +207,11 @@
                 <field name="company_id" groups="base.group_multi_company"/>
             </field>
 
-            <!-- Add filters -->
-            <filter name="filter_to_sell" position="after">
+            <!-- Add filters -->            <filter name="filter_to_sell" position="after">
                 <separator/>
                 <filter string="Apartments" name="is_apartment" domain="[('is_apartment', '=', True)]"/>
                 <filter string="Stores" name="is_store" domain="[('is_store', '=', True)]"/>
+                <filter string="Équipements" name="is_equipement" domain="[('is_equipement', '=', True)]"/>
                 <separator/>                <filter string="Disponible Apartments" name="disponible_apartments" domain="[('is_apartment', '=', True), ('apartment_state', '=', 'disponible')]"/>
                 <filter string="Préréservé Apartments" name="prereserved_apartments" domain="[('is_apartment', '=', True), ('apartment_state', '=', 'prereserved')]"/>
                 <filter string="Vendu Apartments" name="sold_apartments" domain="[('is_apartment', '=', True), ('apartment_state', '=', 'sold')]"/>
@@ -225,6 +219,10 @@
                 <filter string="Disponible Stores" name="disponible_stores" domain="[('is_store', '=', True), ('apartment_state', '=', 'disponible')]"/>
                 <filter string="Préréservé Stores" name="prereserved_stores" domain="[('is_store', '=', True), ('apartment_state', '=', 'prereserved')]"/>
                 <filter string="Vendu Stores" name="sold_stores" domain="[('is_store', '=', True), ('apartment_state', '=', 'sold')]"/>
+                <separator/>
+                <filter string="Disponible Équipements" name="disponible_equipements" domain="[('is_equipement', '=', True), ('apartment_state', '=', 'disponible')]"/>
+                <filter string="Préréservé Équipements" name="prereserved_equipements" domain="[('is_equipement', '=', True), ('apartment_state', '=', 'prereserved')]"/>
+                <filter string="Vendu Équipements" name="sold_equipements" domain="[('is_equipement', '=', True), ('apartment_state', '=', 'sold')]"/>
                 <separator/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
             </filter>
@@ -291,9 +289,8 @@
                                 </div>
                                 <div t-if="record.list_price.raw_value">
                                     <field name="list_price" widget="monetary"/>
-                                </div>
-                                <!-- Real Estate specific fields -->
-                                <div t-if="record.is_apartment.raw_value or record.is_store.raw_value" class="mt-2">
+                                </div>                                <!-- Real Estate specific fields -->
+                                <div t-if="record.is_apartment.raw_value or record.is_store.raw_value or record.is_equipement.raw_value" class="mt-2">
                                     <!-- Status indicator with color coding -->
                                     <div t-if="record.apartment_state.raw_value" class="mb-2">                                        <span t-att-class="'badge ' +
                                             ((record.apartment_state.raw_value == 'disponible') and 'badge-info' or
@@ -329,15 +326,17 @@
                                     </div>
                                     <div t-if="record.is_apartment.raw_value and record.bathrooms.raw_value">
                                         <strong t-translation="on">Bathrooms:</strong> <field name="bathrooms"/>
-                                    </div>
-                                    <!-- Show property type -->
+                                    </div>                                    <!-- Show property type -->
                                     <div class="mt-1">
-                                        <span t-att-class="'badge ' + (record.is_apartment.raw_value and 'badge-primary' or record.is_store.raw_value and 'badge-info')">
+                                        <span t-att-class="'badge ' + (record.is_apartment.raw_value and 'badge-primary' or record.is_store.raw_value and 'badge-info' or record.is_equipement.raw_value and 'badge-warning')">
                                             <t t-if="record.is_apartment.raw_value">
                                                 <span t-translation="on">Apartment</span>
                                             </t>
                                             <t t-if="record.is_store.raw_value">
                                                 <span t-translation="on">Store</span>
+                                            </t>
+                                            <t t-if="record.is_equipement.raw_value">
+                                                <span t-translation="on">Équipement</span>
                                             </t>
                                         </span>
                                     </div>
@@ -418,6 +417,41 @@
             </p>
             <p>
                 Each store must be linked to a building and project.
+            </p>        </field>
+    </record>
+
+    <!-- Real Estate Équipements Product Action -->
+    <record id="action_real_estate_equipement_products" model="ir.actions.act_window">
+        <field name="name">Équipements</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('is_equipement', '=', True)]</field>
+        <field name="context">{
+            'search_default_is_equipement': 1,
+            'search_default_groupby_project': 1,
+            'search_default_groupby_building': 1,
+            'search_default_groupby_apartment_state': 1,
+            'default_is_equipement': True,
+            'default_type': 'product',
+            'default_apartment_state': 'disponible',
+            'default_floor': 0,
+            'default_area': 0.0,
+            'default_context_project_readonly': False,
+            'default_context_building_readonly': False,
+
+            'form_view_ref': 'wm_real_estate.product_template_form_view_real_estate',
+            'from_apartment_list': True
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No équipements found!
+            </p>
+            <p>
+                Équipements are managed as products in the inventory module.
+                Click the create button to add a new équipement.
+            </p>
+            <p>
+                Each équipement must be linked to a building and project.
             </p>
         </field>
     </record>
@@ -444,14 +478,28 @@
         <field name="view_mode">tree</field>
         <field name="view_id" ref="product_template_apartment_list_view"/>
         <field name="act_window_id" ref="action_real_estate_store_products"/>
-    </record>
-
-    <!-- View specific to the store action for form view -->
+    </record>    <!-- View specific to the store action for form view -->
     <record id="action_real_estate_store_products_form" model="ir.actions.act_window.view">
         <field name="sequence" eval="2"/>
         <field name="view_mode">form</field>
         <field name="view_id" ref="product_template_form_view_real_estate"/>
         <field name="act_window_id" ref="action_real_estate_store_products"/>
+    </record>
+
+    <!-- View specific to the équipement action for tree view -->
+    <record id="action_real_estate_equipement_products_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="product_template_apartment_list_view"/>
+        <field name="act_window_id" ref="action_real_estate_equipement_products"/>
+    </record>
+
+    <!-- View specific to the équipement action for form view -->
+    <record id="action_real_estate_equipement_products_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="product_template_form_view_real_estate"/>
+        <field name="act_window_id" ref="action_real_estate_equipement_products"/>
     </record>
 
     <!-- Action for creating new apartment products -->
@@ -460,11 +508,10 @@
         <field name="res_model">product.template</field>
         <field name="view_mode">form</field>
         <field name="target">current</field>
-        <field name="view_id" ref="product_template_form_view_real_estate"/>
-        <field name="context">{
+        <field name="view_id" ref="product_template_form_view_real_estate"/>        <field name="context">{
             'default_is_apartment': True,
             'default_type': 'product',
-            'default_apartment_state': 'available',
+            'default_apartment_state': 'disponible',
             'default_rooms': 1,
             'default_bathrooms': 1,
             'default_floor': 0,
@@ -486,19 +533,16 @@
                 The apartment will be automatically added to the inventory as a product.
             </p>
         </field>
-    </record>
-
-    <!-- Action for creating new store products -->
+    </record>    <!-- Action for creating new store products -->
     <record id="action_create_store_product" model="ir.actions.act_window">
         <field name="name">Create Store</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">form</field>
         <field name="target">current</field>
-        <field name="view_id" ref="product_template_form_view_real_estate"/>
-        <field name="context">{
+        <field name="view_id" ref="product_template_form_view_real_estate"/>        <field name="context">{
             'default_is_store': True,
             'default_type': 'product',
-            'default_apartment_state': 'available',
+            'default_apartment_state': 'disponible',
             'default_floor': 0,
             'default_area': 0.0,
             'default_context_project_readonly': False,
@@ -516,6 +560,37 @@
             <p>
                 Fill in the store details including the project and building it belongs to.
                 The store will be automatically added to the inventory as a product.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for creating new équipement products -->
+    <record id="action_create_equipement_product" model="ir.actions.act_window">
+        <field name="name">Create Équipement</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="view_id" ref="product_template_form_view_real_estate"/>
+        <field name="context">{
+            'default_is_equipement': True,
+            'default_type': 'product',
+            'default_apartment_state': 'disponible',
+            'default_floor': 0,
+            'default_context_project_readonly': False,
+            'default_context_building_readonly': False,
+
+            'form_view_ref': 'wm_real_estate.product_template_form_view_real_estate',
+            'create': True,
+            'show_buttons': True,
+            'from_menu': True
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new équipement
+            </p>
+            <p>
+                Fill in the équipement details including the project and building it belongs to.
+                The équipement will be automatically added to the inventory as a product.
             </p>
         </field>
     </record>

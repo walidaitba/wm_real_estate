@@ -8,12 +8,15 @@
             <form string="Building" t-translation="on">
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <!-- Apartment and Store total buttons -->
+                        <!-- Property type buttons -->
                         <button name="action_view_apartments" type="object" class="oe_stat_button" icon="fa-home">
                             <field name="apartment_count" widget="statinfo" string="Apartments" translate="yes"/>
                         </button>
                         <button name="action_view_stores" type="object" class="oe_stat_button" icon="fa-shopping-bag">
                             <field name="store_count" widget="statinfo" string="Stores" translate="yes"/>
+                        </button>
+                        <button name="action_view_equipements" type="object" class="oe_stat_button" icon="fa-wrench">
+                            <field name="equipement_count" widget="statinfo" string="Équipements" translate="yes"/>
                         </button>
                     </div>
                     <div class="oe_title">
@@ -50,7 +53,7 @@
                             </div>
                             
                             <!-- Stores Row -->
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center mb-2">
                                 <strong class="mr-3">Stores:</strong>
                                 <span class="text-success mr-3">
                                     <field name="sold_store_count" readonly="1" nolabel="1"/> Vendu
@@ -60,6 +63,20 @@
                                 </span>
                                 <span class="text-danger">
                                     <field name="reserved_store_count" readonly="1" nolabel="1"/> Préréservé
+                                </span>
+                            </div>
+                            
+                            <!-- Équipements Row -->
+                            <div class="d-flex align-items-center">
+                                <strong class="mr-3">Équipements:</strong>
+                                <span class="text-success mr-3">
+                                    <field name="sold_equipement_count" readonly="1" nolabel="1"/> Vendu
+                                </span>
+                                <span class="text-info mr-3">
+                                    <field name="available_equipement_count" readonly="1" nolabel="1"/> Disponible
+                                </span>
+                                <span class="text-danger">
+                                    <field name="reserved_equipement_count" readonly="1" nolabel="1"/> Préréservé
                                 </span>
                             </div>
                         </div>
@@ -96,6 +113,10 @@
                 <field name="sold_store_count"/>
                 <field name="available_store_count"/>
                 <field name="reserved_store_count"/>
+                <field name="equipement_count"/>
+                <field name="sold_equipement_count"/>
+                <field name="available_equipement_count"/>
+                <field name="reserved_equipement_count"/>
             </tree>
         </field>
     </record>

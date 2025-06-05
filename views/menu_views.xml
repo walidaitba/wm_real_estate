@@ -86,6 +86,12 @@
               action="action_real_estate_store"
               sequence="4"/>
 
+    <menuitem id="menu_real_estate_equipements"
+              name="Équipements"
+              parent="menu_real_estate_properties"
+              action="action_real_estate_equipement_products"
+              sequence="5"/>
+
     <menuitem id="menu_real_estate_create_apartment"
               name="Créer Appartement"
               parent="menu_real_estate_properties"
@@ -97,6 +103,12 @@
               parent="menu_real_estate_properties"
               action="action_create_store_product"
               sequence="11"/>
+
+    <menuitem id="menu_real_estate_create_equipement"
+              name="Créer Équipement"
+              parent="menu_real_estate_properties"
+              action="action_create_equipement_product"
+              sequence="12"/>
 
     <!-- Configuration Menu -->
     <menuitem id="menu_real_estate_configuration"

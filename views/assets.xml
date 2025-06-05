@@ -5,6 +5,8 @@
             <!-- Apartment buttons functionality -->
             <script type="text/javascript" src="/wm_real_estate/static/src/js/apartment_modal.js"></script>
             <script type="text/javascript" src="/wm_real_estate/static/src/js/apartment_action.js"></script>
+            <!-- Product form widget for mutually exclusive checkboxes -->
+            <script type="text/javascript" src="/wm_real_estate/static/src/js/product_form_widget.js"></script>
             <link rel="stylesheet" type="text/css" href="/wm_real_estate/static/src/css/apartment_modal.css"/>
         </xpath>
     </template>

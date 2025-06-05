@@ -45,13 +45,13 @@ class SaleOrderLine(models.Model):
     def _onchange_building_id(self):
         """When building is selected, filter apartments"""
         if self.building_id:
-            # If we have a building, filter apartments by this building and show only disponible
+            # If we have a building, filter apartments by this building and show only disponible (exclude blocker)
             return {'domain': {'apartment_id': [('building_id', '=', self.building_id.id), ('state', '=', 'disponible')]}}
         elif self.order_id.project_id:
-            # If we have a project but no building, filter apartments by project
+            # If we have a project but no building, filter apartments by project (exclude blocker)
             return {'domain': {'apartment_id': [('project_id', '=', self.order_id.project_id.id), ('state', '=', 'disponible')]}}
         else:
-            # No filters except state
+            # No filters except state (exclude blocker)
             return {'domain': {'apartment_id': [('state', '=', 'disponible')]}}
 
     @api.onchange('apartment_id')
@@ -113,7 +113,7 @@ Salles de bain: {bathrooms}
 
     @api.model
     def create(self, vals):
-        """Override create to handle apartment/store locking"""
+        """Override create to handle apartment/store/équipement locking"""
         # Make sure name is set for the sale order line
         if not vals.get('name') and vals.get('product_id'):
             product = self.env['product.product'].browse(vals.get('product_id'))
@@ -161,6 +161,29 @@ Salles de bain: {bathrooms}
 Projet: {project_name}
 Bâtiment: {building_name}
 Magasin: {product_tmpl.name}
+Étage: {floor}
+Surface: {area} m²
+"""
+                    # Set the building_id
+                    if product_tmpl.building_id:
+                        vals['building_id'] = product_tmpl.building_id.id
+                    
+                    # Set quantity to surface area for stores (surface × price per m²)
+                    if product_tmpl.area and not vals.get('product_uom_qty'):
+                        vals['product_uom_qty'] = product_tmpl.area
+
+                # Handle équipements
+                elif product_tmpl.is_equipement:
+                    # Generate a description for the équipement
+                    project_name = product_tmpl.project_id.name if product_tmpl.project_id else "N/A"
+                    building_name = product_tmpl.building_id.name if product_tmpl.building_id else "N/A"
+                    floor = product_tmpl.floor if product_tmpl.floor is not None else "N/A"
+                    area = product_tmpl.area if product_tmpl.area else "N/A"
+
+                    vals['name'] = f"""
+Projet: {project_name}
+Bâtiment: {building_name}
+Équipement: {product_tmpl.name}
 Étage: {floor}
 Surface: {area} m²
 """
@@ -226,10 +249,26 @@ Surface: {area} m²
                 _logger.info("Store %s marked as prereserved for quotation %s",
                             store_product.name, res.order_id.name)
 
+        # If this is an équipement product, mark it as prereserved
+        elif res.product_id and res.product_id.product_tmpl_id.is_equipement:
+            equipement_product = res.product_id.product_tmpl_id
+
+            if equipement_product.apartment_state == 'disponible':
+                # Update the équipement to prereserved state when added to quotation
+                equipement_product.with_context(from_sale_order=True).write({
+                    'apartment_state': 'prereserved',
+                    'is_locked': True,
+                    'locked_by_order_id': res.order_id.id,
+                })
+
+                # Log the state change
+                _logger.info("Équipement %s marked as prereserved for quotation %s",
+                            equipement_product.name, res.order_id.name)
+
         return res
 
     def unlink(self):
-        """Override unlink to handle apartment/store unlocking"""
+        """Override unlink to handle apartment/store/équipement unlocking"""
         for line in self:
             # Handle apartments
             if line.apartment_id and line.apartment_id.is_locked and line.apartment_id.locked_by_order_id.id == line.order_id.id:
@@ -266,6 +305,23 @@ Surface: {area} m²
                     # Log the state change
                     _logger.info("Store %s state changed back to disponible when removed from quotation %s",
                                 store_product.name, line.order_id.name)
+
+            # Handle équipements
+            elif line.product_id and line.product_id.product_tmpl_id.is_equipement:
+                equipement_product = line.product_id.product_tmpl_id
+
+                # Only unlock équipements that are locked by this order
+                if equipement_product.is_locked and equipement_product.locked_by_order_id.id == line.order_id.id:
+                    # Reset équipement state to disponible
+                    equipement_product.with_context(from_sale_order=True).write({
+                        'apartment_state': 'disponible',
+                        'is_locked': False,
+                        'locked_by_order_id': False,
+                    })
+
+                    # Log the state change
+                    _logger.info("Équipement %s state changed back to disponible when removed from quotation %s",
+                                equipement_product.name, line.order_id.name)
 
         return super(SaleOrderLine, self).unlink()
 
@@ -714,12 +770,32 @@ Price: %(currency)s %(price).2f
                         _logger.info("Store %s state changed to sold when order %s was confirmed",
                                     store_product.name, self.name)
 
+                # Handle équipements
+                elif line.product_id and line.product_id.product_tmpl_id.is_equipement:
+                    equipement_product = line.product_id.product_tmpl_id
+
+                    # When confirming the order, set the équipement to 'sold'
+                    if equipement_product.apartment_state != 'sold':
+                        # Mark équipement as sold
+                        equipement_product.with_context(from_sale_order=True).write({
+                            'apartment_state': 'sold',
+                            'is_locked': False,  # Remove the lock since it's now sold
+                            'locked_by_order_id': False,
+                        })
+
+                        # Quantity management is now handled by Odoo's standard inventory management
+
+                        # Log the state change
+                        _logger.info("Équipement %s state changed to sold when order %s was confirmed",
+                                    equipement_product.name, self.name)
+
             # Log the confirmation
             apartment_count = len(self.order_line.filtered(lambda l: l.apartment_id))
             store_count = len(self.order_line.filtered(lambda l: l.product_id and l.product_id.product_tmpl_id.is_store))
+            equipement_count = len(self.order_line.filtered(lambda l: l.product_id and l.product_id.product_tmpl_id.is_equipement))
 
-            _logger.info("Real estate order %s confirmed with %s apartments and %s stores",
-                        self.name, apartment_count, store_count)
+            _logger.info("Real estate order %s confirmed with %s apartments, %s stores, and %s équipements",
+                        self.name, apartment_count, store_count, equipement_count)
 
             # Check if auto-created invoices are already paid (for external module integration)
             # We'll check the payment status directly, and the _invoice_paid_hook will handle it when payment is complete
@@ -795,15 +871,15 @@ Properties will be marked as 'Sold' when the invoice is created by the auto work
         return invoices
 
     def _create_delivery_picking(self):
-        """Create a delivery order for the apartment or store"""
+        """Create a delivery order for the apartment/store/équipement"""
         self.ensure_one()
 
         # Only create delivery picking for confirmed orders with apartments or stores
         if self.state != 'sale':
             return False
 
-        # Check if we have any real estate products (apartments or stores)
-        has_real_estate_products = any(line.apartment_id or (line.product_id and (line.product_id.product_tmpl_id.is_apartment or line.product_id.product_tmpl_id.is_store)) for line in self.order_line)
+        # Check if we have any real estate products (apartments, stores, or équipements)
+        has_real_estate_products = any(line.apartment_id or (line.product_id and (line.product_id.product_tmpl_id.is_apartment or line.product_id.product_tmpl_id.is_store or line.product_id.product_tmpl_id.is_equipement)) for line in self.order_line)
 
         if not has_real_estate_products:
             return False
@@ -869,7 +945,7 @@ Floor: %(floor)s
                 move = self.env['stock.move'].create({
                     'name': description,
                     'product_id': line.product_id.id,
-                    'product_uom_qty': 1.0,
+                    'product_uom_qty': 1.0,  # Apartments always use quantity 1
                     'product_uom': line.product_uom.id,
                     'picking_id': picking.id,
                     'location_id': location_id,
@@ -911,7 +987,49 @@ Floor: %(floor)s
                 move = self.env['stock.move'].create({
                     'name': description,
                     'product_id': line.product_id.id,
-                    'product_uom_qty': 1.0,
+                    'product_uom_qty': line.product_uom_qty,  # Use sale line quantity (surface area for stores)
+                    'product_uom': line.product_uom.id,
+                    'picking_id': picking.id,
+                    'location_id': location_id,
+                    'location_dest_id': location_dest_id,
+                    'state': 'draft',
+                    'sale_line_id': line.id,
+                })
+
+                # Confirm the move to create move lines and reserve quantity
+                move._action_confirm()
+
+                # Create move lines with quantity done = surface area to allow direct validation
+                if not move.move_line_ids:
+                    move._action_assign()
+                    for move_line in move.move_line_ids:
+                        move_line.qty_done = line.product_uom_qty
+
+            # Handle équipements
+            elif line.product_id and line.product_id.product_tmpl_id.is_equipement:
+                # Get équipement details for better description
+                equipement_product = line.product_id.product_tmpl_id
+                building = equipement_product.building_id
+                project = equipement_product.project_id
+
+                # Create a descriptive name
+                description = _("""Handover of keys and documents for:
+Project: %(project)s
+Building: %(building)s
+Équipement: %(equipement)s
+Floor: %(floor)s
+""") % {
+                    'equipement': equipement_product.name,
+                    'project': project.name if project else _('N/A'),
+                    'building': building.name if building else _('N/A'),
+                    'floor': equipement_product.floor,
+                }
+
+                # Create a stock move for the équipement
+                move = self.env['stock.move'].create({
+                    'name': description,
+                    'product_id': line.product_id.id,
+                    'product_uom_qty': 1.0,  # Équipements always use quantity 1
                     'product_uom': line.product_uom.id,
                     'picking_id': picking.id,
                     'location_id': location_id,
@@ -1044,10 +1162,10 @@ Please review and validate the delivery when complete.
         return all_paid
 
     def action_cancel(self):
-        """Override cancel to handle apartment/store state and locking"""
+        """Override cancel to handle apartment/store/équipement state and locking"""
         res = super(SaleOrder, self).action_cancel()
 
-        # Update apartment/store states when order is cancelled
+        # Update apartment/store/équipement states when order is cancelled
         for line in self.order_line:
             # Handle apartments
             if line.apartment_id:
@@ -1111,5 +1229,36 @@ Please review and validate the delivery when complete.
 
                         _logger.info("Store %s state changed to disponible when order %s was cancelled",
                                     store_product.name, self.name)
+
+            # Handle équipements
+            elif line.product_id and line.product_id.product_tmpl_id.is_equipement:
+                equipement_product = line.product_id.product_tmpl_id
+
+                # If the équipement is locked by this order, unlock it
+                if equipement_product.is_locked and equipement_product.locked_by_order_id.id == self.id:
+                    equipement_product.with_context(from_sale_order=True).write({
+                        'is_locked': False,
+                        'locked_by_order_id': False,
+                    })
+                    _logger.info("Équipement %s unlocked when order %s was cancelled",
+                                equipement_product.name, self.name)
+
+                # If the équipement is prereserved, make it disponible again
+                # Only do this for prereserved équipements, not sold ones
+                if equipement_product.apartment_state == 'prereserved':
+                    # Check if this is the only active order for this équipement
+                    other_orders = self.env['sale.order.line'].search([
+                        ('product_id.product_tmpl_id', '=', equipement_product.id),
+                        ('order_id', '!=', self.id),
+                        ('order_id.state', 'in', ['sale', 'done'])
+                    ])
+
+                    if not other_orders:
+                        # Mark équipement as disponible when order is cancelled
+                        equipement_product.with_context(from_sale_order=True).apartment_state = 'disponible'
+                        # Quantity management is now handled by Odoo's standard inventory management
+
+                        _logger.info("Équipement %s state changed to disponible when order %s was cancelled",
+                                    equipement_product.name, self.name)
 
         return res

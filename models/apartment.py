@@ -55,6 +55,7 @@ class RealEstateApartment(models.Model):
         ('disponible', 'Disponible'),
         ('prereserved', 'Préréservé'),
         ('sold', 'Vendu'),
+        ('blocker', 'Bloqué'),
     ], string='Status', default='disponible', required=True, tracking=True)
 
     # Fields for locking mechanism

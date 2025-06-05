@@ -80,6 +80,22 @@ class RealEstateBuilding(models.Model):
     reserved_store_count = fields.Integer(compute='_compute_sold_available_store_count',
                                 string='Reserved Stores')
 
+    # Équipement-related fields
+    equipement_product_ids = fields.One2many('product.template', 'building_id',
+                                          string='Équipement Products',
+                                          domain=[('is_equipement', '=', True)])
+    equipement_count = fields.Integer(compute='_compute_equipement_count',
+                                   string='Équipement Count')
+
+    sold_equipement_count = fields.Integer(compute='_compute_sold_available_equipement_count',
+                                        string='Sold Équipements')
+
+    available_equipement_count = fields.Integer(compute='_compute_sold_available_equipement_count',
+                                             string='Available Équipements')
+
+    reserved_equipement_count = fields.Integer(compute='_compute_sold_available_equipement_count',
+                                            string='Reserved Équipements')
+
     @api.depends('apartment_ids', 'apartment_ids.product_tmpl_ids')
     def _compute_apartment_count(self):
         for building in self:
@@ -115,7 +131,7 @@ class RealEstateBuilding(models.Model):
                 ('apartment_state', '=', 'sold')
             ])
 
-            # Count available apartments for this building
+            # Count available apartments for this building (exclude blocker status)
             available_count = self.env['product.template'].search_count([
                 ('is_apartment', '=', True),
                 ('building_id', '=', building.id),
@@ -129,8 +145,15 @@ class RealEstateBuilding(models.Model):
                 ('apartment_state', '=', 'prereserved')
             ])
 
+            # Count blocked apartments for this building
+            blocked_count = self.env['product.template'].search_count([
+                ('is_apartment', '=', True),
+                ('building_id', '=', building.id),
+                ('apartment_state', '=', 'blocker')
+            ])
+
             # Calculate total for verification
-            total_by_state = sold_count + available_count + reserved_count
+            total_by_state = sold_count + available_count + reserved_count + blocked_count
 
             # Get total count for comparison
             total_count = self.env['product.template'].search_count([
@@ -139,8 +162,8 @@ class RealEstateBuilding(models.Model):
             ])
 
             # Log for debugging
-            _logger.info("Building %s: sold=%s, available=%s, reserved=%s, total_by_state=%s, total_count=%s",
-                        building.name, sold_count, available_count, reserved_count,
+            _logger.info("Building %s: sold=%s, available=%s, reserved=%s, blocked=%s, total_by_state=%s, total_count=%s",
+                        building.name, sold_count, available_count, reserved_count, blocked_count,
                         total_by_state, total_count)
 
             building.sold_apartment_count = sold_count
@@ -177,7 +200,7 @@ class RealEstateBuilding(models.Model):
                 ('apartment_state', '=', 'sold')
             ])
 
-            # Count available stores for this building
+            # Count available stores for this building (exclude blocker status)
             available_count = self.env['product.template'].search_count([
                 ('is_store', '=', True),
                 ('building_id', '=', building.id),
@@ -191,9 +214,16 @@ class RealEstateBuilding(models.Model):
                 ('apartment_state', '=', 'prereserved')
             ])
 
+            # Count blocked stores for this building
+            blocked_count = self.env['product.template'].search_count([
+                ('is_store', '=', True),
+                ('building_id', '=', building.id),
+                ('apartment_state', '=', 'blocker')
+            ])
+
             # Log for debugging
-            _logger.info("Building %s: sold_store_count=%s, available_store_count=%s, reserved_store_count=%s",
-                        building.name, sold_count, available_count, reserved_count)
+            _logger.info("Building %s: sold_store_count=%s, available_store_count=%s, reserved_store_count=%s, blocked_store_count=%s",
+                        building.name, sold_count, available_count, reserved_count, blocked_count)
 
             building.sold_store_count = sold_count
             building.available_store_count = available_count
@@ -203,6 +233,67 @@ class RealEstateBuilding(models.Model):
             self.env.add_to_compute(self._fields['sold_store_count'], building)
             self.env.add_to_compute(self._fields['available_store_count'], building)
             self.env.add_to_compute(self._fields['reserved_store_count'], building)
+
+    @api.depends('equipement_product_ids')
+    def _compute_equipement_count(self):
+        for building in self:
+            # Count all équipements in this building
+            equipement_count = self.env['product.template'].search_count([
+                ('is_equipement', '=', True),
+                ('building_id', '=', building.id)
+            ])
+
+            # Log for debugging
+            _logger.info("Building %s: equipement_count=%s", building.name, equipement_count)
+
+            building.equipement_count = equipement_count
+
+            # Force cache invalidation
+            self.env.add_to_compute(self._fields['equipement_count'], building)
+
+    @api.depends('equipement_product_ids')
+    def _compute_sold_available_equipement_count(self):
+        for building in self:
+            # Count sold équipements for this building
+            sold_count = self.env['product.template'].search_count([
+                ('is_equipement', '=', True),
+                ('building_id', '=', building.id),
+                ('apartment_state', '=', 'sold')
+            ])
+
+            # Count available équipements for this building (exclude blocker status)
+            available_count = self.env['product.template'].search_count([
+                ('is_equipement', '=', True),
+                ('building_id', '=', building.id),
+                ('apartment_state', '=', 'disponible')
+            ])
+
+            # Count reserved équipements for this building
+            reserved_count = self.env['product.template'].search_count([
+                ('is_equipement', '=', True),
+                ('building_id', '=', building.id),
+                ('apartment_state', '=', 'prereserved')
+            ])
+
+            # Count blocked équipements for this building
+            blocked_count = self.env['product.template'].search_count([
+                ('is_equipement', '=', True),
+                ('building_id', '=', building.id),
+                ('apartment_state', '=', 'blocker')
+            ])
+
+            # Log for debugging
+            _logger.info("Building %s: sold_equipement_count=%s, available_equipement_count=%s, reserved_equipement_count=%s, blocked_equipement_count=%s",
+                        building.name, sold_count, available_count, reserved_count, blocked_count)
+
+            building.sold_equipement_count = sold_count
+            building.available_equipement_count = available_count
+            building.reserved_equipement_count = reserved_count
+
+            # Force cache invalidation
+            self.env.add_to_compute(self._fields['sold_equipement_count'], building)
+            self.env.add_to_compute(self._fields['available_equipement_count'], building)
+            self.env.add_to_compute(self._fields['reserved_equipement_count'], building)
 
     @api.depends('apartment_ids.state')
     def _compute_reservation_count(self):
@@ -560,5 +651,168 @@ class RealEstateBuilding(models.Model):
             },
             'help': """<p class="o_view_nocontent_smiling_face">
                         No reserved stores found for this building
+                    </p>"""
+        }
+
+    # Équipement action methods
+    def action_view_equipements(self):
+        self.ensure_one()
+
+        # Get all équipement products for this building
+        products = self.env['product.template'].search([
+            ('is_equipement', '=', True),
+            ('building_id', '=', self.id)
+        ])
+
+        # Log for debugging
+        _logger.info("Building %s: Found %s équipements", self.name, len(products))
+
+        # Prepare context for the action
+        context = {
+            'default_is_equipement': True,
+            'default_building_id': self.id,
+            'default_project_id': self.project_id.id,
+            'search_default_is_equipement': 1,
+            # Make project and building fields read-only
+            'default_context_project_readonly': True,
+            'default_context_building_readonly': True,
+            'form_view_ref': 'wm_real_estate.product_template_form_view_real_estate',
+            'from_button_box': True,
+            # Ensure quantity is set correctly
+            'default_type': 'product',
+            'default_apartment_state': 'disponible',
+            'default_qty_available': 1.0,
+            'force_qty_available': 1.0,
+        }
+
+        domain = [('is_equipement', '=', True), ('building_id', '=', self.id)]
+
+        return {
+            'name': _('Équipements - Building %s') % self.name,
+            'type': 'ir.actions.act_window',
+            'res_model': 'product.template',
+            'view_mode': 'kanban,tree,form',
+            'domain': domain,
+            'context': context,
+            'target': 'current',
+            'help': """<p class="o_view_nocontent_smiling_face">
+                        No équipements found for this building
+                    </p>"""
+        }
+
+    def action_view_available_equipements(self):
+        self.ensure_one()
+
+        context = {
+            'default_is_equipement': True,
+            'default_building_id': self.id,
+            'default_project_id': self.project_id.id,
+            'search_default_is_equipement': 1,
+            # Make project and building fields read-only
+            'default_context_project_readonly': True,
+            'default_context_building_readonly': True,
+            'form_view_ref': 'wm_real_estate.product_template_form_view_real_estate',
+            'from_button_box': True,
+            # Ensure quantity is set correctly
+            'default_type': 'product',
+            'default_apartment_state': 'available',
+            'default_qty_available': 1.0,
+            'force_qty_available': 1.0,
+        }
+
+        domain = [
+            ('is_equipement', '=', True),
+            ('building_id', '=', self.id),
+            ('apartment_state', '=', 'disponible')
+        ]
+
+        return {
+            'name': _('Available Équipements - Building %s') % self.name,
+            'type': 'ir.actions.act_window',
+            'res_model': 'product.template',
+            'view_mode': 'kanban,tree,form',
+            'domain': domain,
+            'context': context,
+            'target': 'current',
+            'help': """<p class="o_view_nocontent_smiling_face">
+                        No available équipements found for this building
+                    </p>"""
+        }
+
+    def action_view_sold_equipements(self):
+        self.ensure_one()
+
+        context = {
+            'default_is_equipement': True,
+            'default_building_id': self.id,
+            'default_project_id': self.project_id.id,
+            'search_default_is_equipement': 1,
+            # Make project and building fields read-only
+            'default_context_project_readonly': True,
+            'default_context_building_readonly': True,
+            'form_view_ref': 'wm_real_estate.product_template_form_view_real_estate',
+            'from_button_box': True,
+            # Ensure quantity is set correctly
+            'default_type': 'product',
+            'default_apartment_state': 'sold',
+            'default_qty_available': 0.0,
+            'force_qty_available': 0.0,
+        }
+
+        domain = [
+            ('is_equipement', '=', True),
+            ('building_id', '=', self.id),
+            ('apartment_state', '=', 'sold')
+        ]
+
+        return {
+            'name': _('Sold Équipements - Building %s') % self.name,
+            'type': 'ir.actions.act_window',
+            'res_model': 'product.template',
+            'view_mode': 'kanban,tree,form',
+            'domain': domain,
+            'context': context,
+            'target': 'current',
+            'help': """<p class="o_view_nocontent_smiling_face">
+                        No sold équipements found for this building
+                    </p>"""
+        }
+
+    def action_view_reserved_equipements(self):
+        self.ensure_one()
+
+        context = {
+            'default_is_equipement': True,
+            'default_building_id': self.id,
+            'default_project_id': self.project_id.id,
+            'search_default_is_equipement': 1,
+            # Make project and building fields read-only
+            'default_context_project_readonly': True,
+            'default_context_building_readonly': True,
+            'form_view_ref': 'wm_real_estate.product_template_form_view_real_estate',
+            'from_button_box': True,
+            # Ensure quantity is set correctly
+            'default_type': 'product',
+            'default_apartment_state': 'prereserved',
+            'default_qty_available': 0.0,
+            'force_qty_available': 0.0,
+        }
+
+        domain = [
+            ('is_equipement', '=', True),
+            ('building_id', '=', self.id),
+            ('apartment_state', '=', 'prereserved')
+        ]
+
+        return {
+            'name': _('Reserved Équipements - Building %s') % self.name,
+            'type': 'ir.actions.act_window',
+            'res_model': 'product.template',
+            'view_mode': 'kanban,tree,form',
+            'domain': domain,
+            'context': context,
+            'target': 'current',
+            'help': """<p class="o_view_nocontent_smiling_face">
+                        No reserved équipements found for this building
                     </p>"""
         }

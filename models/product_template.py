@@ -12,9 +12,10 @@ class ProductTemplate(models.Model):
     # Real Estate specific fields
     is_apartment = fields.Boolean(string='Is Apartment', default=False)
     is_store = fields.Boolean(string='Is Store', default=False)
+    is_equipement = fields.Boolean(string='Is Équipement', default=False)
     apartment_id = fields.Many2one('real.estate.apartment', string='Apartment')
 
-    # Direct fields for apartment/store properties
+    # Direct fields for apartment/store/équipement properties
     floor = fields.Integer(string='Floor')
     area = fields.Float(string='Area (m²)')
     rooms = fields.Integer(string='Number of Rooms', default=1)
@@ -35,6 +36,7 @@ class ProductTemplate(models.Model):
         ('disponible', 'Disponible'),
         ('prereserved', 'Préréservé'),
         ('sold', 'Vendu'),
+        ('blocker', 'Bloqué'),
     ], string='Apartment Status', compute='_compute_apartment_state', inverse='_inverse_apartment_state', 
        store=True, readonly=False, default='disponible', required=True,
        help="Status of the apartment. This field is synchronized with the apartment record.")
@@ -48,17 +50,26 @@ class ProductTemplate(models.Model):
     lock_date = fields.Datetime(string='Lock Date', related='apartment_id.lock_date', readonly=True,
                               help="Date and time when the apartment was locked")
 
-    @api.depends('apartment_id.state', 'is_apartment', 'is_store')
+    @api.depends('apartment_id.state', 'is_apartment', 'is_store', 'is_equipement', 'sale_ok')
     def _compute_apartment_state(self):
         """Compute apartment state from the linked apartment record"""
         for product in self:
-            if product.is_apartment and product.apartment_id:
-                # For apartments, get the state from the linked apartment
-                product.apartment_state = product.apartment_id.state
-            elif product.is_store:
-                # For stores, use the stored value or default to disponible
-                if not product.apartment_state:
-                    product.apartment_state = 'disponible'
+            # First check if sale_ok is False - this overrides all other states
+            if not product.sale_ok and (product.is_apartment or product.is_store or product.is_equipement):
+                product.apartment_state = 'blocker'
+            elif product.is_apartment and product.apartment_id:
+                # For apartments, get the state from the linked apartment (unless blocked)
+                if product.sale_ok:
+                    product.apartment_state = product.apartment_id.state
+                else:
+                    product.apartment_state = 'blocker'
+            elif product.is_store or product.is_equipement:
+                # For stores and équipement, use the stored value or default to disponible (unless blocked)
+                if product.sale_ok:
+                    if not product.apartment_state or product.apartment_state == 'blocker':
+                        product.apartment_state = 'disponible'
+                else:
+                    product.apartment_state = 'blocker'
             else:
                 # For non-real estate products, set to disponible
                 product.apartment_state = 'disponible'
@@ -66,13 +77,23 @@ class ProductTemplate(models.Model):
     def _inverse_apartment_state(self):
         """Update apartment state when changed from product side"""
         for product in self:
+            # Handle blocker status - update sale_ok field
+            if product.apartment_state == 'blocker':
+                product.sale_ok = False
+            elif product.apartment_state in ['disponible', 'prereserved', 'sold']:
+                # Only set sale_ok to True if it was previously False due to blocker
+                if not product.sale_ok:
+                    product.sale_ok = True
+            
             if product.is_apartment and product.apartment_id:
-                # Update the linked apartment's state
-                product.apartment_id.with_context(from_product_update=True).write({
-                    'state': product.apartment_state
-                })
-                _logger.info("Updated apartment %s state to %s from product", 
-                           product.apartment_id.name, product.apartment_state)
+                # Don't sync blocker status to apartment record - it's product-level only
+                if product.apartment_state != 'blocker':
+                    # Update the linked apartment's state
+                    product.apartment_id.with_context(from_product_update=True).write({
+                        'state': product.apartment_state
+                    })
+                    _logger.info("Updated apartment %s state to %s from product", 
+                               product.apartment_id.name, product.apartment_state)
 
     @api.model
     def default_get(self, fields_list):
@@ -181,9 +202,11 @@ class ProductTemplate(models.Model):
     def _onchange_is_apartment(self):
         """When marking as apartment, set product type to storable and update name placeholder"""
         if self.is_apartment:
-            # If is_store is also checked, uncheck it (mutual exclusivity)
+            # If is_store or is_equipement is also checked, uncheck them (mutual exclusivity)
             if self.is_store:
                 self.is_store = False
+            if self.is_equipement:
+                self.is_equipement = False
 
             # Log the context for debugging
             _logger.info("DEBUG_APARTMENT_CREATION: _onchange_is_apartment context: %s", self.env.context)
@@ -253,9 +276,11 @@ class ProductTemplate(models.Model):
     def _onchange_is_store(self):
         """When marking as store, set product type to storable and update name placeholder"""
         if self.is_store:
-            # If is_apartment is also checked, uncheck it (mutual exclusivity)
+            # If is_apartment or is_equipement is also checked, uncheck them (mutual exclusivity)
             if self.is_apartment:
                 self.is_apartment = False
+            if self.is_equipement:
+                self.is_equipement = False
 
             self.type = 'product'  # Storable product
             # If this is a new record with no name yet, set a default name
@@ -283,6 +308,53 @@ class ProductTemplate(models.Model):
             # CASE 3: Creating from stores page (neither default_building_id nor default_project_id)
             else:
                 # When creating from stores page, both fields should be editable
+                self.context_project_readonly = False
+                self.context_building_readonly = False
+
+            # Override for force_building_id
+            if self.env.context.get('force_building_id'):
+                self.context_building_readonly = True
+
+            # CRITICAL DEBUG: Force building to be editable when coming from project view
+            if self.env.context.get('from_project_view') or self.env.context.get('force_building_editable'):
+                self.context_building_readonly = False
+
+    @api.onchange('is_equipement')
+    def _onchange_is_equipement(self):
+        """When marking as équipement, set product type to storable and update name placeholder"""
+        if self.is_equipement:
+            # If is_apartment or is_store is also checked, uncheck them (mutual exclusivity)
+            if self.is_apartment:
+                self.is_apartment = False
+            if self.is_store:
+                self.is_store = False
+
+            self.type = 'product'  # Storable product
+            # If this is a new record with no name yet, set a default name
+            if not self.name or self.name == 'New Product':
+                self.name = 'New Équipement'
+
+            # Set readonly flags based on context - same logic as apartments and stores
+            # CASE 1: Creating from a building
+            if self.env.context.get('default_building_id'):
+                # When creating from a building, both building and project should be read-only
+                self.context_building_readonly = True
+                self.context_project_readonly = True
+
+            # CASE 2: Creating from a project
+            elif self.env.context.get('default_project_id'):
+                # When creating from a project, project should be read-only but building should be editable
+                self.context_project_readonly = True
+                self.context_building_readonly = False
+
+                # SPECIAL CASE: Explicitly mark as coming from project view
+                if self.env.context.get('from_project_view'):
+                    _logger.info("Creating from project view: Ensuring building_readonly=False")
+                    self.context_building_readonly = False
+
+            # CASE 3: Creating from équipement page (neither default_building_id nor default_project_id)
+            else:
+                # When creating from équipement page, both fields should be editable
                 self.context_project_readonly = False
                 self.context_building_readonly = False
 
@@ -483,6 +555,20 @@ class ProductTemplate(models.Model):
             if not vals.get('name'):
                 vals['name'] = f"Store {int(time.time()) % 10000}"
                 _logger.info("Generated temporary store name: %s", vals['name'])
+
+            # Make sure we have a price
+            if not vals.get('list_price'):
+                vals['list_price'] = 0.0
+
+            # Quantity management is now handled by Odoo's standard inventory management
+            _logger.info("Quantity will be managed by Odoo's standard inventory system")
+
+        # If creating an équipement product
+        elif vals.get('is_equipement'):
+            # If we don't have a name, generate a temporary one
+            if not vals.get('name'):
+                vals['name'] = f"Équipement {int(time.time()) % 10000}"
+                _logger.info("Generated temporary équipement name: %s", vals['name'])
 
             # Make sure we have a price
             if not vals.get('list_price'):
@@ -699,8 +785,39 @@ class ProductTemplate(models.Model):
             except Exception as e:
                 _logger.error("Error updating store after product creation: %s", str(e))
 
-        # Update stock quantity for apartments and stores
-        if res.is_apartment or res.is_store:
+        # Handle équipement naming
+        elif res.is_equipement and res.building_id:
+            try:
+                # Only generate a name if the user hasn't entered one or if it's a default name
+                default_names = ['New Équipement', 'New Product', f"Équipement {int(time.time()) % 10000}"]
+                if res.building_id and res.floor is not None and (not res.name or res.name in default_names):
+                    # Count existing équipements on this floor in this building
+                    floor = res.floor or 0
+                    existing_count = self.env['product.template'].search_count([
+                        ('building_id', '=', res.building_id.id),
+                        ('floor', '=', floor),
+                        ('is_equipement', '=', True)
+                    ])
+
+                    # Generate équipement number
+                    building_prefix = res.building_id.code[0].upper() if res.building_id.code else 'E'
+                    equipement_number = f"{building_prefix}{floor:02d}{existing_count:02d}"  # Use existing_count without +1
+
+                    # Set the name to "Équipement" followed by the number only if user hasn't entered a custom name
+                    suggested_name = f"Équipement {equipement_number}"
+                    res.name = suggested_name
+                    res.default_code = f"EQP-{equipement_number}"
+                    _logger.info("Generated équipement name %s for new équipement", suggested_name)
+                else:
+                    _logger.info("Keeping user-entered équipement name: %s", res.name)
+
+                # Update the stock quantity
+                _logger.info("Setting initial quantity for new équipement %s", res.name)
+            except Exception as e:
+                _logger.error("Error updating équipement after product creation: %s", str(e))
+
+        # Update stock quantity for apartments, stores, and équipements
+        if res.is_apartment or res.is_store or res.is_equipement:
             try:
                 res._update_stock_quantity()
             except Exception as e:
@@ -1014,7 +1131,7 @@ class ProductTemplate(models.Model):
         return apartment_vals
 
     def _update_stock_quantity(self):
-        """Update the stock quantity based on apartment/store state"""
+        """Update the stock quantity based on apartment/store/équipement state"""
         for product in self:
             if not (product.is_apartment or product.is_store):
                 continue
@@ -1038,10 +1155,15 @@ class ProductTemplate(models.Model):
                 _logger.error("No internal stock location found for company %s", self.env.company.name)
                 continue
 
-            # Determine the quantity based on state
+            # Determine the quantity based on state and product type
             quantity = 0.0
             if product.apartment_state == 'disponible':
-                quantity = 1.0
+                if product.is_store and product.area:
+                    # For stores, use surface area as inventory quantity
+                    quantity = product.area
+                else:
+                    # For apartments and équipements, use quantity 1
+                    quantity = 1.0
 
             _logger.info("Setting quantity for %s to %s (state: %s)",
                         product.name, quantity, product.apartment_state)
@@ -1111,11 +1233,11 @@ class ProductTemplate(models.Model):
         return category
 
     def action_create_reservation(self):
-        """Create a new reservation (quotation) for this property (apartment or store)"""
+        """Create a new reservation (quotation) for this property (apartment, store, or équipement)"""
         self.ensure_one()
 
-        if not (self.is_apartment or self.is_store):
-            raise UserError(_("This action is only available for real estate properties (apartments or stores)."))
+        if not (self.is_apartment or self.is_store or self.is_equipement):
+            raise UserError(_("This action is only available for real estate properties (apartments, stores, or équipements)."))
 
         # Check if property is available
         if self.apartment_state != 'disponible':
@@ -1164,7 +1286,7 @@ class ProductTemplate(models.Model):
                 _logger.error("Error creating apartment: %s", str(e))
                 raise UserError(_("Failed to create apartment: %s") % str(e))
 
-        # Create a new quotation with this apartment/store
+        # Create a new quotation with this apartment/store/équipement
         SaleOrder = self.env['sale.order']
         
         # Clear any type from context that might interfere with partner creation
@@ -1195,16 +1317,25 @@ Pièces: {rooms}
 Salles de bain: {bathrooms}
 """
         else:
-            # For stores, use the product data directly
+            # For stores and équipements, use the product data directly
             project_name = self.project_id.name if self.project_id else "N/A"
             building_name = self.building_id.name if self.building_id else "N/A"
             floor = self.floor if self.floor is not None else "N/A"
             area = self.area if self.area else "N/A"
-
-            property_description = f"""
+            
+            if self.is_store:
+                property_description = f"""
 Projet: {project_name}
 Bâtiment: {building_name}
 Magasin: {self.name}
+Étage: {floor}
+Surface: {area} m²
+"""
+            elif self.is_equipement:
+                property_description = f"""
+Projet: {project_name}
+Bâtiment: {building_name}
+Équipement: {self.name}
 Étage: {floor}
 Surface: {area} m²
 """
@@ -1213,7 +1344,7 @@ Surface: {area} m²
         order_line_vals = {
             'product_id': self.product_variant_id.id,
             'building_id': self.building_id.id if self.building_id else False,
-            'product_uom_qty': 1,
+            'product_uom_qty': self.area if self.is_store and self.area else 1,
             'price_unit': self.list_price,
             'name': property_description,
         }
@@ -1233,8 +1364,8 @@ Surface: {area} m²
         new_order = SaleOrder.create(order_vals)
 
         # Log the creation - using separate variables to avoid context leakage
-        apt_or_store = 'apartment' if self.is_apartment else 'store'
-        _logger.info("Created new reservation %s for %s %s", new_order.name, apt_or_store, self.name)
+        property_type = 'apartment' if self.is_apartment else ('store' if self.is_store else 'équipement')
+        _logger.info("Created new reservation %s for %s %s", new_order.name, property_type, self.name)
 
         # Return an action to open the new quotation
         return {
@@ -1249,7 +1380,7 @@ Surface: {area} m²
         }
 
     def action_cancel_reservation(self):
-        """Cancel the reservation and return the apartment/store to disponible state"""
+        """Cancel the reservation and return the apartment/store/équipement to disponible state"""
         self.ensure_one()
         
         if self.apartment_state != 'prereserved':
@@ -1278,7 +1409,7 @@ Surface: {area} m²
                 order.action_cancel()
                 _logger.info("Cancelled sale order %s when canceling reservation for %s", order.name, self.name)
             
-        # Update apartment/store status
+        # Update apartment/store/équipement status
         self.write({
             'apartment_state': 'disponible',
             'is_locked': False,
@@ -1307,6 +1438,110 @@ Surface: {area} m²
             'params': {
                 'title': _('Reservation Cancelled'),
                 'message': _('The reservation has been cancelled and the %s is now disponible.') % property_type,
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
+    def action_cancel_sold_property(self):
+        """Cancel a sold property and return it to disponible state, handling invoices"""
+        self.ensure_one()
+        
+        if self.apartment_state != 'sold':
+            raise UserError(_("Can only cancel sold properties. Current state: %s") % dict(self._fields['apartment_state'].selection)[self.apartment_state])
+        
+        property_type = "apartment" if self.is_apartment else ("store" if self.is_store else "équipement")
+        
+        # Find all related sale order lines for this property
+        sale_lines = self.env['sale.order.line'].search([
+            ('product_id.product_tmpl_id', '=', self.id),
+            ('order_id.state', 'in', ['sale', 'done'])
+        ])
+        
+        if not sale_lines:
+            # No sale orders found, just change state
+            self._reset_property_to_disponible(property_type)
+            return self._show_cancel_success_notification(property_type)
+        
+        # Get all related sale orders
+        sale_orders = sale_lines.mapped('order_id')
+        confirmed_orders = sale_orders.filtered(lambda o: o.state == 'sale')
+        
+        if confirmed_orders:
+            # Find and handle related invoices
+            invoices_to_handle = []
+            for order in confirmed_orders:
+                # Get all invoices for this order
+                order_invoices = order.invoice_ids.filtered(lambda inv: inv.state in ['posted', 'paid'])
+                if order_invoices:
+                    invoices_to_handle.extend(order_invoices)
+            
+            # Ask for confirmation if there are posted invoices
+            if invoices_to_handle:
+                invoice_names = ', '.join([inv.name for inv in invoices_to_handle])
+                # For now, we'll provide a warning but still allow the cancellation
+                # In a production environment, you might want to require special permissions
+                _logger.warning(
+                    "Cancelling sold %s %s with posted invoices: %s. "
+                    "Consider creating credit notes if accounting reconciliation is needed.",
+                    property_type, self.name, invoice_names
+                )
+            
+            # Cancel the sale orders (this will also update the property state)
+            try:
+                for order in confirmed_orders:
+                    order.action_cancel()
+                    _logger.info("Cancelled sale order %s when canceling sold %s %s", 
+                               order.name, property_type, self.name)
+            except Exception as e:
+                _logger.error("Error cancelling sale order: %s", str(e))
+                # If we can't cancel the orders, still proceed with state change
+                # as the user specifically requested to cancel the sold property
+                pass
+        
+        # Ensure the property is set to disponible
+        self._reset_property_to_disponible(property_type)
+        
+        # Log the action in the chatter
+        message = _("Sold %s cancelled: returned to disponible state") % property_type
+        if invoices_to_handle:
+            message += _(" (Warning: Related invoices exist: %s)") % ', '.join([inv.name for inv in invoices_to_handle])
+        self.message_post(body=message, message_type='comment')
+        
+        return self._show_cancel_success_notification(property_type, sold=True)
+    
+    def _reset_property_to_disponible(self, property_type):
+        """Reset property to disponible state"""
+        # Update property status
+        self.write({
+            'apartment_state': 'disponible',
+            'is_locked': False,
+            'locked_by_order_id': False,
+            'lock_date': False
+        })
+        
+        # If linked to an apartment record, update it too
+        if self.apartment_id:
+            self.apartment_id.write({
+                'state': 'disponible',
+                'is_locked': False,
+                'locked_by_order_id': False,
+                'lock_date': False
+            })
+        
+        _logger.info("Reset %s %s to disponible state", property_type, self.name)
+    
+    def _show_cancel_success_notification(self, property_type, sold=False):
+        """Show success notification for cancellation"""
+        title = _('Sold Property Cancelled') if sold else _('Reservation Cancelled')
+        message_type = 'sold property' if sold else 'reservation'
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': title,
+                'message': _('The %s has been cancelled and the %s is now disponible.') % (message_type, property_type),
                 'type': 'success',
                 'sticky': False,
             }
@@ -1474,12 +1709,12 @@ Surface: {area} m²
 
         return category
 
-    @api.constrains('is_apartment', 'is_store')
+    @api.constrains('is_apartment', 'is_store', 'is_equipement')
     def _check_apartment_store_exclusivity(self):
-        """Ensure a product can't be both an apartment and a store"""
+        """Ensure a product can't be both an apartment, store, and équipement"""
         for product in self:
-            if product.is_apartment and product.is_store:
-                raise UserError(_("A product cannot be both an apartment and a store. Please select only one option."))
+            if sum(bool(x) for x in [product.is_apartment, product.is_store, product.is_equipement]) > 1:
+                raise UserError(_("A product can only be one type: apartment, store, or équipement. Please select only one option."))
 
     @api.constrains('is_store', 'building_id')
     def _check_building_required_store(self):
@@ -1487,3 +1722,29 @@ Surface: {area} m²
         for product in self:
             if product.is_store and not product.building_id:
                 raise UserError(_("Building is required for stores. Please select a building."))
+
+    @api.constrains('is_equipement', 'building_id')
+    def _check_building_required_equipement(self):
+        """Ensure building is set for équipement"""
+        for product in self:
+            if product.is_equipement and not product.building_id:
+                raise UserError(_("Building is required for équipement. Please select a building."))
+
+    @api.constrains('is_store', 'area')
+    def _check_store_area_valid(self):
+        """Ensure area is greater than 0 for stores"""
+        for product in self:
+            if product.is_store and (not product.area or product.area <= 0):
+                raise UserError(_("Area must be strictly greater than 0 m² for stores. Please enter a valid area (minimum 1 m²)."))
+
+    @api.onchange('sale_ok')
+    def _onchange_sale_ok(self):
+        """When sale_ok changes, update apartment_state accordingly"""
+        if hasattr(self, 'is_apartment') and hasattr(self, 'is_store') and hasattr(self, 'is_equipement'):
+            if (self.is_apartment or self.is_store or self.is_equipement):
+                if not self.sale_ok:
+                    # Set to blocker when sale_ok is unchecked
+                    self.apartment_state = 'blocker'
+                elif self.apartment_state == 'blocker':
+                    # Return to disponible when sale_ok is checked again (from blocker state)
+                    self.apartment_state = 'disponible'

@@ -87,6 +87,11 @@ msgid "sold"
 msgstr "vendu"
 
 #. module: wm_real_estate
+#: selection:product.template,apartment_state:0
+msgid "blocker"
+msgstr "bloqué"
+
+#. module: wm_real_estate
 #: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__name
 msgid "Order Reference"
 msgstr "Référence commande"
@@ -568,6 +573,21 @@ msgstr "Options Appartement"
 #: code:addons/wm_real_estate/static/src/js/apartment_action.js:0
 msgid "Options Magasin"
 msgstr "Options Magasin"
+
+#. module: wm_real_estate
+#: code:addons/wm_real_estate/static/src/js/apartment_action.js:0
+msgid "Voir l'équipement"
+msgstr "Voir l'équipement"
+
+#. module: wm_real_estate
+#: code:addons/wm_real_estate/static/src/js/apartment_action.js:0
+msgid "Options Équipement"
+msgstr "Options Équipement"
+
+#. module: wm_real_estate
+#: code:addons/wm_real_estate/static/src/js/apartment_action.js:0
+msgid "Équipement"
+msgstr "Équipement"
 
 #. module: wm_real_estate
 #: code:addons/wm_real_estate/static/src/js/apartment_action.js:0
@@ -1074,901 +1094,123 @@ msgid "Reserved Stores"
 msgstr "Magasins réservés"
 
 # ==============================================
-# SALE ORDER LIST VIEW TRANSLATIONS
+# ÉQUIPEMENT TRANSLATIONS  
 # ==============================================
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__team_id
-msgid "Sales Team"
-msgstr "Équipe de vente"
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__equipement_count
+msgid "Équipement Count"
+msgstr "Nombre d'équipements"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__activity_ids
-msgid "Activities"
-msgstr "Activités"
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__sold_equipement_count
+msgid "Sold Équipements"
+msgstr "Équipements vendus"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_untaxed
-msgid "Untaxed Amount"
-msgstr "Montant HT"
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__available_equipement_count
+msgid "Disponible Équipements"
+msgstr "Équipements disponibles"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__invoice_status
-msgid "Invoice Status"
-msgstr "Statut de facturation"
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_project__reserved_equipement_count
+msgid "Préréservé Équipements"
+msgstr "Équipements préréservés"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__delivery_status
-msgid "Delivery Status"
-msgstr "Statut de livraison"
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__equipement_count
+msgid "Équipement Count"
+msgstr "Nombre d'équipements"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__sold_equipement_count
+msgid "Sold Équipements"
+msgstr "Équipements vendus"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_equipement_count
+msgid "Available Équipements"
+msgstr "Équipements disponibles"
+
+#. module: wm_real_estate
+#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__reserved_equipement_count
+msgid "Reserved Équipements"
+msgstr "Équipements réservés"
+
+#. module: wm_real_estate
+#: code:addons/wm_real_estate/views/project_views.xml:0
+msgid "Équipements"
+msgstr "Équipements"
+
+#. module: wm_real_estate
+#: code:addons/wm_real_estate/views/building_views.xml:0
+msgid "Équipements"
+msgstr "Équipements"
 
 # ==============================================
-# PRODUCT TEMPLATE LIST VIEW TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__categ_id
-msgid "Product Category"
-msgstr "Catégorie de produit"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__standard_price
-msgid "Cost"
-msgstr "Coût"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__can_be_sold
-msgid "Can be Sold"
-msgstr "Peut être vendu"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__is_storable
-msgid "Is Storable"
-msgstr "Est stockable"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__active
-msgid "Active"
-msgstr "Actif"
-
-# ==============================================
-# SALE ORDER LIST TRANSLATIONS
+# ADDITIONAL ÉQUIPEMENT TRANSLATIONS
 # ==============================================
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__partner_id
-msgid "Customer"
-msgstr "Client"
+#: code:addons/wm_real_estate/views/product_views.xml:0
+msgid "Is Équipement"
+msgstr "Est un Équipement"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__date_order
-msgid "Order Date"
-msgstr "Date de commande"
+#: code:addons/wm_real_estate/views/product_views.xml:0
+msgid "Équipement Name"
+msgstr "Nom de l'Équipement"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__user_id
-msgid "Salesperson"
-msgstr "Commercial"
+#: code:addons/wm_real_estate/views/product_views.xml:0
+msgid "Équipement Information"
+msgstr "Informations de l'Équipement"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__team_id
-msgid "Sales Team"
-msgstr "Équipe de vente"
+#: code:addons/wm_real_estate/views/product_views.xml:0
+msgid "Create Équipement"
+msgstr "Créer Équipement"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__activity_ids
-msgid "Activities"
-msgstr "Activités"
+#: code:addons/wm_real_estate/views/menu_views.xml:0
+msgid "Créer Équipement"
+msgstr "Créer Équipement"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_untaxed
-msgid "Untaxed Amount"
-msgstr "Montant HT"
+#: code:addons/wm_real_estate/views/product_views.xml:0
+msgid "Create a new équipement"
+msgstr "Créer un nouvel équipement"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_tax
-msgid "Taxes"
-msgstr "Taxes"
+#: code:addons/wm_real_estate/views/product_views.xml:0
+msgid "No équipements found!"
+msgstr "Aucun équipement trouvé !"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_total
-msgid "Total"
-msgstr "Total"
+#: code:addons/wm_real_estate/views/product_views.xml:0
+msgid "Disponible Équipements"
+msgstr "Équipements Disponibles"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__currency_id
-msgid "Currency"
-msgstr "Devise"
+#: code:addons/wm_real_estate/views/product_views.xml:0
+msgid "Préréservé Équipements"
+msgstr "Équipements Préréservés"
 
 #. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__invoice_status
-msgid "Invoice Status"
-msgstr "Statut de facturation"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__delivery_status
-msgid "Delivery Status"
-msgstr "Statut de livraison"
+#: code:addons/wm_real_estate/views/product_views.xml:0
+msgid "Vendu Équipements"
+msgstr "Équipements Vendus"
 
 # ==============================================
-# GENERIC LIST VIEW TRANSLATIONS
+# BLOCKER STATUS TRANSLATIONS
 # ==============================================
 
 #. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Reference"
-msgstr "Référence"
+#: code:addons/wm_real_estate/static/src/js/apartment_action.js:0
+msgid "Bloqu�"
+msgstr "Bloqu�"
 
 #. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Code"
-msgstr "Code"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Type"
-msgstr "Type"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Category"
-msgstr "Catégorie"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Quantity"
-msgstr "Quantité"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Unit Price"
-msgstr "Prix unitaire"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Date"
-msgstr "Date"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Created on"
-msgstr "Créé le"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Last Modified on"
-msgstr "Dernière modification le"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Company"
-msgstr "Société"
-
-# ==============================================
-# ADDITIONAL TABLE HEADER TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__floors
-msgid "Floors"
-msgstr "Étages"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__apartment_count
-msgid "Apartments"
-msgstr "Appartements"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__sold_apartment_count
-msgid "Sold Apartments"
-msgstr "Appartements vendus"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_apartment_count
-msgid "Disponible Apartments"
-msgstr "Appartements disponibles"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_apartment_count
-msgid "Available Apartments"
-msgstr "Appartements disponibles"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__reservation_count
-msgid "Reservation Count"
-msgstr "Nombre de réservations"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__store_count
-msgid "Store Count"
-msgstr "Nombre de magasins"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__sold_store_count
-msgid "Sold Stores"
-msgstr "Magasins vendus"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_store_count
-msgid "Available Stores"
-msgstr "Magasins disponibles"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__reserved_store_count
-msgid "Reserved Stores"
-msgstr "Magasins réservés"
-
-# ==============================================
-# SALE ORDER LIST VIEW TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__team_id
-msgid "Sales Team"
-msgstr "Équipe de vente"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__activity_ids
-msgid "Activities"
-msgstr "Activités"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_untaxed
-msgid "Untaxed Amount"
-msgstr "Montant HT"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__invoice_status
-msgid "Invoice Status"
-msgstr "Statut de facturation"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__delivery_status
-msgid "Delivery Status"
-msgstr "Statut de livraison"
-
-# ==============================================
-# PRODUCT TEMPLATE LIST VIEW TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__categ_id
-msgid "Product Category"
-msgstr "Catégorie de produit"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__standard_price
-msgid "Cost"
-msgstr "Coût"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__can_be_sold
-msgid "Can be Sold"
-msgstr "Peut être vendu"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__is_storable
-msgid "Is Storable"
-msgstr "Est stockable"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__active
-msgid "Active"
-msgstr "Actif"
-
-# ==============================================
-# SALE ORDER LIST TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__partner_id
-msgid "Customer"
-msgstr "Client"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__date_order
-msgid "Order Date"
-msgstr "Date de commande"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__user_id
-msgid "Salesperson"
-msgstr "Commercial"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__team_id
-msgid "Sales Team"
-msgstr "Équipe de vente"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__activity_ids
-msgid "Activities"
-msgstr "Activités"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_untaxed
-msgid "Untaxed Amount"
-msgstr "Montant HT"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_tax
-msgid "Taxes"
-msgstr "Taxes"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_total
-msgid "Total"
-msgstr "Total"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__currency_id
-msgid "Currency"
-msgstr "Devise"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__invoice_status
-msgid "Invoice Status"
-msgstr "Statut de facturation"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__delivery_status
-msgid "Delivery Status"
-msgstr "Statut de livraison"
-
-# ==============================================
-# GENERIC LIST VIEW TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Reference"
-msgstr "Référence"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Code"
-msgstr "Code"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Type"
-msgstr "Type"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Category"
-msgstr "Catégorie"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Quantity"
-msgstr "Quantité"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Unit Price"
-msgstr "Prix unitaire"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Date"
-msgstr "Date"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Created on"
-msgstr "Créé le"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Last Modified on"
-msgstr "Dernière modification le"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Company"
-msgstr "Société"
-
-# ==============================================
-# ADDITIONAL TABLE HEADER TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__floors
-msgid "Floors"
-msgstr "Étages"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__apartment_count
-msgid "Apartments"
-msgstr "Appartements"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__sold_apartment_count
-msgid "Sold Apartments"
-msgstr "Appartements vendus"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_apartment_count
-msgid "Disponible Apartments"
-msgstr "Appartements disponibles"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_apartment_count
-msgid "Available Apartments"
-msgstr "Appartements disponibles"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__reservation_count
-msgid "Reservation Count"
-msgstr "Nombre de réservations"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__store_count
-msgid "Store Count"
-msgstr "Nombre de magasins"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__sold_store_count
-msgid "Sold Stores"
-msgstr "Magasins vendus"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_store_count
-msgid "Available Stores"
-msgstr "Magasins disponibles"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__reserved_store_count
-msgid "Reserved Stores"
-msgstr "Magasins réservés"
-
-# ==============================================
-# SALE ORDER LIST VIEW TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__team_id
-msgid "Sales Team"
-msgstr "Équipe de vente"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__activity_ids
-msgid "Activities"
-msgstr "Activités"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_untaxed
-msgid "Untaxed Amount"
-msgstr "Montant HT"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__invoice_status
-msgid "Invoice Status"
-msgstr "Statut de facturation"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__delivery_status
-msgid "Delivery Status"
-msgstr "Statut de livraison"
-
-# ==============================================
-# PRODUCT TEMPLATE LIST VIEW TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__categ_id
-msgid "Product Category"
-msgstr "Catégorie de produit"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__standard_price
-msgid "Cost"
-msgstr "Coût"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__can_be_sold
-msgid "Can be Sold"
-msgstr "Peut être vendu"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__is_storable
-msgid "Is Storable"
-msgstr "Est stockable"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__active
-msgid "Active"
-msgstr "Actif"
-
-# ==============================================
-# SALE ORDER LIST TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__partner_id
-msgid "Customer"
-msgstr "Client"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__date_order
-msgid "Order Date"
-msgstr "Date de commande"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__user_id
-msgid "Salesperson"
-msgstr "Commercial"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__team_id
-msgid "Sales Team"
-msgstr "Équipe de vente"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__activity_ids
-msgid "Activities"
-msgstr "Activités"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_untaxed
-msgid "Untaxed Amount"
-msgstr "Montant HT"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_tax
-msgid "Taxes"
-msgstr "Taxes"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_total
-msgid "Total"
-msgstr "Total"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__currency_id
-msgid "Currency"
-msgstr "Devise"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__invoice_status
-msgid "Invoice Status"
-msgstr "Statut de facturation"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__delivery_status
-msgid "Delivery Status"
-msgstr "Statut de livraison"
-
-# ==============================================
-# GENERIC LIST VIEW TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Reference"
-msgstr "Référence"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Code"
-msgstr "Code"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Type"
-msgstr "Type"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Category"
-msgstr "Catégorie"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Quantity"
-msgstr "Quantité"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Unit Price"
-msgstr "Prix unitaire"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Date"
-msgstr "Date"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Created on"
-msgstr "Créé le"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Last Modified on"
-msgstr "Dernière modification le"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Company"
-msgstr "Société"
-
-# ==============================================
-# ADDITIONAL TABLE HEADER TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__floors
-msgid "Floors"
-msgstr "Étages"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__apartment_count
-msgid "Apartments"
-msgstr "Appartements"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__sold_apartment_count
-msgid "Sold Apartments"
-msgstr "Appartements vendus"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_apartment_count
-msgid "Disponible Apartments"
-msgstr "Appartements disponibles"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_apartment_count
-msgid "Available Apartments"
-msgstr "Appartements disponibles"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__reservation_count
-msgid "Reservation Count"
-msgstr "Nombre de réservations"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__store_count
-msgid "Store Count"
-msgstr "Nombre de magasins"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__sold_store_count
-msgid "Sold Stores"
-msgstr "Magasins vendus"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_store_count
-msgid "Available Stores"
-msgstr "Magasins disponibles"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__reserved_store_count
-msgid "Reserved Stores"
-msgstr "Magasins réservés"
-
-# ==============================================
-# SALE ORDER LIST VIEW TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__team_id
-msgid "Sales Team"
-msgstr "Équipe de vente"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__activity_ids
-msgid "Activities"
-msgstr "Activités"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_untaxed
-msgid "Untaxed Amount"
-msgstr "Montant HT"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__invoice_status
-msgid "Invoice Status"
-msgstr "Statut de facturation"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__delivery_status
-msgid "Delivery Status"
-msgstr "Statut de livraison"
-
-# ==============================================
-# PRODUCT TEMPLATE LIST VIEW TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__categ_id
-msgid "Product Category"
-msgstr "Catégorie de produit"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__standard_price
-msgid "Cost"
-msgstr "Coût"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__can_be_sold
-msgid "Can be Sold"
-msgstr "Peut être vendu"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__is_storable
-msgid "Is Storable"
-msgstr "Est stockable"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_product_template__active
-msgid "Active"
-msgstr "Actif"
-
-# ==============================================
-# SALE ORDER LIST TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__partner_id
-msgid "Customer"
-msgstr "Client"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__date_order
-msgid "Order Date"
-msgstr "Date de commande"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__user_id
-msgid "Salesperson"
-msgstr "Commercial"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__team_id
-msgid "Sales Team"
-msgstr "Équipe de vente"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__activity_ids
-msgid "Activities"
-msgstr "Activités"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_untaxed
-msgid "Untaxed Amount"
-msgstr "Montant HT"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_tax
-msgid "Taxes"
-msgstr "Taxes"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__amount_total
-msgid "Total"
-msgstr "Total"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__currency_id
-msgid "Currency"
-msgstr "Devise"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__invoice_status
-msgid "Invoice Status"
-msgstr "Statut de facturation"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_sale_order__delivery_status
-msgid "Delivery Status"
-msgstr "Statut de livraison"
-
-# ==============================================
-# GENERIC LIST VIEW TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Reference"
-msgstr "Référence"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Code"
-msgstr "Code"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Type"
-msgstr "Type"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Category"
-msgstr "Catégorie"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Quantity"
-msgstr "Quantité"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Unit Price"
-msgstr "Prix unitaire"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Date"
-msgstr "Date"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Created on"
-msgstr "Créé le"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Last Modified on"
-msgstr "Dernière modification le"
-
-#. module: wm_real_estate
-#: model:ir.ui.view,arch_db:wm_real_estate.generic_list_view
-msgid "Company"
-msgstr "Société"
-
-# ==============================================
-# ADDITIONAL TABLE HEADER TRANSLATIONS
-# ==============================================
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__floors
-msgid "Floors"
-msgstr "Étages"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__apartment_count
-msgid "Apartments"
-msgstr "Appartements"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__sold_apartment_count
-msgid "Sold Apartments"
-msgstr "Appartements vendus"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_apartment_count
-msgid "Disponible Apartments"
-msgstr "Appartements disponibles"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_apartment_count
-msgid "Available Apartments"
-msgstr "Appartements disponibles"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__reservation_count
-msgid "Reservation Count"
-msgstr "Nombre de réservations"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__store_count
-msgid "Store Count"
-msgstr "Nombre de magasins"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__sold_store_count
-msgid "Sold Stores"
-msgstr "Magasins vendus"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__available_store_count
-msgid "Available Stores"
-msgstr "Magasins disponibles"
-
-#. module: wm_real_estate
-#: model:ir.model.fields,field_description:wm_real_estate.field_real_estate_building__reserved_store_count
-msgid "Reserved Stores"
-msgstr "Magasins réservés"
+#: code:addons/wm_real_estate/static/src/js/apartment_action.js:0
+msgid "Cette propri�t� est actuellement bloqu�e et ne peut pas �tre vendue."
+msgstr "Cette propri�t� est actuellement bloqu�e et ne peut pas �tre vendue."
