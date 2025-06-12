@@ -76,9 +76,8 @@
                         <strong>Reference:</strong>
                         <p class="m-0" t-field="o.ref"/>
                     </div>
-                </div>
-
-                <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
+                </div>                <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
+                <t t-set="has_stores" t-value="any(l.product_id.is_store for l in o.invoice_line_ids if l.product_id)"/>
 
                 <table class="table table-sm o_main_table" name="invoice_line_table">
                     <thead>
@@ -86,11 +85,10 @@
                             <th name="th_description" class="text-left"><span>Type</span></th>
                             <th name="th_description" class="text-left"><span>Désignation du bien</span></th>
                             <th name="th_quantity" class="text-right" style="display:none;"><span>Quantity</span></th>
-                            <th name="th_priceunit" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Unit Price</span></th>
-                            <th name="th_price_unit" t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+                            <th name="th_priceunit" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Unit Price</span></th>                            <th name="th_price_unit" t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                 <span>Disc.%</span>
                             </th>
-                            <th name="th_taxes" t-attf-class="text-left {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Taxes</span></th>
+                            <th t-if="has_stores" name="th_taxes" t-attf-class="text-left {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Taxes</span></th>
                             <th name="th_subtotal" class="text-right">
                                 <span groups="account.group_show_line_subtotals_tax_excluded">Amount</span>
                                 <span groups="account.group_show_line_subtotals_tax_included">Total Price</span>
@@ -113,12 +111,14 @@
                                     </td>
                                     <td t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                         <span class="text-nowrap" t-field="line.price_unit"/>
-                                    </td>
-                                    <td t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+                                    </td>                                    <td t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                         <span class="text-nowrap" t-field="line.discount"/>
                                     </td>
-                                    <td t-attf-class="text-left {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+                                    <td t-if="has_stores and line.product_id.is_store" t-attf-class="text-left {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                         <span t-esc="', '.join(map(lambda x: (x.description or x.name), line.tax_ids))" id="line_tax_ids"/>
+                                    </td>
+                                    <td t-if="has_stores and not line.product_id.is_store" t-attf-class="text-left {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+                                        <!-- Empty cell for apartments when stores are present -->
                                     </td>
                                     <td class="text-right o_price_total">
                                         <span class="text-nowrap" t-field="line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
@@ -159,9 +159,8 @@
                                     <td><strong>Subtotal</strong></td>
                                     <td class="text-right">
                                         <span t-field="o.amount_untaxed"/>
-                                    </td>
-                                </tr>
-                                <t t-foreach="o.amount_by_group" t-as="amount_by_group">
+                                    </td>                                </tr>
+                                <t t-if="has_stores" t-foreach="o.amount_by_group" t-as="amount_by_group">
                                     <tr style="">
                                         <t t-if="len(o.line_ids.filtered(lambda line: line.tax_line_id)) in [0, 1] and float_compare(o.amount_untaxed, amount_by_group[2], precision_rounding=o.currency_id.rounding) == 0">
                                             <td><span class="text-nowrap" t-esc="amount_by_group[0]"/></td>
@@ -236,13 +235,109 @@
                 </p>
                 <p t-if="o.invoice_incoterm_id" name="incoterm">
                     <strong>Incoterm: </strong><span t-field="o.invoice_incoterm_id.code"/> - <span t-field="o.invoice_incoterm_id.name"/>
-                </p>
-                <div id="qrcode" t-if="o.display_qr_code and o.amount_residual &gt; 0">
+                </p>                <div id="qrcode" t-if="o.display_qr_code and o.amount_residual &gt; 0">
                     <p t-if="qr_code_urls.get(o.id)">
                         <strong class="text-center">Scan me with your banking app.</strong><br/><br/>
                         <img class="border border-dark rounded" t-att-src="qr_code_urls[o.id]"/>
                     </p>
-                </div>                <!-- New Signature Section before footer -->
+                </div>
+
+                <!-- Payment History Table -->
+                <t t-if="o.payment_state != 'invoicing_legacy'">
+                    <t t-set="payments_vals" t-value="o.sudo()._get_reconciled_info_JSON_values()"/>
+                    <t t-if="payments_vals">
+                        <div class="row mt-4 mb-4" style="page-break-inside: avoid;">
+                            <div class="col-12">
+                                <table class="table table-bordered" style="margin-bottom: 20px;">
+                                    <thead style="background-color: #f8f9fa;">
+                                        <tr>
+                                            <th class="text-center" style="padding: 12px;"><strong>Type de Paiement</strong></th>
+                                            <th class="text-center" style="padding: 12px;"><strong>Ref</strong></th>
+                                            <th class="text-center" style="padding: 12px;"><strong>Date</strong></th>
+                                            <th class="text-center" style="padding: 12px;"><strong>Montant</strong></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="payments_vals" t-as="payment_vals">
+                                            <tr>
+                                                <td class="text-center" style="padding: 8px;">
+                                                    <span t-esc="payment_vals['journal_name']"/>
+                                                </td>
+                                                <td class="text-center" style="padding: 8px;">
+                                                    <span t-esc="payment_vals['ref'] or payment_vals['move_id'] or '-'"/>
+                                                </td>
+                                                <td class="text-center" style="padding: 8px;">
+                                                    <span t-esc="payment_vals['date']" t-options="{'widget': 'date'}"/>
+                                                </td>
+                                                <td class="text-center" style="padding: 8px;">
+                                                    <strong><span t-esc="payment_vals['amount']" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></strong>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                        <!-- Total row -->
+                                        <tr style="background-color: #f8f9fa; border-top: 2px solid #000;">
+                                            <td colspan="3" class="text-right" style="padding: 12px;"><strong>Total Payé:</strong></td>
+                                            <td class="text-center" style="padding: 12px;">
+                                                <strong>
+                                                    <t t-set="total_paid" t-value="sum(float(p['amount']) for p in payments_vals)"/>
+                                                    <span t-esc="total_paid" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                        <!-- Amount Due row if there's remaining balance -->
+                                        <t t-if="o.amount_residual > 0">
+                                            <tr style="background-color: #fff3cd; border-top: 1px solid #000;">
+                                                <td colspan="3" class="text-right" style="padding: 12px;"><strong>Montant Restant:</strong></td>
+                                                <td class="text-center" style="padding: 12px;">
+                                                    <strong style="color: #856404;">
+                                                        <span t-field="o.amount_residual"/>
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                        </t>                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+
+                <!-- Reste à payer Section -->
+                <!--
+                <t t-if="o.amount_residual > 0">
+                    <div class="row mt-3 mb-4" style="page-break-inside: avoid;">
+                        <div class="col-12">
+                            <div style="background-color: #f8d7da; border: 2px solid #dc3545; border-radius: 8px; padding: 20px; text-align: center;">
+                                <h3 style="color: #721c24; margin-bottom: 15px;"><strong>RESTE À PAYER</strong></h3>
+                                <div style="font-size: 28px; font-weight: bold; color: #721c24; margin-bottom: 10px;">
+                                    <span t-field="o.amount_residual"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                -->
+
+                <!-- Conditions de vente Section -->
+                <div class="row mt-5 mb-4" style="page-break-inside: avoid;">
+                    <div class="col-12">
+                        <h4 style="text-align: center; margin-bottom: 20px;"><strong>Conditions de vente</strong></h4>
+                        <div style="text-align: justify; line-height: 1.6; font-size: 12px; direction: rtl;">
+                            <p>يصرح المستفيد على انه لا يملك أي عقار للاستعمال السكني او الثانوي او يستفيد من كراء في المملكة المغربية، ويلتزم بالأدلاء بشهادة تفيد بعدم خضوعه للضريبة على الدخل على الأملاك العقارية وكذا رسمي السكن والخدمات الاجتماعية يوم إبرام عقد الوعد بالبيع والبيع النهائي</p>
+                            
+                            <p>يلتزم المستفيد في حالة تغيير عنوان سكنه(ها) او رقم هاتفه (ها) بإخبار الشركة بهذا التغيير بكل وسائل الاعلام والاشهار سواء بواسطة البريد الالكتروني او رسالة مضمونة، ويتحمل كافة المسؤولية عن عدم الاخبار بالعنوان الجديد.</p>
+                            
+                            <p>في حالة وفاة المستفيد، يفسخ هذا الحجز دون ذعار. من اجل ذلك، يتوجب على ورثته الادلاء للطرف الاول برسم اراثة الهالك، وكذا أي وثيقة اخرى، حتى يتسنى له ارجاع مبالغ التسبيق المؤدة من طرف هذا الاخير لغرض اتفاقية التخصيص.</p>
+                            
+                            <p>هذا التخصيص يلزم المستفيد بشراء الملك المذكور أعلاه بصفة نهائية ولا يمكنه التنازل عنه للغير بأية طريقة.</p>
+                            
+                            <p>يصبح هذا التخصيص مفسوخا، والمبالغ التي بذمة المستفيد مستحقة فورا او عن اخرها مع سقوط الاجل، وذلك بعد مضي خمسة عشر يوما (15) يوما على بعث انذار للمستفيد بواسطة رسالة مضمونة مع الاشعار بالاستلام توجه اليه في موطنه المختار ولو لم يسحبها. في حالة عدم اتمام الواعد بالشراء لإجراءات اتمام البيع داخل الاجل المذكور، يرسل له المالك اشعارا جديدا للتذكير بإتمام الاجراءات في اجل اقصاه 8 ايام من تاريخ توصله به، والتي بانقضائها، سيعتبر عدم حضور الطرف الثاني تخليا من طرفه عن التخصيص، وستطبق في هذا الصدد مقتضيات المتعلقة بالتخلي عن التخصيص. وفي هذا الموضوع، يقر الطرف الثاني بموافقته على ما ذكر ويلتزم بعدم الاعتراض او المطالبة باي شيء</p>
+                            
+                            <p>في حالة تخلي المستفيد عن التخصيص بشكل نهائي، يكون الشركة الحق في تعويض يساوي 10 في المائة من ثمن البيع المشار إليه أعلاه أي 25000,00 DHS يأذن المستفيد اقتطاعه من مبلغ التسبيق المؤدى لهذا الأخير، قبل إرجاع ما تبقى من ذلك المبلغ، ويمنع منعا كليا التخلي للغير.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Signature Section before footer -->
                 <div class="row mt-5 mb-5" style="page-break-inside: avoid;">
                     <div class="col-6 text-center">
                         <div style="border-top: 1px solid black; margin-top: 100px;">

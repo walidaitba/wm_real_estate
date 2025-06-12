@@ -8,11 +8,19 @@
             <field name="sequence">20</field>
         </record>
 
+        <!-- Real Estate Access Rights Group -->
+        <record id="group_real_estate_sale_agent" model="res.groups">
+            <field name="name">Sale Agent</field>
+            <field name="category_id" ref="module_category_real_estate"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Sale Agents have read-only access to price and quantity fields in sale orders and invoices</field>
+        </record>
+
         <!-- Real Estate Manager Group -->
         <record id="group_real_estate_manager" model="res.groups">
             <field name="name">Manager</field>
             <field name="category_id" ref="module_category_real_estate"/>
-            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="implied_ids" eval="[(4, ref('group_real_estate_sale_agent'))]"/>
             <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
         </record>
 
@@ -48,6 +56,30 @@
             <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- Sale Order Rules for Sale Agents -->
+        <record id="real_estate_sale_order_rule_agent" model="ir.rule">
+            <field name="name">Real Estate Sale Orders - Sale Agent</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="groups" eval="[(4, ref('group_real_estate_sale_agent'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Invoice Rules for Sale Agents -->
+        <record id="real_estate_invoice_rule_agent" model="ir.rule">
+            <field name="name">Real Estate Invoices - Sale Agent</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="groups" eval="[(4, ref('group_real_estate_sale_agent'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
         </record>
     </data>
 </odoo>

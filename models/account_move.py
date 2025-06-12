@@ -12,7 +12,9 @@ class AccountMove(models.Model):
                                 help="Related real estate project for this invoice")
     building_id = fields.Many2one('real.estate.building', string='Building',
                                  help="Related building for this invoice")
-
+    # CIN field for easy access to partner's CIN
+    partner_cin = fields.Char(related='partner_id.function', string='CIN', readonly=True, store=True)
+    
     def action_post(self):
         """Override post action to handle apartment state when invoice is posted"""
         # Call super to post the invoice
@@ -144,3 +146,7 @@ The real estate transaction is now complete with payment confirmed.
                     )
 
         return res
+
+
+class AccountMoveLine(models.Model):
+    _inherit = 'account.move.line'

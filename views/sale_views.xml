@@ -274,5 +274,59 @@
         </field>
     </record>
 
-    <!-- Removed problematic view -->
+    <!-- Make price_unit and product_uom_qty readonly for Sale Agents only (not Managers) -->
+    <record id="view_order_form_real_estate_sale_agent_readonly" model="ir.ui.view">
+        <field name="name">sale.order.form.real.estate.sale.agent.readonly</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="view_order_form_real_estate"/>
+        <field name="groups_id" eval="[(4, ref('wm_real_estate.group_real_estate_sale_agent'))]"/>
+        <field name="arch" type="xml">
+            <!-- Make price_unit readonly for Sale Agents in tree view -->
+            <xpath expr="//field[@name='order_line']/tree//field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            
+            <!-- Make product_uom_qty readonly for Sale Agents in tree view -->
+            <xpath expr="//field[@name='order_line']/tree//field[@name='product_uom_qty']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            
+            <!-- Make price_unit readonly for Sale Agents in form view -->
+            <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            
+            <!-- Make product_uom_qty readonly for Sale Agents in form view -->
+            <xpath expr="//field[@name='order_line']/form//field[@name='product_uom_qty']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- View for Managers - fields remain editable (no readonly) -->
+    <record id="view_order_form_real_estate_manager_editable" model="ir.ui.view">
+        <field name="name">sale.order.form.real.estate.manager.editable</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="view_order_form_real_estate_sale_agent_readonly"/>
+        <field name="groups_id" eval="[(4, ref('wm_real_estate.group_real_estate_manager'))]"/>
+        <field name="arch" type="xml">
+            <!-- Remove readonly for Managers in tree view -->
+            <xpath expr="//field[@name='order_line']/tree//field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">0</attribute>
+            </xpath>
+            
+            <xpath expr="//field[@name='order_line']/tree//field[@name='product_uom_qty']" position="attributes">
+                <attribute name="readonly">0</attribute>
+            </xpath>
+            
+            <!-- Remove readonly for Managers in form view -->
+            <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">0</attribute>
+            </xpath>
+            
+            <xpath expr="//field[@name='order_line']/form//field[@name='product_uom_qty']" position="attributes">
+                <attribute name="readonly">0</attribute>
+            </xpath>
+        </field>
+    </record>
 </odoo>

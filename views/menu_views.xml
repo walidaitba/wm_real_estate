@@ -4,6 +4,7 @@
     <menuitem id="menu_real_estate_root"
               name="Immobilier"
               web_icon="wm_real_estate,static/description/icon.png"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="10"/>
 
     <!-- Dashboard Menu -->
@@ -11,12 +12,14 @@
               name="Tableau de bord"
               parent="menu_real_estate_root"
               action="action_real_estate_project"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="1"/>
 
     <!-- Papers Menu (Parent) -->
     <menuitem id="menu_real_estate_papers_root"
               name="Documents"
               parent="menu_real_estate_root"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="10"/>
 
     <!-- Quotations Submenu -->
@@ -24,6 +27,7 @@
               name="Devis"
               parent="menu_real_estate_papers_root"
               action="action_real_estate_reservations"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="1"/>
 
     <!-- Invoices Submenu -->
@@ -31,21 +35,28 @@
               name="Factures"
               parent="menu_real_estate_papers_root"
               action="action_real_estate_invoices"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="2"/>
 
     <!-- Reservations Menu (Apartment Kanban) -->
+    <!--
     <menuitem id="menu_real_estate_apartment_reservations"
               name="Réservations Appartements"
               parent="menu_real_estate_root"
               action="action_real_estate_apartment_reservations"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="15"/>
-
+    -->
+    
     <!-- Reservations Menu (Store Kanban) -->
+    <!--
     <menuitem id="menu_real_estate_store_reservations"
               name="Réservations Magasins"
               parent="menu_real_estate_root"
               action="action_real_estate_store_reservations"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="16"/>
+    -->
 
     <!-- CRM Opportunities Menu -->
     <!--
@@ -60,60 +71,70 @@
     <menuitem id="menu_real_estate_properties"
               name="Propriétés"
               parent="menu_real_estate_root"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="20"/>
 
     <menuitem id="menu_real_estate_projects"
               name="Projets"
               parent="menu_real_estate_properties"
               action="action_real_estate_project"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="1"/>
 
     <menuitem id="menu_real_estate_buildings"
               name="Bâtiments"
               parent="menu_real_estate_properties"
               action="action_real_estate_building"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="2"/>
 
     <menuitem id="menu_real_estate_apartments"
               name="Appartements"
               parent="menu_real_estate_properties"
               action="action_real_estate_apartment_products"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="3"/>
 
     <menuitem id="menu_real_estate_stores"
               name="Magasins"
               parent="menu_real_estate_properties"
               action="action_real_estate_store"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="4"/>
 
     <menuitem id="menu_real_estate_equipements"
               name="Équipements"
               parent="menu_real_estate_properties"
               action="action_real_estate_equipement_products"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="5"/>
 
     <menuitem id="menu_real_estate_create_apartment"
               name="Créer Appartement"
               parent="menu_real_estate_properties"
               action="action_create_apartment_product"
+              groups="wm_real_estate.group_real_estate_manager"
               sequence="10"/>
 
     <menuitem id="menu_real_estate_create_store"
               name="Créer Magasin"
               parent="menu_real_estate_properties"
               action="action_create_store_product"
+              groups="wm_real_estate.group_real_estate_manager"
               sequence="11"/>
 
     <menuitem id="menu_real_estate_create_equipement"
               name="Créer Équipement"
               parent="menu_real_estate_properties"
               action="action_create_equipement_product"
+              groups="wm_real_estate.group_real_estate_manager"
               sequence="12"/>
 
     <!-- Configuration Menu -->
     <menuitem id="menu_real_estate_configuration"
               name="Configuration"
               parent="menu_real_estate_root"
+              groups="wm_real_estate.group_real_estate_manager"
               sequence="100"/>
 
     <!-- Clients Menu -->
@@ -121,6 +142,7 @@
               name="Clients"
               parent="menu_real_estate_root"
               action="contacts.action_contacts"
+              groups="wm_real_estate.group_real_estate_manager,wm_real_estate.group_real_estate_sale_agent"
               sequence="30"/>
 
 </odoo>
