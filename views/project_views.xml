@@ -9,7 +9,7 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_buildings" type="object" class="oe_stat_button" icon="fa-building">
-                            <field name="building_count" widget="statinfo" string="Buildings" translate="yes"/>
+                            <field name="building_count" widget="statinfo" string="Bâtiments" translate="yes"/>
                         </button>
 
                         <!-- Property type buttons -->
@@ -179,7 +179,7 @@
                                     <field name="city"/>
                                 </div>
                                 <div>
-                                    <span><t t-esc="record.building_count.value"/> <span t-translation="on">Buildings</span></span>
+                                    <span><t t-esc="record.building_count.value"/> <span t-translation="on">Bâtiments</span></span>
                                 </div>
 
                                 <!-- Apartment information -->

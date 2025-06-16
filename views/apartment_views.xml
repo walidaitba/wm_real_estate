@@ -428,12 +428,9 @@
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban</field>
         <field name="view_id" ref="view_real_estate_store_kanban"/>
-        <field name="search_view_id" ref="product_template_search_view_real_estate"/>
+        <!-- <field name="search_view_id" ref="product_template_search_view_real_estate"/> -->
         <field name="domain">[('is_store', '=', True)]</field>
-        <field name="context">{
-            'create': False,
-            'search_default_groupby_apartment_state': 1
-        }</field>
+        <field name="context">{'create': False, 'search_default_groupby_apartment_state': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No stores found!

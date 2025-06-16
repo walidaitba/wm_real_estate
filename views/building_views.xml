@@ -21,7 +21,7 @@
                     </div>
                     <div class="oe_title">
                         <h1>
-                            <field name="name" placeholder="Building Name"/>
+                            <field name="name" placeholder="Bâtiment"/>
                         </h1>
                     </div>
                     <group>
@@ -102,21 +102,21 @@
         <field name="model">real.estate.building</field>
         <field name="arch" type="xml">
             <tree string="Buildings">
-                <field name="name"/>
                 <field name="project_id"/>
-                <field name="floors"/>
-                <field name="apartment_count"/>
-                <field name="sold_apartment_count"/>
-                <field name="available_apartment_count"/>
-                <field name="reservation_count"/>
-                <field name="store_count"/>
-                <field name="sold_store_count"/>
-                <field name="available_store_count"/>
-                <field name="reserved_store_count"/>
-                <field name="equipement_count"/>
-                <field name="sold_equipement_count"/>
-                <field name="available_equipement_count"/>
-                <field name="reserved_equipement_count"/>
+                <field name="name"/>
+                <field name="floors" attrs="{'invisible': [('floors', '=', False)]}"/>
+                <field name="apartment_count" attrs="{'invisible': [('apartment_count', '=', 0)]}"/>
+                <field name="sold_apartment_count" attrs="{'invisible': [('apartment_count', '=', 0)]}"/>
+                <field name="available_apartment_count" attrs="{'invisible': [('apartment_count', '=', 0)]}"/>
+                <field name="reservation_count" attrs="{'invisible': [('apartment_count', '=', 0)]}"/>
+                <field name="store_count" attrs="{'invisible': [('store_count', '=', 0)]}"/>
+                <field name="sold_store_count" attrs="{'invisible': [('store_count', '=', 0)]}"/>
+                <field name="available_store_count" attrs="{'invisible': [('store_count', '=', 0)]}"/>
+                <field name="reserved_store_count" attrs="{'invisible': [('store_count', '=', 0)]}"/>
+                <field name="equipement_count" attrs="{'invisible': [('equipement_count', '=', 0)]}"/>
+                <field name="sold_equipement_count" attrs="{'invisible': [('equipement_count', '=', 0)]}"/>
+                <field name="available_equipement_count" attrs="{'invisible': [('equipement_count', '=', 0)]}"/>
+                <field name="reserved_equipement_count" attrs="{'invisible': [('equipement_count', '=', 0)]}"/>
             </tree>
         </field>
     </record>

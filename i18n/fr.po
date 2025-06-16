@@ -342,7 +342,7 @@ msgstr "Sélectionner ou créer un bâtiment"
 #. module: wm_real_estate
 #: model:ir.ui.view,arch_db:wm_real_estate.view_real_estate_building_form
 msgid "Building Name"
-msgstr "Nom du bâtiment"
+msgstr "Bâtiment"
 
 # ==============================================
 # HELP TEXT

@@ -7,3 +7,12 @@ access_product_category,product.category,product.model_product_category,wm_real_
 access_sale_order,sale.order,sale.model_sale_order,wm_real_estate.group_real_estate_manager,1,1,1,1
 access_sale_order_line,sale.order.line,sale.model_sale_order_line,wm_real_estate.group_real_estate_manager,1,1,1,1
 access_apartment_actions,apartment.actions,model_apartment_actions,wm_real_estate.group_real_estate_manager,1,1,1,1
+access_real_estate_project_agent,real.estate.project,model_real_estate_project,wm_real_estate.group_real_estate_sale_agent,1,1,1,0
+access_real_estate_building_agent,real.estate.building,model_real_estate_building,wm_real_estate.group_real_estate_sale_agent,1,1,1,0
+access_real_estate_apartment_agent,real.estate.apartment,model_real_estate_apartment,wm_real_estate.group_real_estate_sale_agent,1,1,1,0
+access_product_template_agent,product.template,product.model_product_template,wm_real_estate.group_real_estate_sale_agent,1,1,1,0
+access_product_category_agent,product.category,product.model_product_category,wm_real_estate.group_real_estate_sale_agent,1,1,1,0
+access_sale_order_agent,sale.order,sale.model_sale_order,wm_real_estate.group_real_estate_sale_agent,1,1,1,0
+access_sale_order_line_agent,sale.order.line,sale.model_sale_order_line,wm_real_estate.group_real_estate_sale_agent,1,1,1,0
+access_account_move_agent,account.move,account.model_account_move,wm_real_estate.group_real_estate_sale_agent,1,1,1,0
+access_apartment_actions_agent,apartment.actions,model_apartment_actions,wm_real_estate.group_real_estate_sale_agent,1,1,1,0

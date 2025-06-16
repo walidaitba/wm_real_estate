@@ -29,7 +29,7 @@ class RealEstateBuilding(models.Model):
 
         return res
 
-    name = fields.Char(string='Building Name', required=True, tracking=True)
+    name = fields.Char(string='Bâtiment', required=True, tracking=True)
 
     project_id = fields.Many2one('real.estate.project', string='Project',
                                 required=True, tracking=True,

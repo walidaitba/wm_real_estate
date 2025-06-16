@@ -10,26 +10,26 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     # Real Estate specific fields
-    is_apartment = fields.Boolean(string='Is Apartment', default=False)
-    is_store = fields.Boolean(string='Is Store', default=False)
-    is_equipement = fields.Boolean(string='Is Équipement', default=False)
-    apartment_id = fields.Many2one('real.estate.apartment', string='Apartment')
+    is_apartment = fields.Boolean(string='Appartement', default=False)
+    is_store = fields.Boolean(string='Magasin', default=False)
+    is_equipement = fields.Boolean(string='Équipement', default=False)
+    apartment_id = fields.Many2one('real.estate.apartment', string='Appartement')
 
     # Direct fields for apartment/store/équipement properties
-    floor = fields.Integer(string='Floor')
-    area = fields.Float(string='Area (m²)')
-    rooms = fields.Integer(string='Number of Rooms', default=1)
-    bathrooms = fields.Integer(string='Number of Bathrooms', default=1)
+    floor = fields.Integer(string='Étage')
+    area = fields.Float(string='Surface (m²)')
+    rooms = fields.Integer(string='Nombre de pièces', default=1)
+    bathrooms = fields.Integer(string='Nombre de salles de bain', default=1)
 
     # Building and Project information
-    building_id = fields.Many2one('real.estate.building', string='Building')
-    project_id = fields.Many2one('real.estate.project', string='Project')
+    building_id = fields.Many2one('real.estate.building', string='Bâtiment')
+    project_id = fields.Many2one('real.estate.project', string='Projet')
 
     # Context fields for form behavior
-    context_project_readonly = fields.Boolean(string='Project Readonly', default=False,
-                                            help="Technical field to make project field readonly based on context")
-    context_building_readonly = fields.Boolean(string='Building Readonly', default=False,
-                                             help="Technical field to make building field readonly based on context")
+    context_project_readonly = fields.Boolean(string='Projet en lecture seule', default=False,
+                                            help="Champ technique pour rendre le champ projet en lecture seule selon le contexte")
+    context_building_readonly = fields.Boolean(string='Bâtiment en lecture seule', default=False,
+                                             help="Champ technique pour rendre le champ bâtiment en lecture seule selon le contexte")
 
     # State for apartments - computed from apartment's actual state
     apartment_state = fields.Selection([
@@ -37,18 +37,18 @@ class ProductTemplate(models.Model):
         ('prereserved', 'Préréservé'),
         ('sold', 'Vendu'),
         ('blocker', 'Bloqué'),
-    ], string='Apartment Status', compute='_compute_apartment_state', inverse='_inverse_apartment_state', 
+    ], string='Statut de l\'appartement', compute='_compute_apartment_state', inverse='_inverse_apartment_state', 
        store=True, readonly=False, default='disponible', required=True,
-       help="Status of the apartment. This field is synchronized with the apartment record.")
+       help="Statut de l'appartement. Ce champ est synchronisé avec l'enregistrement de l'appartement.")
 
     # Locking mechanism fields
-    is_locked = fields.Boolean(string='Locked', related='apartment_id.is_locked', readonly=True,
-                              help="Indicates if the apartment is locked for a quotation")
-    locked_by_order_id = fields.Many2one('sale.order', string='Locked By Order',
+    is_locked = fields.Boolean(string='Verrouillé', related='apartment_id.is_locked', readonly=True,
+                              help="Indique si l'appartement est verrouillé pour un devis")
+    locked_by_order_id = fields.Many2one('sale.order', string='Verrouillé par le devis',
                                        related='apartment_id.locked_by_order_id', readonly=True,
-                                       help="The quotation that has locked this apartment")
-    lock_date = fields.Datetime(string='Lock Date', related='apartment_id.lock_date', readonly=True,
-                              help="Date and time when the apartment was locked")
+                                       help="Le devis qui a verrouillé cet appartement")
+    lock_date = fields.Datetime(string='Date de verrouillage', related='apartment_id.lock_date', readonly=True,
+                              help="Date et heure du verrouillage de l'appartement")
 
     @api.depends('apartment_id.state', 'is_apartment', 'is_store', 'is_equipement', 'sale_ok')
     def _compute_apartment_state(self):
@@ -1233,21 +1233,21 @@ class ProductTemplate(models.Model):
         return category
 
     def action_create_reservation(self):
-        """Create a new reservation (quotation) for this property (apartment, store, or équipement)"""
+        """Créer une nouvelle réservation (devis) pour ce bien immobilier (appartement, commerce ou équipement)"""
         self.ensure_one()
 
         if not (self.is_apartment or self.is_store or self.is_equipement):
-            raise UserError(_("This action is only available for real estate properties (apartments, stores, or équipements)."))
+            raise UserError(_("Cette action n'est disponible que pour les biens immobiliers (appartements, commerces ou équipements)."))
 
         # Check if property is available
         if self.apartment_state != 'disponible':
-            raise UserError(_("Only disponible properties can be reserved."))
+            raise UserError(_("Seuls les biens disponibles peuvent être réservés."))
 
         # For apartments, check if we have an apartment_id
         if self.is_apartment and not self.apartment_id:
             # Try to create the apartment if it doesn't exist
             try:
-                _logger.info("Apartment ID not found. Attempting to create a new apartment record.")
+                _logger.info("ID d'appartement non trouvé. Tentative de création d'un nouvel enregistrement d'appartement.")
 
                 # Prepare apartment values
                 apartment_vals = {
@@ -1265,14 +1265,14 @@ class ProductTemplate(models.Model):
 
                 # Check if we have a building_id - this is required for apartments
                 if not apartment_vals.get('building_id'):
-                    raise UserError(_("Cannot create apartment without building. Please select a building first."))
+                    raise UserError(_("Impossible de créer un appartement sans bâtiment. Veuillez sélectionner un bâtiment."))
 
                 # Create a new apartment with context to prevent circular reference
                 apartment = self.env['real.estate.apartment'].with_context(from_product_create=True).create(apartment_vals)
 
                 # Link the apartment to this product
                 self.apartment_id = apartment.id
-                _logger.info("Created and linked apartment %s with ID %s", apartment.name, apartment.id)
+                _logger.info("Appartement %s créé et lié avec l'ID %s", apartment.name, apartment.id)
 
                 # Force a cache invalidation to ensure the link is saved
                 self.invalidate_cache()
@@ -1281,10 +1281,10 @@ class ProductTemplate(models.Model):
                 self = self.browse(self.id)
 
                 if not self.apartment_id:
-                    raise UserError(_("Failed to link the apartment. Please try again or contact your administrator."))
+                    raise UserError(_("Échec de la liaison de l'appartement. Veuillez réessayer ou contacter votre administrateur."))
             except Exception as e:
-                _logger.error("Error creating apartment: %s", str(e))
-                raise UserError(_("Failed to create apartment: %s") % str(e))
+                _logger.error("Erreur lors de la création de l'appartement : %s", str(e))
+                raise UserError(_("Échec de la création de l'appartement : %s") % str(e))
 
         # Create a new quotation with this apartment/store/équipement
         SaleOrder = self.env['sale.order']
@@ -1380,11 +1380,11 @@ Surface: {area} m²
         }
 
     def action_cancel_reservation(self):
-        """Cancel the reservation and return the apartment/store/équipement to disponible state"""
+        """Annuler la réservation et remettre le bien à l'état disponible"""
         self.ensure_one()
         
         if self.apartment_state != 'prereserved':
-            raise UserError(_("Cannot cancel reservation: property is not in préréservé state"))
+            raise UserError(_("Impossible d'annuler la réservation : le bien n'est pas en état préréservé"))
             
         # Find any related sale order lines for this property
         sale_lines = self.env['sale.order.line'].search([
@@ -1399,8 +1399,8 @@ Surface: {area} m²
                 # If there are confirmed orders, ask user for confirmation
                 order_names = ', '.join(confirmed_orders.mapped('order_id.name'))
                 raise UserError(_(
-                    "Cannot cancel reservation: there are confirmed sale orders (%s) for this property. "
-                    "Please cancel the sale orders first."
+                    "Impossible d'annuler la réservation : des commandes confirmées existent (%s) pour ce bien. "
+                    "Veuillez d'abord annuler les commandes de vente."
                 ) % order_names)
             
             # Cancel any draft or sent orders
@@ -1428,7 +1428,7 @@ Surface: {area} m²
             
         # Log the action in the chatter
         property_type = "apartment" if self.is_apartment else "store"
-        message = _("Reservation cancelled: %s returned to disponible state") % property_type
+        message = _("Reservation annulée : %s retourné à l'état disponible") % property_type
         self.message_post(body=message, message_type='comment')
         
         # Show success notification
@@ -1436,19 +1436,19 @@ Surface: {area} m²
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Reservation Cancelled'),
-                'message': _('The reservation has been cancelled and the %s is now disponible.') % property_type,
+                'title': _('Reservation Annulée'),
+                'message': _('La réservation a été annulée et le %s est maintenant disponible.') % property_type,
                 'type': 'success',
                 'sticky': False,
             }
         }
 
     def action_cancel_sold_property(self):
-        """Cancel a sold property and return it to disponible state, handling invoices"""
+        """Annuler un bien vendu et le remettre à l'état disponible, gestion des factures"""
         self.ensure_one()
         
         if self.apartment_state != 'sold':
-            raise UserError(_("Can only cancel sold properties. Current state: %s") % dict(self._fields['apartment_state'].selection)[self.apartment_state])
+            raise UserError(_("Seuls les biens vendus peuvent être annulés. État actuel : %s") % dict(self._fields['apartment_state'].selection)[self.apartment_state])
         
         property_type = "apartment" if self.is_apartment else ("store" if self.is_store else "équipement")
         
@@ -1503,9 +1503,9 @@ Surface: {area} m²
         self._reset_property_to_disponible(property_type)
         
         # Log the action in the chatter
-        message = _("Sold %s cancelled: returned to disponible state") % property_type
+        message = _("Bien vendu annulé : retourné à l'état disponible") % property_type
         if invoices_to_handle:
-            message += _(" (Warning: Related invoices exist: %s)") % ', '.join([inv.name for inv in invoices_to_handle])
+            message += _(" (Avertissement : Des factures liées existent : %s)") % ', '.join([inv.name for inv in invoices_to_handle])
         self.message_post(body=message, message_type='comment')
         
         return self._show_cancel_success_notification(property_type, sold=True)
@@ -1533,7 +1533,7 @@ Surface: {area} m²
     
     def _show_cancel_success_notification(self, property_type, sold=False):
         """Show success notification for cancellation"""
-        title = _('Sold Property Cancelled') if sold else _('Reservation Cancelled')
+        title = _('Bien Vendu Annulé') if sold else _('Réservation Annulée')
         message_type = 'sold property' if sold else 'reservation'
         
         return {
@@ -1541,18 +1541,18 @@ Surface: {area} m²
             'tag': 'display_notification',
             'params': {
                 'title': title,
-                'message': _('The %s has been cancelled and the %s is now disponible.') % (message_type, property_type),
+                'message': _('Le %s a été annulé et le %s est maintenant disponible.') % (message_type, property_type),
                 'type': 'success',
                 'sticky': False,
             }
         }
 
     def action_confirm_reservation(self):
-        """Confirm the reservation by opening the related quotation"""
+        """Confirmer la réservation en ouvrant le devis associé"""
         self.ensure_one()
         
         if self.apartment_state != 'prereserved':
-            raise UserError(_("Can only confirm reservations for préréservé properties"))
+            raise UserError(_("Seules les réservations d'un bien préréservé peuvent être confirmées."))
             
         # Find the active sale order for this property
         sale_lines = self.env['sale.order.line'].search([
@@ -1561,14 +1561,14 @@ Surface: {area} m²
         ])
         
         if not sale_lines:
-            raise UserError(_("No active quotation found for this property"))
+            raise UserError(_("Aucun devis actif trouvé pour ce bien"))
             
         # Get the most recent quotation
         active_order = sale_lines.mapped('order_id').sorted('create_date', reverse=True)[0]
         
         # Return an action to open the quotation
         return {
-            'name': _('Confirm Reservation'),
+            'name': _('Confirmer la Réservation'),
             'type': 'ir.actions.act_window',
             'res_model': 'sale.order',
             'res_id': active_order.id,
@@ -1582,11 +1582,11 @@ Surface: {area} m²
         }
 
     def action_view_reservation_document(self):
-        """View the reservation document (invoice) for sold properties"""
+        """Voir le document de réservation (facture) pour les biens vendus"""
         self.ensure_one()
         
         if self.apartment_state != 'sold':
-            raise UserError(_("Can only view reservation documents for sold properties"))
+            raise UserError(_("Seuls les biens vendus permettent de voir le document de réservation."))
             
         # Find the confirmed sale order for this property
         sale_lines = self.env['sale.order.line'].search([
@@ -1595,7 +1595,7 @@ Surface: {area} m²
         ])
         
         if not sale_lines:
-            raise UserError(_("No confirmed sale order found for this property"))
+            raise UserError(_("Aucune commande de vente confirmée trouvée pour ce bien"))
             
         # Get the most recent confirmed order
         confirmed_order = sale_lines.mapped('order_id').sorted('create_date', reverse=True)[0]
@@ -1612,7 +1612,7 @@ Surface: {area} m²
             invoice = invoices.sorted('create_date', reverse=True)[0]
             
             return {
-                'name': _('Reservation Document'),
+                'name': _('Document de Réservation'),
                 'type': 'ir.actions.act_window',
                 'res_model': 'account.move',
                 'res_id': invoice.id,
@@ -1624,7 +1624,7 @@ Surface: {area} m²
         else:
             # If no invoice exists, show the confirmed sale order
             return {
-                'name': _('Reservation Document'),
+                'name': _('Document de Réservation'),
                 'type': 'ir.actions.act_window',
                 'res_model': 'sale.order',
                 'res_id': confirmed_order.id,
@@ -1660,17 +1660,17 @@ Surface: {area} m²
         return True
 
     def action_open_quants(self):
-        """Open the stock quants view for this property (apartment or store)"""
+        """Ouvrir la vue des stocks pour ce bien (appartement ou commerce)"""
         self.ensure_one()
 
         if not (self.is_apartment or self.is_store):
-            raise UserError(_("This action is only available for real estate properties (apartments or stores)."))
+            raise UserError(_("Cette action n'est disponible que pour les biens immobiliers (appartements ou commerces)."))
 
         # Get the product variant
         product_variant = self.product_variant_ids[0] if self.product_variant_ids else False
         if not product_variant:
-            property_type = "apartment" if self.is_apartment else "store"
-            raise UserError(_("No product variant found for this %s.") % property_type)
+            property_type = "appartement" if self.is_apartment else "commerce"
+            raise UserError(_("Aucune variante de produit trouvée pour ce %s.") % property_type)
 
         # Open the stock quants view
         property_type = "Apartment" if self.is_apartment else "Store"
@@ -1711,31 +1711,31 @@ Surface: {area} m²
 
     @api.constrains('is_apartment', 'is_store', 'is_equipement')
     def _check_apartment_store_exclusivity(self):
-        """Ensure a product can't be both an apartment, store, and équipement"""
+        """S'assurer qu'un produit ne peut être qu'un seul type à la fois"""
         for product in self:
             if sum(bool(x) for x in [product.is_apartment, product.is_store, product.is_equipement]) > 1:
-                raise UserError(_("A product can only be one type: apartment, store, or équipement. Please select only one option."))
+                raise UserError(_("Un produit ne peut être qu'un seul type : appartement, commerce ou équipement. Veuillez sélectionner une seule option."))
 
     @api.constrains('is_store', 'building_id')
     def _check_building_required_store(self):
-        """Ensure building is set for stores"""
+        """S'assurer qu'un bâtiment est renseigné pour les commerces"""
         for product in self:
             if product.is_store and not product.building_id:
-                raise UserError(_("Building is required for stores. Please select a building."))
+                raise UserError(_("Le bâtiment est obligatoire pour les commerces. Veuillez sélectionner un bâtiment."))
 
     @api.constrains('is_equipement', 'building_id')
     def _check_building_required_equipement(self):
-        """Ensure building is set for équipement"""
+        """S'assurer qu'un bâtiment est renseigné pour les équipements"""
         for product in self:
             if product.is_equipement and not product.building_id:
-                raise UserError(_("Building is required for équipement. Please select a building."))
+                raise UserError(_("Le bâtiment est obligatoire pour les équipements. Veuillez sélectionner un bâtiment."))
 
     @api.constrains('is_store', 'area')
     def _check_store_area_valid(self):
-        """Ensure area is greater than 0 for stores"""
+        """S'assurer que la surface est supérieure à 0 pour les commerces"""
         for product in self:
             if product.is_store and (not product.area or product.area <= 0):
-                raise UserError(_("Area must be strictly greater than 0 m² for stores. Please enter a valid area (minimum 1 m²)."))
+                raise UserError(_("La surface doit être strictement supérieure à 0 m² pour les commerces. Veuillez saisir une surface valide (minimum 1 m²)."))
 
     @api.onchange('sale_ok')
     def _onchange_sale_ok(self):

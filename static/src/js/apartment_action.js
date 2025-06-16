@@ -220,7 +220,7 @@ odoo.define('wm_real_estate.apartment_action', function (require) {
                 });
 
                 buttons.push({
-                    text: _t('Confirmer la réservation'),
+                    text: _t('Voire la réservation'),
                     classes: 'btn-success',
                     click: function () {
                         self._rpc({

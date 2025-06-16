@@ -19,7 +19,6 @@
         'stock',           # Inventory management
         'sale_stock',      # Sales and inventory integration
         'account',         # Accounting/Invoicing module
-        'crm',             # CRM module for lead/opportunity management
     ],
     'data': [
         'security/security.xml',
@@ -35,8 +34,6 @@
         'views/sale_actions.xml',
         'views/menu_views.xml',
         'views/stock_menu_views.xml',
-        'views/crm_lead_views.xml', #desactivate crm features for now
-        'views/crm_actions.xml',
         'views/account_views.xml',  # Add invoice view customizations
         'views/partner_views.xml',  # Customize partner form (function field as CIN)
         'views/report_reservation_template.xml',  # New reservation report template
