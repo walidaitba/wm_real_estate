@@ -16,3 +16,11 @@ access_sale_order_agent,sale.order,sale.model_sale_order,wm_real_estate.group_re
 access_sale_order_line_agent,sale.order.line,sale.model_sale_order_line,wm_real_estate.group_real_estate_sale_agent,1,1,1,0
 access_account_move_agent,account.move,account.model_account_move,wm_real_estate.group_real_estate_sale_agent,1,1,1,0
 access_apartment_actions_agent,apartment.actions,model_apartment_actions,wm_real_estate.group_real_estate_sale_agent,1,1,1,0
+access_ir_actions_act_window_agent,ir.actions.act_window,base.model_ir_actions_act_window,wm_real_estate.group_real_estate_sale_agent,1,0,0,0
+access_ir_actions_act_window_view_agent,ir.actions.act_window.view,base.model_ir_actions_act_window_view,wm_real_estate.group_real_estate_sale_agent,1,0,0,0
+access_ir_ui_menu_agent,ir.ui.menu,base.model_ir_ui_menu,wm_real_estate.group_real_estate_sale_agent,1,0,0,0
+access_ir_model_agent,ir.model,base.model_ir_model,wm_real_estate.group_real_estate_sale_agent,1,0,0,0
+access_ir_model_fields_agent,ir.model.fields,base.model_ir_model_fields,wm_real_estate.group_real_estate_sale_agent,1,0,0,0
+access_ir_model_data_agent,ir.model.data,base.model_ir_model_data,wm_real_estate.group_real_estate_sale_agent,1,0,0,0
+access_ir_ui_view_agent,ir.ui.view,base.model_ir_ui_view,wm_real_estate.group_real_estate_sale_agent,1,0,0,0
+access_ir_actions_report_agent,ir.actions.report,base.model_ir_actions_report,wm_real_estate.group_real_estate_sale_agent,1,0,0,0

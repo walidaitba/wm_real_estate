@@ -23,6 +23,7 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'security/access_rights.xml',
         'data/sequence.xml',
         'data/server_actions.xml',
         'views/assets.xml',

@@ -80,22 +80,34 @@ class SaleOrderLine(models.Model):
             # Get all relevant apartment details
             project_name = apartment.project_id.name if apartment.project_id else "N/A"
             building_name = apartment.building_id.name if apartment.building_id else "N/A"
-            floor = apartment.floor if apartment.floor is not None else "N/A"
             area = apartment.area if apartment.area else "N/A"
-            rooms = apartment.rooms if apartment.rooms else "N/A"
-            bathrooms = apartment.bathrooms if apartment.bathrooms else "N/A"
-
-            # Format a comprehensive description with all apartment details
-            apartment_details = f"""
+            
+            # Check if it's an apartment product to include floor, rooms, and bathrooms
+            product = self.product_id.product_tmpl_id if self.product_id else False
+            is_apartment = product and product.is_apartment if product else True  # Default to True if no product
+            
+            # Base description for all property types
+            property_details = f"""
 Projet: {project_name}
 Bâtiment: {building_name}
 Appartement: {apartment.name}
-Étage: {floor}
-Surface: {area} m²
+"""
+            
+            # Add floor, rooms, and bathrooms only for apartments
+            if is_apartment:
+                floor = apartment.floor if apartment.floor is not None else "N/A"
+                rooms = apartment.rooms if apartment.rooms else "N/A"
+                bathrooms = apartment.bathrooms if apartment.bathrooms else "N/A"
+                
+                property_details += f"""Étage: {floor}
 Pièces: {rooms}
 Salles de bain: {bathrooms}
 """
-            self.name = apartment_details
+            
+            # Add surface for all property types
+            property_details += f"Surface: {area} m²"
+            
+            self.name = property_details
 
     @api.onchange('product_id')
     def _onchange_product_id_apartment(self):
@@ -131,20 +143,30 @@ Salles de bain: {bathrooms}
                         # Generate a description for the apartment
                         project_name = apartment.project_id.name if apartment.project_id else "N/A"
                         building_name = apartment.building_id.name if apartment.building_id else "N/A"
-                        floor = apartment.floor if apartment.floor is not None else "N/A"
                         area = apartment.area if apartment.area else "N/A"
-                        rooms = apartment.rooms if apartment.rooms else "N/A"
-                        bathrooms = apartment.bathrooms if apartment.bathrooms else "N/A"
-
-                        vals['name'] = f"""
+                        
+                        # Base description for all property types
+                        property_details = f"""
 Projet: {project_name}
 Bâtiment: {building_name}
 Appartement: {apartment.name}
-Étage: {floor}
-Surface: {area} m²
+"""
+                        
+                        # Add floor, rooms, and bathrooms only for apartments
+                        if product_tmpl.is_apartment:
+                            floor = apartment.floor if apartment.floor is not None else "N/A"
+                            rooms = apartment.rooms if apartment.rooms else "N/A"
+                            bathrooms = apartment.bathrooms if apartment.bathrooms else "N/A"
+                            
+                            property_details += f"""Étage: {floor}
 Pièces: {rooms}
 Salles de bain: {bathrooms}
 """
+                        
+                        # Add surface for all property types
+                        property_details += f"Surface: {area} m²"
+                        
+                        vals['name'] = property_details
                         # Also set the apartment_id and building_id
                         vals['apartment_id'] = apartment.id
                         vals['building_id'] = apartment.building_id.id
@@ -154,14 +176,12 @@ Salles de bain: {bathrooms}
                     # Generate a description for the store
                     project_name = product_tmpl.project_id.name if product_tmpl.project_id else "N/A"
                     building_name = product_tmpl.building_id.name if product_tmpl.building_id else "N/A"
-                    floor = product_tmpl.floor if product_tmpl.floor is not None else "N/A"
                     area = product_tmpl.area if product_tmpl.area else "N/A"
 
                     vals['name'] = f"""
 Projet: {project_name}
 Bâtiment: {building_name}
 Magasin: {product_tmpl.name}
-Étage: {floor}
 Surface: {area} m²
 """
                     # Set the building_id
@@ -177,14 +197,12 @@ Surface: {area} m²
                     # Generate a description for the équipement
                     project_name = product_tmpl.project_id.name if product_tmpl.project_id else "N/A"
                     building_name = product_tmpl.building_id.name if product_tmpl.building_id else "N/A"
-                    floor = product_tmpl.floor if product_tmpl.floor is not None else "N/A"
                     area = product_tmpl.area if product_tmpl.area else "N/A"
 
                     vals['name'] = f"""
 Projet: {project_name}
 Bâtiment: {building_name}
 Équipement: {product_tmpl.name}
-Étage: {floor}
 Surface: {area} m²
 """
                     # Set the building_id
@@ -712,12 +730,12 @@ Price: %(currency)s %(price).2f
         # Check if this is a real estate order with a TBD customer
         if self.is_real_estate and self.is_tbd_customer:
             # Show an error message
-            raise UserError(_("Please select a real customer before confirming the order."))
+            raise UserError(_("Veuillez sélectionner un vrai client avant de confirmer la commande."))
 
         # Check if partner_id is set
         if not self.partner_id:
             # Show an error message
-            raise UserError(_("Please select a customer before confirming the order."))
+            raise UserError(_("Veuillez sélectionner un client avant de confirmer la commande."))
 
         # Call super to confirm the order
         res = super(SaleOrder, self).action_confirm()
@@ -975,12 +993,10 @@ Floor: %(floor)s
 Project: %(project)s
 Building: %(building)s
 Store: %(store)s
-Floor: %(floor)s
 """) % {
                     'store': store_product.name,
                     'project': project.name if project else _('N/A'),
                     'building': building.name if building else _('N/A'),
-                    'floor': store_product.floor,
                 }
 
                 # Create a stock move for the store
@@ -1017,12 +1033,10 @@ Floor: %(floor)s
 Project: %(project)s
 Building: %(building)s
 Équipement: %(equipement)s
-Floor: %(floor)s
 """) % {
                     'equipement': equipement_product.name,
                     'project': project.name if project else _('N/A'),
                     'building': building.name if building else _('N/A'),
-                    'floor': equipement_product.floor,
                 }
 
                 # Create a stock move for the équipement

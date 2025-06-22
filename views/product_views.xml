@@ -53,11 +53,9 @@
 
                     <!-- Hidden fields to store context values -->
                     <field name="context_project_readonly" invisible="1"/>
-                    <field name="context_building_readonly" invisible="1"/>
-
-                    <!-- Floor field - shown for apartments, stores, and équipements -->
-                    <field name="floor"                           attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)],
-                                  'required': ['|', '|', ('is_apartment', '=', True), ('is_store', '=', True), ('is_equipement', '=', True)]}"
+                    <field name="context_building_readonly" invisible="1"/>                    <!-- Floor field - shown only for apartments -->
+                    <field name="floor"                           attrs="{'invisible': [('is_apartment', '=', False)],
+                                  'required': [('is_apartment', '=', True)]}"
                            help="Numéro d'étage où se trouve le bien"
                            string="Étage"/>
 
@@ -128,7 +126,7 @@
                 <field name="company_id" invisible="1" groups="base.group_multi_company"/>
                 <field name="project_id" optional="show" attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)]}"/>
                 <field name="building_id" optional="show" attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)]}"/>
-                <field name="floor" optional="show" attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)]}"/>                <field name="area" optional="show" attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)]}"/>
+                <field name="floor" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>                <field name="area" optional="show" attrs="{'invisible': ['&amp;', ('is_apartment', '=', False), ('is_store', '=', False)]}"/>
                 <field name="rooms" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
                 <field name="bathrooms" optional="show" attrs="{'invisible': [('is_apartment', '=', False)]}"/>
                 <field name="apartment_state" optional="show" attrs="{'invisible': ['&amp;', '&amp;', ('is_apartment', '=', False), ('is_store', '=', False), ('is_equipement', '=', False)]}"/>
@@ -330,14 +328,13 @@
                 </templates>
             </kanban>
         </field>
-    </record>
-
-    <!-- Real Estate Apartments Product Action -->
+    </record>    <!-- Real Estate Apartments Product Action -->
     <record id="action_real_estate_apartment_products" model="ir.actions.act_window">
         <field name="name">Apartments</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('is_apartment', '=', True)]</field>
+        <field name="groups_id" eval="[(4, ref('wm_real_estate.group_real_estate_manager')), (4, ref('wm_real_estate.group_real_estate_sale_agent'))]"/>
         <field name="context">{
             'search_default_is_apartment': 1,
             'search_default_groupby_project': 1,
@@ -366,14 +363,13 @@
                 Chaque appartement doit être lié à un bâtiment et un projet.
             </p>
         </field>
-    </record>
-
-    <!-- Real Estate Stores Product Action -->
+    </record>    <!-- Real Estate Stores Product Action -->
     <record id="action_real_estate_store_products" model="ir.actions.act_window">
         <field name="name">Stores</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('is_store', '=', True)]</field>
+        <field name="groups_id" eval="[(4, ref('wm_real_estate.group_real_estate_manager')), (4, ref('wm_real_estate.group_real_estate_sale_agent'))]"/>
         <field name="context">{
             'search_default_is_store': 1,
             'search_default_groupby_project': 1,            'search_default_groupby_building': 1,
@@ -400,14 +396,13 @@
             <p>
                 Each store must be linked to a building and project.
             </p>        </field>
-    </record>
-
-    <!-- Real Estate Équipements Product Action -->
+    </record>    <!-- Real Estate Équipements Product Action -->
     <record id="action_real_estate_equipement_products" model="ir.actions.act_window">
         <field name="name">Équipements</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('is_equipement', '=', True)]</field>
+        <field name="groups_id" eval="[(4, ref('wm_real_estate.group_real_estate_manager')), (4, ref('wm_real_estate.group_real_estate_sale_agent'))]"/>
         <field name="context">{
             'search_default_is_equipement': 1,
             'search_default_groupby_project': 1,

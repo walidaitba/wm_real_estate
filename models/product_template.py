@@ -1320,7 +1320,6 @@ Salles de bain: {bathrooms}
             # For stores and équipements, use the product data directly
             project_name = self.project_id.name if self.project_id else "N/A"
             building_name = self.building_id.name if self.building_id else "N/A"
-            floor = self.floor if self.floor is not None else "N/A"
             area = self.area if self.area else "N/A"
             
             if self.is_store:
@@ -1328,7 +1327,6 @@ Salles de bain: {bathrooms}
 Projet: {project_name}
 Bâtiment: {building_name}
 Magasin: {self.name}
-Étage: {floor}
 Surface: {area} m²
 """
             elif self.is_equipement:
@@ -1336,7 +1334,6 @@ Surface: {area} m²
 Projet: {project_name}
 Bâtiment: {building_name}
 Équipement: {self.name}
-Étage: {floor}
 Surface: {area} m²
 """
 
